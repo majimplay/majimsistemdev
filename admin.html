@@ -91,6 +91,19 @@
         document.getElementById('userCount').textContent = 'Erro ao carregar';
     }
 }
+async function debugUsers() {
+    const query = new Parse.Query(Parse.User);
+    const users = await query.find();
+    console.log('Lista completa de usuários:', 
+        users.map(u => ({
+            id: u.id,
+            username: u.get('username'),
+            isAdmin: u.get('admin') // Apenas se tiver um campo específico
+        }))
+    );
+}
+debugUsers();
+        
         // Inicialização
         checkAdmin();
     </script>
