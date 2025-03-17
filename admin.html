@@ -33,53 +33,63 @@
         </div>
     </div>
 
-    <script>
-        // Configuração do Parse
-        Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
-        Parse.serverURL = "https://parseapi.back4app.com";
+<script>
+    Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
+    Parse.serverURL = "https://parseapi.back4app.com";
 
-        async function checkAdmin() {
+    async function checkAdmin() {
+        try {
             const user = Parse.User.current();
-            
             if (!user) {
-                alert('⚠️ Faça login primeiro!');
-                window.location.href = 'index.html';
-                return;
+                throw new Error('Usuário não logado');
             }
 
-            try {
-                const isAdmin = await Parse.Cloud.run('isAdmin');
-                console.log('É admin?', isAdmin);
-                
-                if (isAdmin) {
-                    // Mostrar conteúdo admin
-                    document.getElementById('adminContent').classList.remove('hidden');
-                    document.getElementById('adminUsername').textContent = user.get('username');
-                    await loadStats();
-                } else {
-                    alert('🚫 Acesso restrito a administradores!');
-                    window.location.href = 'index.html';
-                }
-            } catch (error) {
-                console.error('Erro:', error);
-                alert('❌ Falha na verificação de admin: ' + error.message);
-                window.location.href = 'index.html';
+            console.log('Iniciando verificação de admin...');
+            
+            // Método 1: Cloud Function
+            const isAdminCloud = await Parse.Cloud.run('isAdmin').catch(console.error);
+            console.log('Resultado Cloud Function:', isAdminCloud);
+
+            // Método 2: Query direta
+            const roleQuery = new Parse.Query(Parse.Role)
+                .equalTo('name', 'admin')
+                .equalTo('users', user);
+
+            const isAdminLocal = await roleQuery.count() > 0;
+            console.log('Resultado Local Query:', isAdminLocal);
+
+            if (!isAdminCloud && !isAdminLocal) {
+                throw new Error('Usuário não é admin');
             }
+
+            // Se passar, mostra conteúdo
+            document.getElementById('adminContent').classList.remove('hidden');
+            document.getElementById('adminUsername').textContent = user.get('username');
+            loadStats();
+
+        } catch (error) {
+            console.error('Erro crítico:', error);
+            alert(`🔥 ERRO: ${error.message}`);
+            window.location.href = 'index.html';
         }
+    }
 
-        async function loadStats() {
-            try {
-                const userQuery = new Parse.Query(Parse.User);
-                const userCount = await userQuery.count();
-                document.getElementById('userCount').textContent = userCount;
-            } catch (error) {
-                console.error('Erro ao carregar estatísticas:', error);
-                document.getElementById('userCount').textContent = 'Erro ao carregar';
-            }
-        }
+    checkAdmin();
+// Debug rápido
+    async function debugAdminCheck() {
+    const user = Parse.User.current();
+    console.log('Usuário atual:', user);
+    
+    const rolesQuery = new Parse.Query(Parse.Role)
+        .equalTo('users', user)
+        .select('name');
+    
+    const roles = await rolesQuery.find();
+    console.log('Roles do usuário:', roles.map(r => r.get('name')));
+}
 
-        // Inicialização
-        checkAdmin();
-    </script>
+debugAdminCheck();
+    
+</script>
 </body>
 </html>
