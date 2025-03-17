@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Painel Administrativo</title>
+  <!-- CSS: Estilos da Página (mantido igual) -->
+  <style>
+    /* ... (estilos permanecem os mesmos) ... */
+  </style>
+</head>
+<body>
+  <!-- Conteúdo mantido igual -->
+  <div class="welcome-banner hidden" id="userWelcome"></div>
+
+  <div class="admin-panel" id="adminContent">
+    <h2>📦 Gerenciamento de Produtos</h2>
+    
+    <!-- Formulário de Adição de Produto -->
+    <form id="productForm">
+      <div style="display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;">
+        <input type="text" id="productName" placeholder="Nome do Produto" required>
+        <input type="number" id="productPrice" step="0.01" placeholder="Preço" required>
+        <div class="image-upload">
+          <label class="upload-label">
+            📸 Escolher Imagem
+            <input type="file" id="productImage" accept="image/*" required hidden>
+          </label>
+        </div>
+        <button type="submit" class="btn btn-edit">➕ Adicionar</button>
+      </div>
+    </form>
+
+    <!-- Tabela de Produtos -->
+    <table id="productsTable">
+      <thead>
+        <tr>
+          <th>Imagens</th>
+          <th>Produto</th>
+          <th>Preço</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <p id="message">Carregando...</p>
+
+  <!-- Parse SDK -->
+  <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
+  
+  <script>
+    // 1. Inicialização do Parse
+    Parse.initialize("SEU_APP_ID", "SUA_JAVASCRIPT_KEY");
+    Parse.serverURL = 'https://your-parse-server.com/parse';
+
+    // 2. Classe Produto
+    const Product = Parse.Object.extend("Product");
+    
+    // 3. Variáveis Globais
+    let products = [];
+    let changes = {};
+
+    // 4. Funções Utilitárias
+    function debounce(func, timeout = 300) {
+      let timer;
+      return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => func.apply(this, args), timeout);
+      };
+    }
+
+    async function updateProduto(id, updates) {
+      try {
+        const query = new Parse.Query(Product);
+        const product = await query.get(id);
+        Object.keys(updates).forEach(key => product.set(key, updates[key]));
+        await product.save();
+      } catch (error) {
+        alert('Erro ao atualizar: ' + error.message);
+      }
+    }
+
+    async function uploadImage(file) {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      return new Promise((resolve, reject) => {
+        reader.onload = async () => {
+          try {
+            const formData = new FormData();
+            formData.append('image', reader.result.split(',')[1]);
+            const response = await fetch(`https://api.imgbb.com/1/upload?key=43ff22682bbe91ea89a32047a821bae8`, {
+              method: 'POST',
+              body: formData
+            });
+            const data = await response.json();
+            if (!data.success) throw new Error(data.error.message);
+            resolve(data.data.url);
+          } catch (error) {
+            reject(error);
+          }
+        };
+      });
+    }
+
+    // 5. Carregar Produtos
+    async function carregarProdutos() {
+      try {
+        const query = new Parse.Query(Product);
+        const results = await query.find();
+        products = results;
+        renderizarTabela();
+      } catch (error) {
+        alert('Erro ao carregar produtos: ' + error.message);
+      }
+    }
+
+    // 6. Renderização da Tabela
+    function renderizarTabela() {
+      const tbody = document.querySelector('#productsTable tbody');
+      tbody.innerHTML = '';
+      
+      products.forEach(product => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>
+            <div class="image-gallery">
+              ${product.get('imagens').map((url, index) => `
+                <div class="image-container">
+                  <img src="${url}" class="product-image">
+                  <div class="delete-image" onclick="removerImagem('${product.id}', ${index})">×</div>
+                </div>
+              `).join('')}
+            </div>
+            <button class="btn btn-edit" onclick="adicionarImagem('${product.id}')">📷 Adicionar Imagem</button>
+          </td>
+          <td>
+            <div class="editable-field" 
+                 contenteditable="true" 
+                 data-id="${product.id}" 
+                 data-field="nome">${product.get('nome')}</div>
+          </td>
+          <td>
+            <div class="editable-field" 
+                 contenteditable="true" 
+                 data-id="${product.id}" 
+                 data-field="preco">${product.get('preco').toFixed(2)}</div>
+          </td>
+          <td>
+            <button class="btn btn-delete" onclick="excluirProduto('${product.id}')">🗑️ Excluir</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.querySelectorAll('.editable-field').forEach(field => {
+        field.addEventListener('input', debounce(() => {
+          const id = field.getAttribute('data-id');
+          const fieldName = field.getAttribute('data-field');
+          const value = fieldName === 'preco' 
+            ? parseFloat(field.textContent) 
+            : field.textContent;
+          updateProduto(id, { [fieldName]: value });
+        }, 500));
+      });
+    }
+
+    // 7. Funções Globais
+    window.adicionarImagem = async (productId) => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        try {
+          const imageUrl = await uploadImage(file);
+          const product = products.find(p => p.id === productId);
+          const imagens = product.get('imagens') || [];
+          imagens.push(imageUrl);
+          product.set('imagens', imagens);
+          await product.save();
+          carregarProdutos();
+        } catch (error) {
+          alert(error.message);
+        }
+      };
+      input.click();
+    };
+
+    window.removerImagem = async (productId, index) => {
+      const confirmar = confirm('Deseja realmente remover esta imagem?');
+      if (!confirmar) return;
+      const product = products.find(p => p.id === productId);
+      const imagens = product.get('imagens').filter((_, i) => i !== index);
+      product.set('imagens', imagens);
+      await product.save();
+      carregarProdutos();
+    };
+
+    window.excluirProduto = async (id) => {
+      if (confirm('Tem certeza que deseja excluir este produto?')) {
+        try {
+          const product = products.find(p => p.id === id);
+          await product.destroy();
+          carregarProdutos();
+        } catch (error) {
+          alert('Erro ao excluir: ' + error.message);
+        }
+      }
+    };
+
+    // 8. Adicionar Novo Produto
+    document.getElementById('productForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('productName').value;
+      const price = parseFloat(document.getElementById('productPrice').value);
+      const imageFile = document.getElementById('productImage').files[0];
+      
+      try {
+        const imageUrl = await uploadImage(imageFile);
+        const product = new Product();
+        product.set('nome', name);
+        product.set('preco', price);
+        product.set('imagens', [imageUrl]);
+        await product.save();
+        document.getElementById('productForm').reset();
+        carregarProdutos();
+      } catch (error) {
+        alert(error.message);
+      }
+    });
+
+    // 9. Inicialização
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Aqui você deve adicionar sua verificação de autenticação
+      // Exemplo básico (substituir pelo seu sistema):
+      if (usuarioAutenticado) {
+        document.getElementById('message').classList.add('hidden');
+        await carregarProdutos();
+      } else {
+        document.getElementById('message').textContent = "🔒 Acesso não autorizado";
+      }
+    });
+  </script>
+</body>
+</html>
