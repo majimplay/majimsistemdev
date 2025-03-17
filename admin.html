@@ -37,37 +37,29 @@
         Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
         Parse.serverURL = "https://parseapi.back4app.com";
 
-    async function checkAdmin() {
-        const user = Parse.User.current();
-        
-        if (!user) {
-            alert('⚠️ Faça login primeiro!');
-            window.location.href = 'index.html';
-            return;
-        }
-
-        try {
-            // Nova verificação usando relações de roles
-            const rolesQuery = new Parse.Query(Parse.Role);
-            rolesQuery.equalTo('users', user);
-            
-            const roles = await rolesQuery.find();
-            const isAdmin = roles.some(role => role.get('name') === 'admin');
-
-            if (isAdmin) {
-                document.getElementById('adminContent').classList.remove('hidden');
-                document.getElementById('adminUsername').textContent = user.get('username');
-                loadStats();
-            } else {
-                alert('🚫 Acesso apenas para administradores!');
-                window.location.href = 'index.html';
-            }
-        } catch (error) {
-            console.error('Erro:', error);
-            alert('❌ Erro ao verificar permissões!');
-            window.location.href = 'index.html';
-        }
+async function checkAdmin() {
+    const user = Parse.User.current();
+    
+    if (!user) {
+        alert('⚠️ Faça login primeiro!');
+        window.location.href = 'index.html';
+        return;
     }
+
+    try {
+        const isAdmin = await Parse.Cloud.run('isAdmin');
+        
+        if (isAdmin) {
+            // Mostrar conteúdo admin
+        } else {
+            // Redirecionar
+        }
+    } catch (error) {
+        console.error('Erro:', error);
+        alert('❌ Falha na verificação de admin!');
+        window.location.href = 'index.html';
+    }
+}
 
     // Restante do código permanece igual
     checkAdmin();
