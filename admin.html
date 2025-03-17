@@ -48,18 +48,11 @@
                 console.log('Iniciando verificação de admin...');
                 
                 // Verificação dupla para garantir
-                const [isAdminCloud, isAdminLocal] = await Promise.all([
-                    Parse.Cloud.run('isAdmin').catch(() => false),
-                    new Parse.Query(Parse.Role)
-                        .equalTo('name', 'admin')
-                        .equalTo('users', user)
-                        .count()
-                        .then(count => count > 0)
-                ]);
+                const isAdminLocal = await checkIfUserIsAdmin(user);
 
-                console.log('Cloud:', isAdminCloud, 'Local:', isAdminLocal);
+                console.log('Admin Local:', isAdminLocal);
 
-                if (!isAdminCloud && !isAdminLocal) {
+                if (!isAdminLocal) {
                     throw new Error('Acesso negado: você não é administrador');
                 }
 
@@ -74,49 +67,46 @@
                 window.location.href = 'index.html';
             }
         }
- async function checkIfUserIsAdmin(user) {
-    const roleQuery = new Parse.Query(Parse.Role);
-    roleQuery.equalTo("name", "admin");
-    roleQuery.equalTo("users", user);
-    const count = await roleQuery.count();
-    return count > 0; // Retorna true se o usuário for admin
-}
-   async function loadStats() {
-  try {
-    // Em vez de fazer userQuery.find() direto, chamamos a Cloud Function
-    const userCount = await Parse.Cloud.run("getUserCount");
-    document.getElementById('userCount').textContent = userCount;
-  } catch (error) {
-    console.error('Erro ao carregar estatísticas:', error);
-    document.getElementById('userCount').textContent = 'Erro ao carregar';
-  }
-}
-        
-async function debugUsers() {
-    const query = new Parse.Query(Parse.User);
-    const users = await query.find();
-    console.log('Lista completa de usuários:', 
-        users.map(u => ({
-            id: u.id,
-            username: u.get('username'),
-            isAdmin: u.get('admin') // Apenas se tiver um campo específico
-        }))
-    );
-}
-debugUsers();
-const users = await query.find();
-const usersWithAdminStatus = await Promise.all(users.map(async (u) => ({
-    id: u.id,
-    username: u.get('username'),
-    isAdmin: await checkIfUserIsAdmin(u)
-})));
 
-console.log('Lista completa de usuários:', usersWithAdminStatus);
+        async function checkIfUserIsAdmin(user) {
+            const roleQuery = new Parse.Query(Parse.Role);
+            roleQuery.equalTo("name", "admin");
+            roleQuery.equalTo("users", user);
+            const count = await roleQuery.count();
+            return count > 0; // Retorna true se o usuário for admin
+        }
 
-        
-        
+        async function loadStats() {
+            try {
+                const userCount = await Parse.Cloud.run("getUserCount");
+                document.getElementById('userCount').textContent = userCount;
+            } catch (error) {
+                console.error('Erro ao carregar estatísticas:', error);
+                document.getElementById('userCount').textContent = 'Erro ao carregar';
+            }
+        }
+
+        async function debugUsers() {
+            try {
+                const query = new Parse.Query(Parse.User);
+                query.limit(1000); // Garante que até 1000 usuários sejam retornados
+                const users = await query.find();
+
+                const usersWithAdminStatus = await Promise.all(users.map(async (u) => ({
+                    id: u.id,
+                    username: u.get('username'),
+                    isAdmin: await checkIfUserIsAdmin(u)
+                })));
+
+                console.log('Lista completa de usuários:', usersWithAdminStatus);
+            } catch (error) {
+                console.error('Erro ao buscar usuários:', error);
+            }
+        }
+
         // Inicialização
         checkAdmin();
+        debugUsers();
     </script>
 </body>
 </html>
