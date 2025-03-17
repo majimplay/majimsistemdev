@@ -75,18 +75,15 @@
             }
         }
 
-    async function loadStats() {
-    try {
-        const userQuery = new Parse.Query(Parse.User);
-        userQuery.limit(1000); // Para garantir que traga mais usuários
-        const users = await userQuery.find({ useMasterKey: true }); // Usa a chave mestre para ignorar ACLs
-        
-        console.log('Usuários encontrados:', users.map(u => u.get('username'))); 
-        document.getElementById('userCount').textContent = users.length;
-    } catch (error) {
-        console.error('Erro ao carregar estatísticas:', error);
-        document.getElementById('userCount').textContent = 'Erro ao carregar';
-    }
+   async function loadStats() {
+  try {
+    // Em vez de fazer userQuery.find() direto, chamamos a Cloud Function
+    const userCount = await Parse.Cloud.run("getUserCount");
+    document.getElementById('userCount').textContent = userCount;
+  } catch (error) {
+    console.error('Erro ao carregar estatísticas:', error);
+    document.getElementById('userCount').textContent = 'Erro ao carregar';
+  }
 }
         
 async function debugUsers() {
