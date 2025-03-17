@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Página Inicial</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            margin: 10px;
+            text-decoration: none;
+            color: #fff;
+            background-color: #007BFF;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 id="welcomeMessage">Bem-vindo ao Nosso Site! Visitante</h1>
+        <button id="logoutBtn" class="hidden">Sair</button>
+        <p id="userInfo">Carregando...</p>
+
+        <p>Escolha uma das opções abaixo:</p>
+
+        <!-- Botões modificados para simulação -->
+        <a href="#" class="btn" id="loginLink">Login</a>
+        <a href="#" class="btn" id="registerLink">Registrar</a>
+        <a href="sobre.html" class="btn">Sobre Nós</a>
+        <a href="construcao.html" class="btn">Página em Construção</a>
+    </div>
+
+    <script>
+        // Elementos da interface
+        const welcomeMessageEl = document.getElementById('welcomeMessage');
+        const userInfoEl = document.getElementById('userInfo');
+        const logoutBtn = document.getElementById('logoutBtn');
+        
+        // Função para atualizar a interface
+        function updateUI() {
+            const user = sessionStorage.getItem('mockUser');
+            if (user) {
+                welcomeMessageEl.textContent = `Bem-vindo ao Nosso Site! ${user}`;
+                userInfoEl.textContent = "";
+                logoutBtn.classList.remove('hidden');
+            } else {
+                welcomeMessageEl.textContent = "Bem-vindo ao Nosso Site! Visitante";
+                userInfoEl.textContent = "Nenhum usuário logado.";
+                logoutBtn.classList.add('hidden');
+            }
+        }
+
+        // Simulação de Login
+        document.getElementById('loginLink').addEventListener('click', function(e) {
+            e.preventDefault();
+            const username = prompt('Digite seu nome de usuário (simulado):');
+            if (username) {
+                sessionStorage.setItem('mockUser', username);
+                updateUI();
+            }
+        });
+
+        // Simulação de Registro
+        document.getElementById('registerLink').addEventListener('click', function(e) {
+            e.preventDefault();
+            alert('Registro não disponível em modo demonstração.');
+        });
+
+        // Logout
+        logoutBtn.addEventListener('click', function() {
+            sessionStorage.removeItem('mockUser');
+            updateUI();
+        });
+
+        // Inicialização
+        updateUI();
+    </script>
+</body>
+</html>
