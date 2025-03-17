@@ -37,52 +37,40 @@
         Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
         Parse.serverURL = "https://parseapi.back4app.com";
 
-        // Função para verificar privilégios
-        async function checkAdminPrivileges() {
-            const user = Parse.User.current();
+    async function checkAdmin() {
+        const user = Parse.User.current();
+        
+        if (!user) {
+            alert('⚠️ Faça login primeiro!');
+            window.location.href = 'index.html';
+            return;
+        }
+
+        try {
+            // Nova verificação usando relações de roles
+            const rolesQuery = new Parse.Query(Parse.Role);
+            rolesQuery.equalTo('users', user);
             
-            if (!user) {
-                alert('Acesso negado: Faça login primeiro!');
-                window.location.href = 'index.html';
-                return;
-            }
+            const roles = await rolesQuery.find();
+            const isAdmin = roles.some(role => role.get('name') === 'admin');
 
-            try {
-                // Verifica se o usuário tem a role 'admin'
-                const roleQuery = new Parse.Query(Parse.Role);
-                roleQuery.equalTo('name', 'admin');
-                roleQuery.equalTo('users', user);
-                
-                const isAdmin = await roleQuery.first();
-                
-                if (isAdmin) {
-                    document.getElementById('adminContent').classList.remove('hidden');
-                    document.getElementById('adminUsername').textContent = user.get('username');
-                    loadStats();
-                } else {
-                    alert('Acesso restrito a administradores!');
-                    window.location.href = 'index.html';
-                }
-            } catch (error) {
-                console.error('Erro ao verificar permissões:', error);
-                alert('Erro ao verificar permissões!');
+            if (isAdmin) {
+                document.getElementById('adminContent').classList.remove('hidden');
+                document.getElementById('adminUsername').textContent = user.get('username');
+                loadStats();
+            } else {
+                alert('🚫 Acesso apenas para administradores!');
                 window.location.href = 'index.html';
             }
+        } catch (error) {
+            console.error('Erro:', error);
+            alert('❌ Erro ao verificar permissões!');
+            window.location.href = 'index.html';
         }
+    }
 
-        // Carrega estatísticas
-        async function loadStats() {
-            try {
-                const userQuery = new Parse.Query(Parse.User);
-                const userCount = await userQuery.count();
-                document.getElementById('userCount').textContent = userCount;
-            } catch (error) {
-                console.error('Erro ao carregar estatísticas:', error);
-            }
-        }
-
-        // Inicialização
-        checkAdminPrivileges();
-    </script>
+    // Restante do código permanece igual
+    checkAdmin();
+</script>
 </body>
 </html>
