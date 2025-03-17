@@ -75,22 +75,20 @@
             }
         }
 
-      async function loadStats() {
+    async function loadStats() {
     try {
         const userQuery = new Parse.Query(Parse.User);
-        // Adicione esta linha para ignorar ACLs e contar TODOS os usuários
-        userQuery.limit(1000); // Limite máximo padrão do Parse
-        const users = await userQuery.find();
+        userQuery.limit(1000); // Para garantir que traga mais usuários
+        const users = await userQuery.find({ useMasterKey: true }); // Usa a chave mestre para ignorar ACLs
         
-        // Debug no console
-        console.log('Usuários encontrados:', users.map(u => u.get('username')));
-        
+        console.log('Usuários encontrados:', users.map(u => u.get('username'))); 
         document.getElementById('userCount').textContent = users.length;
     } catch (error) {
         console.error('Erro ao carregar estatísticas:', error);
         document.getElementById('userCount').textContent = 'Erro ao carregar';
     }
 }
+        
 async function debugUsers() {
     const query = new Parse.Query(Parse.User);
     const users = await query.find();
