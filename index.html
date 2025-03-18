@@ -58,7 +58,7 @@
       color: white;
       cursor: pointer;
     }
-    /* Estilos do conteúdo */
+    /* Estilos do conteúdo principal */
     .container {
       padding: 20px;
     }
@@ -98,7 +98,7 @@
     }
     /* Estilos do Modal do Carrinho */
     #cartModal {
-      display: none; /* Oculto por padrão */
+      display: none;
       position: fixed;
       top: 0;
       left: 0;
@@ -138,21 +138,21 @@
   <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
 </head>
 <body>
-  <!-- Cabeçalho com login/usuário -->
+  <!-- Cabeçalho com sistema de login -->
   <header>
     <div class="logo">
       <h2>Minha Loja</h2>
     </div>
     <div class="auth-area">
-      <!-- Área de login (exibida se o usuário não estiver logado) -->
+      <!-- Área de login (quando o usuário não está autenticado) -->
       <div id="loginArea" class="login-form">
         <input type="text" id="usernameInput" placeholder="Nome">
         <input type="password" id="passwordInput" placeholder="Senha">
         <button id="loginBtn">Entrar</button>
         <a href="#" id="forgotPasswordLink">Esqueci a senha</a>
-        <a href="#" id="registerLink">Registrar</a>
+        <a href="registro.html" id="registerLink">Registrar</a>
       </div>
-      <!-- Área de usuário logado -->
+      <!-- Área do usuário logado -->
       <div id="userArea" class="user-info" style="display:none;">
         <span id="welcomeUser"></span>
         <a href="#" id="cartLink">Carrinho</a>
@@ -161,11 +161,11 @@
     </div>
   </header>
 
-  <!-- Conteúdo principal: Exibição dos produtos -->
+  <!-- Conteúdo principal: exibição dos produtos -->
   <div class="container">
     <h1>Produtos à Venda</h1>
     <div id="productGrid" class="product-grid">
-      <!-- Os produtos serão carregados dinamicamente -->
+      <!-- Produtos carregados dinamicamente -->
     </div>
   </div>
 
@@ -188,7 +188,7 @@
     Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
     Parse.serverURL = "https://parseapi.back4app.com";
 
-    let cart = []; // Array que representa o carrinho de compras
+    let cart = []; // Carrinho de compras
 
     // Atualiza a interface de autenticação
     function updateAuthUI() {
@@ -203,7 +203,7 @@
       }
     }
 
-    // Função para carregar produtos do Parse
+    // Carrega os produtos do Parse e exibe em formato de cards
     async function loadProducts() {
       const Produto = Parse.Object.extend("Produto");
       const query = new Parse.Query(Produto);
@@ -280,7 +280,7 @@
       }
     });
 
-    // Função para recuperação de senha
+    // Recuperação de senha
     document.getElementById("forgotPasswordLink").addEventListener("click", async function(e) {
       e.preventDefault();
       const email = prompt("Digite seu email para recuperação de senha:");
@@ -294,24 +294,10 @@
       }
     });
 
-    // Função de registro
-    document.getElementById("registerLink").addEventListener("click", async function(e) {
+    // Registro redireciona para a página registro.html
+    document.getElementById("registerLink").addEventListener("click", function(e) {
       e.preventDefault();
-      const username = prompt("Escolha um nome de usuário:");
-      const email = prompt("Digite seu email:");
-      const password = prompt("Escolha uma senha:");
-      const user = new Parse.User();
-      user.set("username", username);
-      user.set("email", email);
-      user.set("password", password);
-      try {
-        await user.signUp();
-        updateAuthUI();
-        alert("Registro realizado com sucesso!");
-        loadProducts();
-      } catch (error) {
-        alert("Erro no registro: " + error.message);
-      }
+      window.location.href = "registro.html";
     });
 
     // Função de logout
