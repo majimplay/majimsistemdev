@@ -1,208 +1,342 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <title>Sistema de Produtos</title>
-    
-    <!-- Parse SDK -->
-    <script src="https://npmcdn.com/parse/dist/parse.min.js"></script>
-    
-    <!-- Estilos -->
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: Arial, sans-serif;
-        }
-
-        body {
-            background: #f0f2f5;
-        }
-
-        .navbar {
-            background: #2c3e50;
-            padding: 1rem;
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 2rem auto;
-            padding: 1rem;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
-        }
-
-        th, td {
-            padding: 1rem;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-
-        th {
-            background: #2c3e50;
-            color: white;
-        }
-
-        tr:hover {
-            background: #f5f5f5;
-        }
-
-        .produto-img {
-            width: 100px;
-            height: auto;
-            border-radius: 4px;
-        }
-
-        .login-container {
-            max-width: 400px;
-            margin: 5rem auto;
-            padding: 2rem;
-            background: white;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
-        }
-
-        .form-group {
-            margin-bottom: 1rem;
-        }
-
-        input {
-            width: 100%;
-            padding: 0.5rem;
-            margin-top: 0.5rem;
-        }
-
-        button {
-            background: #2c3e50;
-            color: white;
-            padding: 0.5rem 1rem;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background: #34495e;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Painel Administrativo - Gerenciar Produtos</title>
+  <style>
+    /* Estilos baseados em meuprimeirosite/admin.html */
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f2f5;
+      padding: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .hidden { display: none; }
+    .admin-panel {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 2rem 0;
+    }
+    th, td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    th { background: #f8f9fa; }
+    tr:hover { background: #f9f9f9; }
+    input[type="text"], input[type="number"] {
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      width: 150px;
+    }
+    .btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .btn-edit { background: #4CAF50; color: white; }
+    .btn-delete { background: #f44336; color: white; }
+    .btn:hover { opacity: 0.9; }
+    .welcome-banner {
+      background: #2196F3;
+      color: white;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 2rem;
+    }
+    img.product-image {
+      height: 50px;
+      border-radius: 4px;
+      object-fit: cover;
+    }
+    .image-upload {
+      position: relative;
+      display: inline-block;
+    }
+    .image-upload input[type="file"] { display: none; }
+    .upload-label {
+      background: #2196F3;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .upload-label:hover { opacity: 0.9; }
+    .image-gallery {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+    .image-container { position: relative; }
+    .delete-image {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: red;
+      color: white;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      display: none;
+      cursor: pointer;
+    }
+    .image-container:hover .delete-image { display: block; }
+    .editable-field {
+      border-bottom: 1px dashed #666;
+      cursor: text;
+      padding: 4px;
+    }
+    .editable-field:focus {
+      outline: none;
+      background: #f0f8ff;
+      border-radius: 4px;
+    }
+  </style>
 </head>
 <body>
-    <nav class="navbar">
-        <h1>Sistema de Produtos</h1>
-        <button onclick="logout()">Sair</button>
-    </nav>
+  <!-- Mensagem de carregamento -->
+  <div id="message">Carregando...</div>
+  <!-- Banner de Boas-vindas -->
+  <div class="welcome-banner hidden" id="userWelcome"></div>
+  <!-- Conteúdo Administrativo -->
+  <div class="admin-panel hidden" id="adminContent">
+    <h2>Gerenciamento de Produtos</h2>
+    <!-- Formulário para adicionar produto -->
+    <form id="productForm">
+      <div style="display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;">
+        <input type="text" id="productName" placeholder="Nome do Produto" required>
+        <input type="number" id="productPrice" step="0.01" placeholder="Preço" required>
+        <div class="image-upload">
+          <label class="upload-label">
+            Escolher Imagem
+            <input type="file" id="productImage" accept="image/*" required>
+          </label>
+        </div>
+        <button type="submit" class="btn btn-edit">➕ Adicionar</button>
+      </div>
+    </form>
+    <!-- Tabela de Produtos -->
+    <table id="productsTable">
+      <thead>
+        <tr>
+          <th>Imagens</th>
+          <th>Produto</th>
+          <th>Preço</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <!-- Parse SDK -->
+  <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
+  <script>
+    /* 1. Inicialização do Parse */
+    Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
+    Parse.serverURL = "https://parseapi.back4app.com";
 
-    <div class="container">
-        <table id="productsTable">
-            <thead>
-                <tr>
-                    <th>Nome</th>
-                    <th>Descrição</th>
-                    <th>Preço</th>
-                    <th>Imagem</th>
-                </tr>
-            </thead>
-            <tbody id="tableBody">
-                <!-- Dados serão preenchidos via JavaScript -->
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Modal de Login -->
-    <div id="loginModal" class="login-container" style="display: none;">
-        <h2>Login</h2>
-        <form onsubmit="event.preventDefault(); login()">
-            <div class="form-group">
-                <label>Usuário:</label>
-                <input type="text" id="username" required>
-            </div>
-            <div class="form-group">
-                <label>Senha:</label>
-                <input type="password" id="password" required>
-            </div>
-            <button type="submit">Entrar</button>
-        </form>
-    </div>
-
-    <script>
-        // Configuração do Parse
-        Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
-        Parse.serverURL = 'https://parseapi.back4app.com/';
-
-        // Verifica autenticação ao carregar
-        document.addEventListener('DOMContentLoaded', () => {
-            const currentUser = Parse.User.current();
-            if (currentUser) {
-                loadProducts();
-            } else {
-                showLogin();
-            }
-        });
-
-        // Carrega produtos
-        async function loadProducts() {
-            const query = new Parse.Query("Produto");
-            try {
-                const results = await query.find();
-                populateTable(results);
-            } catch (error) {
-                console.error('Erro ao carregar produtos:', error);
-            }
+    /* 2. Verificação de Autenticação e Admin */
+    async function checkAdmin() {
+      try {
+        const user = Parse.User.current();
+        if (!user) {
+          throw new Error('Usuário não logado');
         }
-
-        // Preenche tabela
-        function populateTable(products) {
-            const tbody = document.getElementById('tableBody');
-            tbody.innerHTML = '';
-
-            products.forEach(product => {
-                const row = `
-                    <tr>
-                        <td>${product.get('nome')}</td>
-                        <td>${product.get('descricao')}</td>
-                        <td>R$ ${product.get('preco').toFixed(2)}</td>
-                        <td><img src="${product.get('imagem')" class="produto-img"></td>
-                    </tr>
-                `;
-                tbody.innerHTML += row;
-            });
+        const isAdminLocal = await checkIfUserIsAdmin(user);
+        if (!isAdminLocal) {
+          throw new Error('Acesso negado: você não é administrador');
         }
+        // Exibe o conteúdo administrativo
+        document.getElementById('adminContent').classList.remove('hidden');
+        document.getElementById('userWelcome').classList.remove('hidden');
+        document.getElementById('userWelcome').innerHTML = `Bem-vindo, <strong>${user.get("username")}</strong>!`;
+        document.getElementById('message').classList.add('hidden');
+        loadProducts();
+      } catch (error) {
+        alert("❌ ERRO: " + error.message);
+        window.location.href = 'index.html';
+      }
+    }
 
-        // Sistema de login
-        async function login() {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
+    async function checkIfUserIsAdmin(user) {
+      // Verifica se o usuário possui a Role "admin"
+      const roleQuery = new Parse.Query(Parse.Role);
+      roleQuery.equalTo("name", "admin");
+      roleQuery.equalTo("users", user);
+      const count = await roleQuery.count();
+      return count > 0;
+    }
 
-            try {
-                await Parse.User.logIn(username, password);
-                document.getElementById('loginModal').style.display = 'none';
-                loadProducts();
-            } catch (error) {
-                alert('Login falhou: ' + error.message);
-            }
+    /* 3. Classe Produto (Parse Object) */
+    const Produto = Parse.Object.extend("Produto");
+
+    /* 4. Carregar Produtos */
+    async function loadProducts() {
+      const query = new Parse.Query(Produto);
+      try {
+        const results = await query.find();
+        updateTable(results);
+      } catch (error) {
+        alert("Erro ao carregar produtos: " + error.message);
+      }
+    }
+
+    /* 5. Atualizar a Tabela de Produtos */
+    function updateTable(produtos) {
+      const tbody = document.querySelector('#productsTable tbody');
+      tbody.innerHTML = "";
+      produtos.forEach(produto => {
+        const imagens = produto.get("imagens") || [];
+        const imagemHtml = imagens.map((url, index) => `
+          <div class="image-container">
+            <img src="${url}" class="product-image">
+            <div class="delete-image" onclick="removeImage('${produto.id}', ${index})">×</div>
+          </div>
+        `).join("");
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>
+            <div class="image-gallery">${imagemHtml}</div>
+            <button class="btn btn-edit" onclick="addImage('${produto.id}')">Adicionar Imagem</button>
+          </td>
+          <td>
+            <div class="editable-field" contenteditable="true" data-id="${produto.id}" data-field="nome">${produto.get("nome")}</div>
+          </td>
+          <td>
+            <div class="editable-field" contenteditable="true" data-id="${produto.id}" data-field="preco">${parseFloat(produto.get("preco")).toFixed(2)}</div>
+          </td>
+          <td>
+            <button class="btn btn-delete" onclick="deleteProduct('${produto.id}')">Excluir</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+      // Atualização com debounce para campos editáveis
+      document.querySelectorAll('.editable-field').forEach(field => {
+        field.addEventListener('input', debounce(() => {
+          const id = field.getAttribute('data-id');
+          const fieldName = field.getAttribute('data-field');
+          const value = fieldName === "preco" ? parseFloat(field.textContent) : field.textContent;
+          updateProductField(id, fieldName, value);
+        }, 500));
+      });
+    }
+
+    // Função debounce
+    function debounce(func, timeout = 300){
+      let timer;
+      return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => { func.apply(this, args); }, timeout);
+      };
+    }
+
+    async function updateProductField(id, fieldName, value) {
+      const query = new Parse.Query(Produto);
+      try {
+        const produto = await query.get(id);
+        produto.set(fieldName, value);
+        await produto.save();
+      } catch (error) {
+        alert("Erro ao atualizar: " + error.message);
+      }
+    }
+
+    /* 6. Adicionar Novo Produto */
+    document.getElementById('productForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const nome = document.getElementById('productName').value;
+      const preco = parseFloat(document.getElementById('productPrice').value);
+      const fileInput = document.getElementById('productImage');
+      const file = fileInput.files[0];
+      if (!file) {
+        alert("Selecione uma imagem.");
+        return;
+      }
+      try {
+        // Cria e salva o arquivo usando Parse.File
+        const parseFile = new Parse.File(file.name, file);
+        await parseFile.save();
+        // Cria o novo produto com os campos desejados
+        const produto = new Produto();
+        produto.set("nome", nome);
+        produto.set("preco", preco);
+        produto.set("imagens", [parseFile.url()]);
+        await produto.save();
+        document.getElementById('productForm').reset();
+        loadProducts();
+      } catch (error) {
+        alert("Erro ao adicionar produto: " + error.message);
+      }
+    });
+
+    /* 7. Deletar Produto */
+    async function deleteProduct(id) {
+      const query = new Parse.Query(Produto);
+      try {
+        const produto = await query.get(id);
+        await produto.destroy();
+        loadProducts();
+      } catch (error) {
+        alert("Erro ao excluir produto: " + error.message);
+      }
+    }
+
+    /* 8. Adicionar Imagem a Produto Existente */
+    async function addImage(produtoId) {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        try {
+          const parseFile = new Parse.File(file.name, file);
+          await parseFile.save();
+          const query = new Parse.Query(Produto);
+          const produto = await query.get(produtoId);
+          const imagens = produto.get("imagens") || [];
+          imagens.push(parseFile.url());
+          produto.set("imagens", imagens);
+          await produto.save();
+          loadProducts();
+        } catch (error) {
+          alert("Erro ao adicionar imagem: " + error.message);
         }
+      };
+      input.click();
+    }
 
-        // Logout
-        function logout() {
-            Parse.User.logOut();
-            showLogin();
-        }
+    /* 9. Remover Imagem */
+    async function removeImage(produtoId, index) {
+      if (!confirm("Deseja realmente remover esta imagem?")) return;
+      try {
+        const query = new Parse.Query(Produto);
+        const produto = await query.get(produtoId);
+        let imagens = produto.get("imagens") || [];
+        imagens.splice(index, 1);
+        produto.set("imagens", imagens);
+        await produto.save();
+        loadProducts();
+      } catch (error) {
+        alert("Erro ao remover imagem: " + error.message);
+      }
+    }
 
-        // Mostra formulário de login
-        function showLogin() {
-            document.getElementById('loginModal').style.display = 'block';
-            document.querySelector('.container').style.display = 'none';
-            document.querySelector('.navbar').style.display = 'none';
-        }
-    </script>
+    /* 10. Inicializar a Página (verificação de admin + carregamento dos produtos) */
+    checkAdmin();
+  </script>
 </body>
 </html>
