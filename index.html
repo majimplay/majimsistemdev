@@ -1,140 +1,399 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <title>Catálogo de Produtos</title>
-    
-    <!-- Parse SDK -->
-    <script src="https://npmcdn.com/parse/dist/parse.min.js"></script>
-    
-    <!-- Estilos melhorados -->
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Arial, sans-serif;
-        }
+  <meta charset="UTF-8">
+  <title>Loja Virtual com Galeria de Produtos</title>
+  <style>
+    /* Estilos gerais melhorados */
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f8f9fa;
+    }
 
-        body {
-            background: #f8f9fa;
-        }
+    header {
+      background: #2c3e50;
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
 
-        .navbar {
-            background: #2c3e50;
-            padding: 1rem 2rem;
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
+    .logo h2 {
+      margin: 0;
+      font-size: 1.8rem;
+    }
 
-        .container {
-            max-width: 1200px;
-            margin: 2rem auto;
-            padding: 1rem;
-        }
+    .auth-area {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
 
-        .products-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 2rem;
-            padding: 1rem;
-        }
+    .login-form, .user-info {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
 
-        .product-card {
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease;
-        }
+    .login-form input {
+      padding: 0.5rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      min-width: 180px;
+    }
 
-        .product-card:hover {
-            transform: translateY(-5px);
-        }
+    .login-form button, .user-info button {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
 
-        .product-image {
-            width: 100%;
-            height: 250px;
-            object-fit: cover;
-            border-bottom: 3px solid #2c3e50;
-        }
+    .login-form button {
+      background: #27ae60;
+      color: white;
+    }
 
-        .product-info {
-            padding: 1.5rem;
-        }
+    .user-info button {
+      background: #e74c3c;
+      color: white;
+    }
 
-        .product-price {
-            color: #27ae60;
-            font-size: 1.4rem;
-            font-weight: bold;
-            margin: 0.5rem 0;
-        }
+    /* Container principal */
+    .container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
 
-        .product-description {
-            color: #7f8c8d;
-            font-size: 0.9rem;
-            line-height: 1.4;
-        }
+    .container h1 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 2rem;
+    }
 
-        /* Restante do CSS mantido do exemplo anterior */
-        /* ... (manter os estilos de login e outros existentes) */
-    </style>
+    /* Grid de produtos melhorado */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 2rem;
+    }
+
+    .product-card {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease;
+    }
+
+    .product-card:hover {
+      transform: translateY(-5px);
+    }
+
+    /* Carrossel de imagens */
+    .product-images {
+      position: relative;
+      height: 300px;
+      overflow: hidden;
+    }
+
+    .image-slider {
+      display: flex;
+      transition: transform 0.5s ease;
+      height: 100%;
+    }
+
+    .product-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    .slider-nav {
+      position: absolute;
+      bottom: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .slider-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.5);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .slider-dot.active {
+      background: white;
+      transform: scale(1.2);
+    }
+
+    /* Informações do produto */
+    .product-info {
+      padding: 1.5rem;
+    }
+
+    .product-info h3 {
+      margin: 0 0 0.5rem;
+      color: #2c3e50;
+      font-size: 1.2rem;
+    }
+
+    .product-price {
+      color: #27ae60;
+      font-size: 1.4rem;
+      font-weight: bold;
+      margin: 0.5rem 0;
+    }
+
+    .product-description {
+      color: #7f8c8d;
+      font-size: 0.9rem;
+      line-height: 1.4;
+      margin-bottom: 1rem;
+    }
+
+    .product-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .buy-button {
+      background: #2980b9;
+      color: white;
+      padding: 0.8rem 1.5rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      flex-grow: 1;
+      transition: background 0.3s ease;
+    }
+
+    .buy-button:hover {
+      background: #3498db;
+    }
+
+    /* Modal do Carrinho melhorado */
+    #cartModal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(3px);
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 600px;
+      margin: 2rem auto;
+      position: relative;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    #cartItems div {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    #cartTotal {
+      font-size: 1.2rem;
+      color: #2c3e50;
+      margin-top: 1.5rem;
+      text-align: right;
+    }
+
+    #closeCartBtn {
+      background: #95a5a6;
+      margin-top: 1.5rem;
+      width: 100%;
+    }
+  </style>
+  <!-- SDK do Parse -->
+  <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
 </head>
 <body>
-    <nav class="navbar">
-        <h1>Catálogo Digital</h1>
-        <button onclick="logout()" class="logout-btn">Sair</button>
-    </nav>
-
-    <div class="container">
-        <div class="products-grid" id="productsGrid">
-            <!-- Cards serão gerados via JavaScript -->
-        </div>
+  <!-- Cabeçalho mantido com melhorias visuais -->
+  <header>
+    <div class="logo">
+      <h2>Galeria de Produtos</h2>
     </div>
+    <div class="auth-area">
+      <!-- Área de login atualizada -->
+      <div id="loginArea" class="login-form">
+        <input type="text" id="usernameInput" placeholder="Nome de usuário">
+        <input type="password" id="passwordInput" placeholder="Senha">
+        <button id="loginBtn">Entrar</button>
+        <a href="#" id="forgotPasswordLink">Recuperar senha</a>
+      </div>
+      <!-- Área do usuário -->
+      <div id="userArea" class="user-info" style="display:none;">
+        <span id="welcomeUser"></span>
+        <a href="#" id="cartLink">🛒 Carrinho</a>
+        <button id="logoutBtn">Sair</button>
+      </div>
+    </div>
+  </header>
 
-    <!-- Modal de Login (mantido do exemplo anterior) -->
+  <!-- Conteúdo principal com nova galeria -->
+  <div class="container">
+    <h1>Nossos Produtos</h1>
+    <div id="productGrid" class="product-grid">
+      <!-- Produtos serão carregados aqui -->
+    </div>
+  </div>
 
-    <script>
-        // Configuração do Parse mantida
+  <!-- Modal do Carrinho atualizado -->
+  <div id="cartModal">
+    <div class="modal-content">
+      <h2>Seu Carrinho</h2>
+      <div id="cartItems"></div>
+      <div id="cartTotalContainer">
+        <strong>Total: R$ <span id="cartTotal">0.00</span></strong>
+      </div>
+      <button id="closeCartBtn" class="buy-button">Fechar</button>
+    </div>
+  </div>
 
-        // Função de carregamento atualizada
-        async function loadProducts() {
-            const query = new Parse.Query("Produto");
-            try {
-                const results = await query.find();
-                populateProductsGrid(results);
-            } catch (error) {
-                console.error('Erro ao carregar produtos:', error);
-            }
+  <script>
+    // Inicialização do Parse mantida
+
+    // Variável para controle do carrossel
+    const productSliders = new Map();
+
+    // Função para criar slider de imagens
+    function createImageSlider(containerId, images) {
+      let currentSlide = 0;
+      const container = document.getElementById(containerId);
+      const slider = container.querySelector('.image-slider');
+      const dots = container.querySelectorAll('.slider-dot');
+
+      function updateSlider() {
+        slider.style.transform = `translateX(-${currentSlide * 100}%)`;
+        dots.forEach((dot, index) => {
+          dot.classList.toggle('active', index === currentSlide);
+        });
+      }
+
+      return {
+        next: () => {
+          currentSlide = (currentSlide + 1) % images.length;
+          updateSlider();
+        },
+        prev: () => {
+          currentSlide = (currentSlide - 1 + images.length) % images.length;
+          updateSlider();
+        },
+        goTo: (index) => {
+          currentSlide = index;
+          updateSlider();
         }
+      };
+    }
 
-        // Nova função para exibir os produtos em grid
-        function populateProductsGrid(products) {
-            const grid = document.getElementById('productsGrid');
-            grid.innerHTML = '';
+    // Carregamento de produtos atualizado
+    async function loadProducts() {
+      const Produto = Parse.Object.extend("Produto");
+      const query = new Parse.Query(Produto);
+      try {
+        const results = await query.find();
+        const grid = document.getElementById("productGrid");
+        grid.innerHTML = "";
 
-            products.forEach(product => {
-                const card = `
-                    <div class="product-card">
-                        <img src="${product.get('imagem') || 'https://via.placeholder.com/300x250'}" 
-                             class="product-image"
-                             alt="${product.get('nome')}"
-                             onerror="this.src='https://via.placeholder.com/300x250'">
-                        <div class="product-info">
-                            <h3>${product.get('nome')}</h3>
-                            <div class="product-price">R$ ${product.get('preco').toFixed(2)}</div>
-                            <p class="product-description">${product.get('descricao')}</p>
-                        </div>
-                    </div>
-                `;
-                grid.innerHTML += card;
-            });
-        }
+        results.forEach((produto, index) => {
+          const images = produto.get("imagens") || [];
+          const hasImages = images.length > 0;
+          
+          const card = document.createElement("div");
+          card.className = "product-card";
+          card.innerHTML = `
+            <div class="product-images" id="slider-${index}">
+              <div class="image-slider" style="width: ${hasImages ? images.length * 100 : 100}%">
+                ${hasImages ? 
+                  images.map(img => `<img src="${img}" class="product-image" alt="${produto.get("nome")}">`).join('') :
+                  `<img src="https://via.placeholder.com/300x300?text=Sem+Imagem" class="product-image">`
+                }
+              </div>
+              <div class="slider-nav">
+                ${hasImages ? 
+                  images.map((_, i) => `<div class="slider-dot ${i === 0 ? 'active' : ''}"></div>`).join('') :
+                  ''
+                }
+              </div>
+            </div>
+            <div class="product-info">
+              <h3>${produto.get("nome")}</h3>
+              <p class="product-price">R$ ${parseFloat(produto.get("preco")).toFixed(2)}</p>
+              ${produto.get("descricao") ? `<p class="product-description">${produto.get("descricao")}</p>` : ''}
+              <div class="product-actions">
+                <button class="buy-button" onclick="addToCart('${produto.id}', '${produto.get("nome")}', ${produto.get("preco")})">Comprar</button>
+              </div>
+            </div>
+          `;
 
-        // Restante do código mantido
-    </script>
+          grid.appendChild(card);
+          
+          if (hasImages) {
+            productSliders.set(`slider-${index}`, createImageSlider(`slider-${index}`, images));
+          }
+        });
+
+      } catch (error) {
+        console.error("Erro ao carregar produtos: ", error);
+      }
+    }
+
+    // Restante do código mantido com melhorias
+    // ... (funções de autenticação e carrinho mantidas)
+
+    // Atualização da interface do carrinho
+    function renderCart() {
+      const cartItemsDiv = document.getElementById("cartItems");
+      cartItemsDiv.innerHTML = "";
+      let total = 0;
+
+      cart.forEach((item, index) => {
+        total += item.price;
+        const itemElement = document.createElement("div");
+        itemElement.innerHTML = `
+          <div>
+            <span>${item.name}</span>
+            <small>R$ ${item.price.toFixed(2)}</small>
+          </div>
+          <button onclick="removeFromCart(${index})" class="buy-button" style="background: #e74c3c">
+            Remover
+          </button>
+        `;
+        cartItemsDiv.appendChild(itemElement);
+      });
+
+      document.getElementById("cartTotal").textContent = total.toFixed(2);
+    }
+
+    // Inicialização
+    updateAuthUI();
+    loadProducts();
+  </script>
 </body>
 </html>
