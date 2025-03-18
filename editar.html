@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Editar Produto</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f2f5;
+      padding: 20px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    .hidden { display: none; }
+    .container {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 {
+      margin-bottom: 1.5rem;
+    }
+    form div {
+      margin-bottom: 1rem;
+    }
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: bold;
+    }
+    input[type="text"],
+    input[type="number"],
+    textarea {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    textarea {
+      resize: vertical;
+    }
+    .btn {
+      padding: 10px 18px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 10px;
+      transition: 0.3s;
+    }
+    .btn-save { background: #4CAF50; color: white; }
+    .btn-back { background: #555; color: white; }
+    .btn:hover { opacity: 0.9; }
+    /* Estilo para exibição das imagens */
+    .image-item {
+      display: inline-block;
+      position: relative;
+      margin: 10px;
+    }
+    .image-item img {
+      width: 200px;
+      height: auto;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    .image-item button {
+      position: absolute;
+      background: rgba(0,0,0,0.6);
+      color: #fff;
+      border: none;
+      padding: 4px 8px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    .remove-btn {
+      top: 5px;
+      right: 5px;
+    }
+    .move-left-btn {
+      bottom: 5px;
+      left: 5px;
+    }
+    .move-right-btn {
+      bottom: 5px;
+      right: 5px;
+    }
+    /* Botão para adicionar imagem */
+    #addImageBtn {
+      padding: 8px 16px;
+      background: #2196F3;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: 0.3s;
+      margin-top: 10px;
+    }
+    #addImageBtn:hover { opacity: 0.9; }
+  </style>
+</head>
+<body>
+  <!-- Mensagem de carregamento -->
+  <div id="message">Carregando...</div>
+  
+  <div class="container hidden" id="content">
+    <h1>Editar Produto</h1>
+    <form id="editForm">
+      <div>
+        <label for="nome">Nome do Produto:</label>
+        <input type="text" id="nome" required>
+      </div>
+      <div>
+        <label for="preco">Preço:</label>
+        <input type="number" id="preco" step="0.01" required>
+      </div>
+      <div>
+        <label for="descricao">Descrição:</label>
+        <textarea id="descricao" rows="4" placeholder="Digite a descrição do produto"></textarea>
+      </div>
+      <div>
+        <h3>Imagens do Produto</h3>
+        <div id="imagesContainer"></div>
+        <button type="button" id="addImageBtn">Adicionar Imagem</button>
+      </div>
+      <div style="margin-top: 1.5rem;">
+        <button type="submit" class="btn btn-save">Salvar</button>
+        <button type="button" class="btn btn-back" onclick="window.location.href='painelcompleto.html'">Voltar</button>
+      </div>
+    </form>
+  </div>
+  
+  <!-- Input oculto para upload de novas imagens -->
+  <input type="file" id="newImageInput" accept="image/*" style="display: none;">
+  
+  <!-- Parse SDK -->
+  <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
+  <script>
+    // Inicialização do Parse
+    Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
+    Parse.serverURL = "https://parseapi.back4app.com";
+  
+    let produto; // Objeto do produto
+    let imagens = []; // Array com URLs das imagens
+  
+    // Função para obter parâmetro da query string
+    function getQueryParam(param) {
+      const params = new URLSearchParams(window.location.search);
+      return params.get(param);
+    }
+  
+    const produtoId = getQueryParam("id");
+  
+    // Carrega o produto a ser editado
+    async function loadProduct() {
+      const Produto = Parse.Object.extend("Produto");
+      const query = new Parse.Query(Produto);
+      try {
+        produto = await query.get(produtoId);
+        document.getElementById("nome").value = produto.get("nome");
+        document.getElementById("preco").value = parseFloat(produto.get("preco")).toFixed(2);
+        document.getElementById("descricao").value = produto.get("descricao") || "";
+        imagens = produto.get("imagens") || [];
+        renderImages();
+        document.getElementById("message").classList.add("hidden");
+        document.getElementById("content").classList.remove("hidden");
+      } catch (error) {
+        alert("Erro ao carregar o produto: " + error.message);
+      }
+    }
+  
+    // Renderiza as imagens com botões de reordenar e remover
+    function renderImages() {
+      const container = document.getElementById("imagesContainer");
+      container.innerHTML = "";
+      imagens.forEach((url, index) => {
+        const div = document.createElement("div");
+        div.className = "image-item";
+  
+        const img = document.createElement("img");
+        img.src = url;
+  
+        // Botão para remover a imagem
+        const removeBtn = document.createElement("button");
+        removeBtn.className = "remove-btn";
+        removeBtn.textContent = "X";
+        removeBtn.onclick = function() {
+          if (confirm("Deseja remover esta imagem?")) {
+            imagens.splice(index, 1);
+            renderImages();
+          }
+        };
+  
+        // Botão para mover a imagem para a esquerda
+        const moveLeftBtn = document.createElement("button");
+        moveLeftBtn.className = "move-left-btn";
+        moveLeftBtn.textContent = "←";
+        moveLeftBtn.onclick = function() {
+          if (index > 0) {
+            [imagens[index - 1], imagens[index]] = [imagens[index], imagens[index - 1]];
+            renderImages();
+          }
+        };
+  
+        // Botão para mover a imagem para a direita
+        const moveRightBtn = document.createElement("button");
+        moveRightBtn.className = "move-right-btn";
+        moveRightBtn.textContent = "→";
+        moveRightBtn.onclick = function() {
+          if (index < imagens.length - 1) {
+            [imagens[index], imagens[index + 1]] = [imagens[index + 1], imagens[index]];
+            renderImages();
+          }
+        };
+  
+        div.appendChild(img);
+        div.appendChild(removeBtn);
+        div.appendChild(moveLeftBtn);
+        div.appendChild(moveRightBtn);
+        container.appendChild(div);
+      });
+    }
+  
+    // Adicionar nova imagem
+    document.getElementById("addImageBtn").addEventListener("click", function() {
+      document.getElementById("newImageInput").click();
+    });
+  
+    document.getElementById("newImageInput").addEventListener("change", async function(event) {
+      const file = event.target.files[0];
+      if (file) {
+        try {
+          const parseFile = new Parse.File(file.name, file);
+          await parseFile.save();
+          imagens.push(parseFile.url());
+          renderImages();
+        } catch (error) {
+          alert("Erro ao adicionar imagem: " + error.message);
+        }
+      }
+    });
+  
+    // Salvar alterações do produto
+    document.getElementById("editForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      try {
+        produto.set("nome", document.getElementById("nome").value);
+        produto.set("preco", parseFloat(document.getElementById("preco").value));
+        produto.set("descricao", document.getElementById("descricao").value);
+        produto.set("imagens", imagens);
+        await produto.save();
+        alert("Produto atualizado com sucesso!");
+        window.location.href = "painelcompleto.html";
+      } catch (error) {
+        alert("Erro ao salvar o produto: " + error.message);
+      }
+    });
+  
+    loadProduct();
+  </script>
+</body>
+</html>
