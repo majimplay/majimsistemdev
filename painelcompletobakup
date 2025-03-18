@@ -113,7 +113,7 @@
   <!-- Conteúdo Administrativo -->
   <div class="admin-panel hidden" id="adminContent">
     <h2>Gerenciamento de Produtos</h2>
-    <!-- Formulário para adicionar produto -->
+    <!-- Formulário para adicionar produto (somente para admin) -->
     <form id="productForm">
       <div style="display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;">
         <input type="text" id="productName" placeholder="Nome do Produto" required>
@@ -145,31 +145,37 @@
   <!-- Parse SDK -->
   <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
   <script>
+    /* Variável global para definir o modo apenas visualização */
+    let readOnly = false;
+
     /* 1. Inicialização do Parse */
     Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
     Parse.serverURL = "https://parseapi.back4app.com";
 
-    /* 2. Verificação de Autenticação e Admin */
-    async function checkAdmin() {
-      try {
-        const user = Parse.User.current();
-        if (!user) {
-          throw new Error('Usuário não logado');
-        }
+    /* 2. Inicialização da Página */
+    async function initPage() {
+      const user = Parse.User.current();
+      if (user) {
+        // Se estiver logado, verifica se é admin
         const isAdminLocal = await checkIfUserIsAdmin(user);
-        if (!isAdminLocal) {
-          throw new Error('Acesso negado: você não é administrador');
+        if (isAdminLocal) {
+          readOnly = false;
+          document.getElementById('userWelcome').innerHTML = `Bem-vindo, <strong>${user.get("username")}</strong>!`;
+        } else {
+          readOnly = true;
+          document.getElementById('userWelcome').innerHTML = `Olá, <strong>${user.get("username")}</strong>! Visualização somente.`;
+          document.getElementById('productForm').style.display = 'none';
         }
-        // Exibe o conteúdo administrativo
-        document.getElementById('adminContent').classList.remove('hidden');
-        document.getElementById('userWelcome').classList.remove('hidden');
-        document.getElementById('userWelcome').innerHTML = `Bem-vindo, <strong>${user.get("username")}</strong>!`;
-        document.getElementById('message').classList.add('hidden');
-        loadProducts();
-      } catch (error) {
-        alert("❌ ERRO: " + error.message);
-        window.location.href = 'index.html';
+      } else {
+        // Se não estiver logado, define modo somente visualização
+        readOnly = true;
+        document.getElementById('productForm').style.display = 'none';
+        document.getElementById('userWelcome').innerHTML = `Visualização somente.`;
       }
+      document.getElementById('adminContent').classList.remove('hidden');
+      document.getElementById('userWelcome').classList.remove('hidden');
+      document.getElementById('message').classList.add('hidden');
+      loadProducts();
     }
 
     async function checkIfUserIsAdmin(user) {
@@ -204,36 +210,38 @@
         const imagemHtml = imagens.map((url, index) => `
           <div class="image-container">
             <img src="${url}" class="product-image">
-            <div class="delete-image" onclick="removeImage('${produto.id}', ${index})">×</div>
+            ${!readOnly ? `<div class="delete-image" onclick="removeImage('${produto.id}', ${index})">×</div>` : ''}
           </div>
         `).join("");
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>
             <div class="image-gallery">${imagemHtml}</div>
-            <button class="btn btn-edit" onclick="addImage('${produto.id}')">Adicionar Imagem</button>
+            ${!readOnly ? `<button class="btn btn-edit" onclick="addImage('${produto.id}')">Adicionar Imagem</button>` : ''}
           </td>
           <td>
-            <div class="editable-field" contenteditable="true" data-id="${produto.id}" data-field="nome">${produto.get("nome")}</div>
+            <div class="editable-field" ${!readOnly ? 'contenteditable="true"' : ''} data-id="${produto.id}" data-field="nome">${produto.get("nome")}</div>
           </td>
           <td>
-            <div class="editable-field" contenteditable="true" data-id="${produto.id}" data-field="preco">${parseFloat(produto.get("preco")).toFixed(2)}</div>
+            <div class="editable-field" ${!readOnly ? 'contenteditable="true"' : ''} data-id="${produto.id}" data-field="preco">${parseFloat(produto.get("preco")).toFixed(2)}</div>
           </td>
           <td>
-            <button class="btn btn-delete" onclick="deleteProduct('${produto.id}')">Excluir</button>
+            ${!readOnly ? `<button class="btn btn-delete" onclick="deleteProduct('${produto.id}')">Excluir</button>` : ''}
           </td>
         `;
         tbody.appendChild(tr);
       });
-      // Atualização com debounce para campos editáveis
-      document.querySelectorAll('.editable-field').forEach(field => {
-        field.addEventListener('input', debounce(() => {
-          const id = field.getAttribute('data-id');
-          const fieldName = field.getAttribute('data-field');
-          const value = fieldName === "preco" ? parseFloat(field.textContent) : field.textContent;
-          updateProductField(id, fieldName, value);
-        }, 500));
-      });
+      // Se não estiver em modo somente visualização, permite edição inline
+      if (!readOnly) {
+        document.querySelectorAll('.editable-field').forEach(field => {
+          field.addEventListener('input', debounce(() => {
+            const id = field.getAttribute('data-id');
+            const fieldName = field.getAttribute('data-field');
+            const value = fieldName === "preco" ? parseFloat(field.textContent) : field.textContent;
+            updateProductField(id, fieldName, value);
+          }, 500));
+        });
+      }
     }
 
     // Função debounce
@@ -256,7 +264,7 @@
       }
     }
 
-    /* 6. Adicionar Novo Produto */
+    /* 6. Adicionar Novo Produto (somente para admin) */
     document.getElementById('productForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const nome = document.getElementById('productName').value;
@@ -286,7 +294,7 @@
       }
     });
 
-    /* 7. Deletar Produto */
+    /* 7. Deletar Produto (somente para admin) */
     async function deleteProduct(id) {
       const query = new Parse.Query(Produto);
       try {
@@ -298,7 +306,7 @@
       }
     }
 
-    /* 8. Adicionar Imagem a Produto Existente */
+    /* 8. Adicionar Imagem a Produto Existente (somente para admin) */
     async function addImage(produtoId) {
       const input = document.createElement('input');
       input.type = 'file';
@@ -323,7 +331,7 @@
       input.click();
     }
 
-    /* 9. Remover Imagem */
+    /* 9. Remover Imagem (somente para admin) */
     async function removeImage(produtoId, index) {
       if (!confirm("Deseja realmente remover esta imagem?")) return;
       try {
@@ -356,8 +364,8 @@
       }
     });
 
-    /* 11. Inicializar a Página (verificação de admin + carregamento dos produtos) */
-    checkAdmin();
+    /* 11. Inicializar a Página */
+    initPage();
   </script>
 </body>
 </html>
