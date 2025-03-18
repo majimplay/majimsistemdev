@@ -2,23 +2,50 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>mapa do site</title>
+  <title>Mapa do Site</title>
   <style>
-     </style>
-  </head>
+    .botoes {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    
+    .botao {
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+    }
 
-  <body>
+    .botao:hover {
+      background-color: #0056b3;
+    }
+
+    header {
+      padding: 20px;
+      background-color: #f8f9fa;
+    }
+
+    .logo h2 {
+      margin: 0;
+      color: #333;
+    }
+  </style>
+</head>
+
+<body>
   <!-- Cabeçalho -->
   <header>
     <div class="logo">
-      <h2>mapa do site </h2>
-
-       <button id="loja">minha loja</button>
-   <a href="loga.html" id="loja">Registrar</a> 
-      <button id="produto">produto</button>
-   <a href="produto.html" id="produto">ver produto</a> 
+      <h2>Mapa do Site</h2>
+      <div class="botoes">
+        <a href="loga.html" class="botao">Registrar</a>
+        <a href="produto.html" class="botao">Ver Produtos</a>
+      </div>
     </div>
-
-      </header>
-      </body>
+  </header>
+</body>
 </html>
