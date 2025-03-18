@@ -3,8 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <title>Produtos - Minha Loja</title>
+  <!-- Splide CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@splidejs/splide@latest/dist/css/splide.min.css">
   <style>
-    /* Estilos gerais e do cabeçalho */
+    /* Estilos gerais */
     body {
       font-family: sans-serif;
       margin: 0;
@@ -22,16 +24,11 @@
     header .logo h2 {
       margin: 0;
     }
-    .auth-area {
-      display: flex;
-      align-items: center;
-    }
     .auth-area a {
       margin-left: 10px;
       color: white;
       text-decoration: none;
     }
-    /* Estilos do conteúdo principal */
     .container {
       padding: 20px;
     }
@@ -48,20 +45,18 @@
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
       text-align: center;
     }
-    /* Estilos para o carousel */
-    .carousel {
-      position: relative;
-      overflow: hidden;
+    .splide__slide img {
       width: 100%;
       height: 200px;
-      margin-bottom: 10px;
-    }
-    .carousel img {
-      width: 100%;
-      height: 100%;
       object-fit: cover;
       border-radius: 5px;
-      transition: opacity 0.5s ease-in-out;
+    }
+    .product-card h3 {
+      margin: 10px 0 5px;
+    }
+    .product-card p {
+      margin: 5px 0;
+      font-weight: bold;
     }
     .product-card button {
       margin-top: 10px;
@@ -75,46 +70,7 @@
     .product-card button:hover {
       background: #218838;
     }
-    /* Estilos do Modal do Carrinho */
-    #cartModal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.5);
-      justify-content: center;
-      align-items: center;
-    }
-    #cartModal .modal-content {
-      background: white;
-      padding: 20px;
-      border-radius: 5px;
-      width: 90%;
-      max-width: 500px;
-    }
-    #cartModal h2 {
-      margin-top: 0;
-    }
-    #cartItems {
-      margin: 20px 0;
-    }
-    #cartItems div {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 10px;
-    }
-    #cartModal button {
-      padding: 8px 12px;
-      margin-top: 10px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
   </style>
-  <!-- SDK do Parse -->
-  <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
 </head>
 <body>
   <header>
@@ -127,58 +83,34 @@
     </div>
   </header>
 
-  <!-- Conteúdo principal: exibição dos produtos -->
+  <!-- Conteúdo principal -->
   <div class="container">
     <h1>Produtos à Venda</h1>
     <div id="productGrid" class="product-grid">
-      <!-- Produtos carregados dinamicamente -->
+      <!-- Cards dos produtos serão inseridos aqui -->
     </div>
   </div>
 
-  <!-- Modal do Carrinho de Compras -->
-  <div id="cartModal">
-    <div class="modal-content">
-      <h2>Carrinho de Compras</h2>
-      <div id="cartItems">
-        <!-- Itens do carrinho -->
-      </div>
-      <div>
-        <strong>Total: R$ <span id="cartTotal">0.00</span></strong>
-      </div>
-      <button id="closeCartBtn">Fechar</button>
-    </div>
-  </div>
-
+  <!-- Splide JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@latest/dist/js/splide.min.js"></script>
+  <!-- Splide Auto Scroll Extension -->
+  <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide-extension-auto-scroll@latest/dist/js/splide-extension-auto-scroll.min.js"></script>
+  <!-- Parse SDK -->
+  <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
   <script>
     // Inicializa o Parse
     Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
     Parse.serverURL = "https://parseapi.back4app.com";
 
-    let cart = []; // Carrinho de compras
+    let cart = [];
 
-    // Função para iniciar o carousel para cada produto
-    function initializeCarousel(carouselDiv, images) {
-      let currentIndex = 0;
-      const imgElement = carouselDiv.querySelector("img");
-      let intervalId = setInterval(() => {
-        currentIndex = (currentIndex + 1) % images.length;
-        imgElement.src = images[currentIndex];
-      }, 3000);
-
-      // Para o ciclo quando o mouse estiver sobre o carousel
-      carouselDiv.addEventListener("mouseenter", () => {
-        clearInterval(intervalId);
-      });
-      // Reinicia o ciclo ao retirar o mouse
-      carouselDiv.addEventListener("mouseleave", () => {
-        intervalId = setInterval(() => {
-          currentIndex = (currentIndex + 1) % images.length;
-          imgElement.src = images[currentIndex];
-        }, 3000);
-      });
+    // Função para adicionar um produto ao carrinho
+    function addToCart(id, name, price) {
+      cart.push({ id, name, price });
+      alert(name + " adicionado ao carrinho!");
     }
 
-    // Carrega os produtos do Parse e exibe em formato de cards com carousel
+    // Carrega os produtos do Parse e cria os carousels usando Splide com auto-scroll
     async function loadProducts() {
       const Produto = Parse.Object.extend("Produto");
       const query = new Parse.Query(Produto);
@@ -187,69 +119,47 @@
         const grid = document.getElementById("productGrid");
         grid.innerHTML = "";
         results.forEach(produto => {
-          // Obtém as imagens do produto ou usa placeholder se não houver
-          const imagens = produto.get("imagens") || [];
+          let imagens = produto.get("imagens") || [];
           if (imagens.length === 0) {
-            imagens.push("https://via.placeholder.com/200x200?text=Sem+Imagem");
+            imagens = ["https://via.placeholder.com/200x200?text=Sem+Imagem"];
           }
+          // Cria um id único para o Splide
+          const splideId = "splide-" + produto.id;
           const card = document.createElement("div");
           card.className = "product-card";
           card.innerHTML = `
-            <div class="carousel">
-              <img src="${imagens[0]}" alt="${produto.get("nome")}">
+            <div id="${splideId}" class="splide">
+              <div class="splide__track">
+                <ul class="splide__list">
+                  ${imagens.map(img => `<li class="splide__slide"><img src="${img}" alt="${produto.get("nome")}"></li>`).join('')}
+                </ul>
+              </div>
             </div>
             <h3>${produto.get("nome")}</h3>
             <p>R$ ${parseFloat(produto.get("preco")).toFixed(2)}</p>
             <button onclick="addToCart('${produto.id}', '${produto.get("nome")}', ${parseFloat(produto.get("preco")).toFixed(2)})">Comprar</button>
           `;
           grid.appendChild(card);
-          // Inicia o carousel para este produto
-          initializeCarousel(card.querySelector(".carousel"), imagens);
+
+          // Inicializa o Splide com a extensão AutoScroll
+          new Splide('#' + splideId, {
+            type      : 'loop',
+            perPage   : 1,
+            pagination: false,
+            arrows    : false,
+            autoScroll: {
+              speed: 1,
+              pauseOnHover: true,
+            },
+          }, {
+            AutoScroll: Splide.Extensions.AutoScroll,
+          }).mount();
         });
       } catch (error) {
-        console.error("Erro ao carregar produtos: ", error);
+        console.error("Erro ao carregar produtos:", error);
       }
     }
 
-    // Adiciona um produto ao carrinho
-    function addToCart(id, name, price) {
-      cart.push({ id, name, price });
-      alert(name + " adicionado ao carrinho!");
-    }
-
-    // Exibe o modal do carrinho
-    document.getElementById("cartLink").addEventListener("click", function(e) {
-      e.preventDefault();
-      renderCart();
-      document.getElementById("cartModal").style.display = "flex";
-    });
-
-    // Fecha o modal do carrinho
-    document.getElementById("closeCartBtn").addEventListener("click", function() {
-      document.getElementById("cartModal").style.display = "none";
-    });
-
-    // Renderiza os itens do carrinho e calcula o total
-    function renderCart() {
-      const cartItemsDiv = document.getElementById("cartItems");
-      cartItemsDiv.innerHTML = "";
-      let total = 0;
-      cart.forEach((item, index) => {
-        total += parseFloat(item.price);
-        const itemDiv = document.createElement("div");
-        itemDiv.innerHTML = `<span>${item.name} - R$ ${parseFloat(item.price).toFixed(2)}</span> <button onclick="removeFromCart(${index})">Remover</button>`;
-        cartItemsDiv.appendChild(itemDiv);
-      });
-      document.getElementById("cartTotal").textContent = total.toFixed(2);
-    }
-
-    // Remove um item do carrinho
-    function removeFromCart(index) {
-      cart.splice(index, 1);
-      renderCart();
-    }
-
-    // Inicializa o carregamento dos produtos
     loadProducts();
   </script>
 </body>
