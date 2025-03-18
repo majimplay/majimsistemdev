@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Página com Parse Server</title>
+    <style>
+        /* Mantemos o mesmo CSS anterior */
+        body {
+            font-family: sans-serif;
+            background: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            margin: 10px;
+            text-decoration: none;
+            color: #fff;
+            background-color: #007BFF;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+    <!-- Adicionamos o SDK do Parse -->
+    <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1 id="welcomeMessage">Bem-vindo ao Nosso Site! Visitante</h1>
+        <button id="logoutBtn" class="hidden">Sair</button>
+        <p id="userInfo">Carregando...</p>
+
+        <p>Escolha uma das opções abaixo:</p>
+
+        <!-- Botões modificados para Parse -->
+        <a href="#" class="btn" id="loginLink">Login</a>
+        <a href="#" class="btn" id="registerLink">Registrar</a>
+        <a href="sobre.html" class="btn">Sobre Nós</a>
+        <a href="tabela.html" class="btn">tabela de produtos</a>
+           <a href=" painelcompleto.html" class="btn">painel completo</a>
+   
+    </div>
+
+    <script>
+        // Configuração do Parse
+        Parse.initialize(
+            "TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY",   // Substitua pelo seu App ID
+            "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I"    // Substitua pela sua JavaScript Key
+        );
+        Parse.serverURL = "https://parseapi.back4app.com"; // URL do seu servidor
+
+        // Elementos da interface
+        const welcomeMessageEl = document.getElementById('welcomeMessage');
+        const userInfoEl = document.getElementById('userInfo');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        // Verifica o status de login
+        function checkLogin() {
+            const currentUser = Parse.User.current();
+            if (currentUser) {
+                welcomeMessageEl.textContent = `Bem-vindo, ${currentUser.get("username")}!`;
+                userInfoEl.textContent = `Email: ${currentUser.get("email")}`;
+                logoutBtn.classList.remove('hidden');
+            } else {
+                welcomeMessageEl.textContent = "Bem-vindo ao Nosso Site! Visitante";
+                userInfoEl.textContent = "Nenhum usuário logado.";
+                logoutBtn.classList.add('hidden');
+            }
+        }
+
+        // Login
+        document.getElementById('loginLink').addEventListener('click', async (e) => {
+            e.preventDefault();
+            const username = prompt('Digite seu nome de usuário:');
+            const password = prompt('Digite sua senha:');
+            
+            try {
+                const user = await Parse.User.logIn(username, password);
+                checkLogin();
+                alert(`Bem-vindo de volta, ${user.get("username")}!`);
+            } catch (error) {
+                alert(`Erro no login: ${error.message}`);
+            }
+        });
+
+        // Registro
+        document.getElementById('registerLink').addEventListener('click', async (e) => {
+            e.preventDefault();
+            const username = prompt('Escolha um nome de usuário:');
+            const email = prompt('Digite seu email:');
+            const password = prompt('Escolha uma senha:');
+
+            const user = new Parse.User();
+            user.set("username", username);
+            user.set("email", email);
+            user.set("password", password);
+
+            try {
+                await user.signUp();
+                checkLogin();
+                alert('Registro realizado com sucesso!');
+            } catch (error) {
+                alert(`Erro no registro: ${error.message}`);
+            }
+        });
+
+        // Logout
+        logoutBtn.addEventListener('click', async () => {
+            try {
+                await Parse.User.logOut();
+                checkLogin();
+                alert('Você saiu da conta.');
+            } catch (error) {
+                alert(`Erro ao sair: ${error.message}`);
+            }
+        });
+
+        // Inicialização
+        checkLogin();
+    </script>
+</body>
+</html>
