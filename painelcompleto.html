@@ -119,6 +119,8 @@
         <input type="text" id="productName" placeholder="Nome do Produto" required>
         <input type="number" id="productPrice" step="0.01" placeholder="Preço" required>
         <div class="image-upload">
+          <!-- Preview da imagem selecionada -->
+          <img id="imagePreview" src="" alt="Miniatura" style="display:none; max-height:100px; margin-bottom:10px;">
           <label class="upload-label">
             Escolher Imagem
             <input type="file" id="productImage" accept="image/*" required>
@@ -276,6 +278,8 @@
         produto.set("imagens", [parseFile.url()]);
         await produto.save();
         document.getElementById('productForm').reset();
+        // Esconde o preview após o reset
+        document.getElementById('imagePreview').style.display = 'none';
         loadProducts();
       } catch (error) {
         alert("Erro ao adicionar produto: " + error.message);
@@ -335,7 +339,24 @@
       }
     }
 
-    /* 10. Inicializar a Página (verificação de admin + carregamento dos produtos) */
+    /* 10. Preview da Imagem Selecionada */
+    document.getElementById('productImage').addEventListener('change', function(event) {
+      const file = event.target.files[0];
+      const preview = document.getElementById('imagePreview');
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          preview.src = e.target.result;
+          preview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      } else {
+        preview.src = '';
+        preview.style.display = 'none';
+      }
+    });
+
+    /* 11. Inicializar a Página (verificação de admin + carregamento dos produtos) */
     checkAdmin();
   </script>
 </body>
