@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Detalhes do Produto</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f4f4f4;
+      padding: 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    .slider {
+      position: relative;
+      overflow: hidden;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .slider img {
+      width: 100%;
+      display: block;
+    }
+    .arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0,0,0,0.5);
+      color: white;
+      border: none;
+      padding: 10px;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .slider:hover .arrow {
+      opacity: 1;
+    }
+    .arrow.left {
+      left: 10px;
+    }
+    .arrow.right {
+      right: 10px;
+    }
+    .product-info {
+      text-align: center;
+    }
+    .product-info h1 {
+      margin-bottom: 10px;
+    }
+    .product-info p {
+      font-size: 1.2em;
+      color: #333;
+    }
+    .buy-btn {
+      padding: 10px 20px;
+      background: #28a745;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1em;
+    }
+    .buy-btn:hover {
+      background: #218838;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="slider" id="productSlider">
+      <button class="arrow left" id="prevBtn">&#10094;</button>
+      <img src="" id="sliderImage" alt="Foto do Produto">
+      <button class="arrow right" id="nextBtn">&#10095;</button>
+    </div>
+    
+    <div class="product-info">
+      <h1 id="productName">Nome do Produto</h1>
+      <p id="productPrice">R$ 0,00</p>
+      <button class="buy-btn" id="buyBtn">Comprar</button>
+    </div>
+  </div>
+  
+  <script>
+    // Array de imagens para o slider – normalmente estas seriam carregadas dinamicamente (por exemplo, do Parse)
+    const imagens = [
+      "https://via.placeholder.com/800x500?text=Foto+1",
+      "https://via.placeholder.com/800x500?text=Foto+2",
+      "https://via.placeholder.com/800x500?text=Foto+3",
+      "https://via.placeholder.com/800x500?text=Foto+4"
+    ];
+    
+    let currentIndex = 0;
+    
+    const sliderImage = document.getElementById("sliderImage");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    
+    function updateSlider() {
+      sliderImage.src = imagens[currentIndex];
+    }
+    
+    prevBtn.addEventListener("click", () => {
+      currentIndex = (currentIndex === 0) ? imagens.length - 1 : currentIndex - 1;
+      updateSlider();
+    });
+    
+    nextBtn.addEventListener("click", () => {
+      currentIndex = (currentIndex === imagens.length - 1) ? 0 : currentIndex + 1;
+      updateSlider();
+    });
+    
+    // Inicializa o slider
+    updateSlider();
+    
+    // Exemplo: Atualiza informações do produto (estas informações normalmente virão do banco de dados)
+    document.getElementById("productName").textContent = "Produto Exemplo";
+    document.getElementById("productPrice").textContent = "R$ " + (99.90).toFixed(2);
+    
+    // Ação do botão comprar – por exemplo, pode adicionar ao carrinho
+    document.getElementById("buyBtn").addEventListener("click", () => {
+      alert("Produto adicionado ao carrinho!");
+      // Aqui você pode implementar a lógica para adicionar o produto ao carrinho
+    });
+  </script>
+</body>
+</html>
