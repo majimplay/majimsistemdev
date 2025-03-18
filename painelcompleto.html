@@ -226,7 +226,10 @@
             <div class="editable-field" ${!readOnly ? 'contenteditable="true"' : ''} data-id="${produto.id}" data-field="preco">${parseFloat(produto.get("preco")).toFixed(2)}</div>
           </td>
           <td>
-            ${!readOnly ? `<button class="btn btn-delete" onclick="deleteProduct('${produto.id}')">Excluir</button>` : ''}
+            ${!readOnly ? `
+              <button class="btn btn-edit" onclick="editProduct('${produto.id}')">Editar</button><br><br>
+              <button class="btn btn-delete" onclick="deleteProduct('${produto.id}')">Excluir</button>
+            ` : ''}
           </td>
         `;
         tbody.appendChild(tr);
@@ -296,6 +299,7 @@
 
     /* 7. Deletar Produto (somente para admin) */
     async function deleteProduct(id) {
+      if (!confirm("Deseja realmente excluir este produto?")) return;
       const query = new Parse.Query(Produto);
       try {
         const produto = await query.get(id);
@@ -304,6 +308,12 @@
       } catch (error) {
         alert("Erro ao excluir produto: " + error.message);
       }
+    }
+
+    /* Função para redirecionar à página de edição */
+    function editProduct(id) {
+      // Redireciona para a página editar.html passando o id do produto via query string
+      window.location.href = `editar.html?id=${id}`;
     }
 
     /* 8. Adicionar Imagem a Produto Existente (somente para admin) */
@@ -360,12 +370,4 @@
         reader.readAsDataURL(file);
       } else {
         preview.src = '';
-        preview.style.display = 'none';
-      }
-    });
-
-    /* 11. Inicializar a Página */
-    initPage();
-  </script>
-</body>
-</html>
+        preview.style
