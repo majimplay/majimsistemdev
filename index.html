@@ -2,189 +2,76 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Loja Virtual com Galeria de Produtos</title>
+  <title>Produtos - Minha Loja</title>
+  <link rel="icon" href="data:,">
   <style>
-    /* Estilos gerais melhorados */
+    /* Estilos gerais e do cabeçalho */
     body {
-      font-family: 'Segoe UI', sans-serif;
+      font-family: sans-serif;
       margin: 0;
       padding: 0;
-      background: #f8f9fa;
+      background: #f4f4f4;
     }
-
     header {
-      background: #2c3e50;
+      background: #007BFF;
       color: white;
-      padding: 1rem 2rem;
+      padding: 10px 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
-
-    .logo h2 {
+    header .logo h2 {
       margin: 0;
-      font-size: 1.8rem;
     }
-
     .auth-area {
       display: flex;
-      gap: 1rem;
       align-items: center;
     }
-
-    .login-form, .user-info {
+    .auth-area a {
+      margin-left: 10px;
+      color: white;
+      text-decoration: none;
+    }
+    /* Estilos para o Reveal.js e slides de produto */
+    .reveal {
+      margin: 20px auto;
+      width: 80%;
+      height: 500px;
+    }
+    .reveal .slides section {
       display: flex;
-      gap: 0.5rem;
+      flex-direction: column;
       align-items: center;
+      justify-content: center;
     }
-
-    .login-form input {
-      padding: 0.5rem;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      min-width: 180px;
-    }
-
-    .login-form button, .user-info button {
-      padding: 0.5rem 1rem;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .login-form button {
-      background: #27ae60;
-      color: white;
-    }
-
-    .user-info button {
-      background: #e74c3c;
-      color: white;
-    }
-
-    /* Container principal */
-    .container {
-      max-width: 1200px;
-      margin: 2rem auto;
-      padding: 0 1rem;
-    }
-
-    .container h1 {
-      text-align: center;
-      color: #2c3e50;
-      margin-bottom: 2rem;
-    }
-
-    /* Grid de produtos melhorado */
-    .product-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 2rem;
-    }
-
     .product-card {
       background: white;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-      transition: transform 0.3s ease;
+      padding: 15px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      text-align: center;
+      width: 80%;
+      margin: 0 auto;
     }
-
-    .product-card:hover {
-      transform: translateY(-5px);
-    }
-
-    /* Carrossel de imagens */
-    .product-images {
-      position: relative;
-      height: 300px;
-      overflow: hidden;
-    }
-
-    .image-slider {
-      display: flex;
-      transition: transform 0.5s ease;
-      height: 100%;
-    }
-
-    .product-image {
-      width: 100%;
-      height: 100%;
+    .product-card img {
+      max-width: 100%;
+      height: 200px;
       object-fit: cover;
-      flex-shrink: 0;
+      border-radius: 5px;
     }
-
-    .slider-nav {
-      position: absolute;
-      bottom: 1rem;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      gap: 0.5rem;
-    }
-
-    .slider-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.5);
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .slider-dot.active {
-      background: white;
-      transform: scale(1.2);
-    }
-
-    /* Informações do produto */
-    .product-info {
-      padding: 1.5rem;
-    }
-
-    .product-info h3 {
-      margin: 0 0 0.5rem;
-      color: #2c3e50;
-      font-size: 1.2rem;
-    }
-
-    .product-price {
-      color: #27ae60;
-      font-size: 1.4rem;
-      font-weight: bold;
-      margin: 0.5rem 0;
-    }
-
-    .product-description {
-      color: #7f8c8d;
-      font-size: 0.9rem;
-      line-height: 1.4;
-      margin-bottom: 1rem;
-    }
-
-    .product-actions {
-      display: flex;
-      gap: 0.5rem;
-    }
-
-    .buy-button {
-      background: #2980b9;
+    .product-card button {
+      margin-top: 10px;
+      padding: 8px 12px;
+      background: #28a745;
       color: white;
-      padding: 0.8rem 1.5rem;
       border: none;
-      border-radius: 4px;
+      border-radius: 5px;
       cursor: pointer;
-      flex-grow: 1;
-      transition: background 0.3s ease;
     }
-
-    .buy-button:hover {
-      background: #3498db;
+    .product-card button:hover {
+      background: #218838;
     }
-
-    /* Modal do Carrinho melhorado */
+    /* Estilos do Modal do Carrinho */
     #cartModal {
       display: none;
       position: fixed;
@@ -193,206 +80,174 @@
       width: 100%;
       height: 100%;
       background: rgba(0,0,0,0.5);
-      backdrop-filter: blur(3px);
-      z-index: 1000;
+      justify-content: center;
+      align-items: center;
     }
-
-    .modal-content {
+    #cartModal .modal-content {
       background: white;
-      padding: 2rem;
-      border-radius: 12px;
+      padding: 20px;
+      border-radius: 5px;
       width: 90%;
-      max-width: 600px;
-      margin: 2rem auto;
-      position: relative;
-      top: 50%;
-      transform: translateY(-50%);
+      max-width: 500px;
     }
-
+    #cartModal h2 {
+      margin-top: 0;
+    }
+    #cartItems {
+      margin: 20px 0;
+    }
     #cartItems div {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      padding: 1rem 0;
-      border-bottom: 1px solid #eee;
+      margin-bottom: 10px;
     }
-
-    #cartTotal {
-      font-size: 1.2rem;
-      color: #2c3e50;
-      margin-top: 1.5rem;
-      text-align: right;
-    }
-
-    #closeCartBtn {
-      background: #95a5a6;
-      margin-top: 1.5rem;
-      width: 100%;
+    #cartModal button {
+      padding: 8px 12px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
     }
   </style>
+  <!-- Reveal.js CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/reveal.js/dist/reveal.css">
+  <link rel="stylesheet" href="https://unpkg.com/reveal.js/dist/theme/white.css">
   <!-- SDK do Parse -->
   <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
 </head>
 <body>
-  <!-- Cabeçalho mantido com melhorias visuais -->
   <header>
     <div class="logo">
-      <h2>Galeria de Produtos</h2>
+      <h2>Minha Loja</h2>
     </div>
     <div class="auth-area">
-      <!-- Área de login atualizada -->
-      <div id="loginArea" class="login-form">
-        <input type="text" id="usernameInput" placeholder="Nome de usuário">
-        <input type="password" id="passwordInput" placeholder="Senha">
-        <button id="loginBtn">Entrar</button>
-        <a href="#" id="forgotPasswordLink">Recuperar senha</a>
-      </div>
-      <!-- Área do usuário -->
-      <div id="userArea" class="user-info" style="display:none;">
-        <span id="welcomeUser"></span>
-        <a href="#" id="cartLink">🛒 Carrinho</a>
-        <button id="logoutBtn">Sair</button>
-      </div>
+      <a href="index.html">Home</a>
+      <a href="#" id="cartLink">Carrinho</a>
     </div>
   </header>
 
-  <!-- Conteúdo principal com nova galeria -->
+  <!-- Conteúdo principal: Exibição dos produtos via Reveal.js -->
   <div class="container">
-    <h1>Nossos Produtos</h1>
-    <div id="productGrid" class="product-grid">
-      <!-- Produtos serão carregados aqui -->
+    <h1 style="text-align: center;">Produtos à Venda</h1>
+    <div class="reveal">
+      <div class="slides" id="slides-container">
+        <!-- Slides serão gerados dinamicamente -->
+        <section><h2>Nenhum produto encontrado</h2></section>
+      </div>
     </div>
   </div>
 
-  <!-- Modal do Carrinho atualizado -->
+  <!-- Modal do Carrinho de Compras -->
   <div id="cartModal">
     <div class="modal-content">
-      <h2>Seu Carrinho</h2>
-      <div id="cartItems"></div>
-      <div id="cartTotalContainer">
+      <h2>Carrinho de Compras</h2>
+      <div id="cartItems">
+        <!-- Itens do carrinho -->
+      </div>
+      <div>
         <strong>Total: R$ <span id="cartTotal">0.00</span></strong>
       </div>
-      <button id="closeCartBtn" class="buy-button">Fechar</button>
+      <button id="closeCartBtn">Fechar</button>
     </div>
   </div>
 
+  <!-- Reveal.js via jsDelivr -->
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/dist/reveal.js"></script>
+
   <script>
-    // Inicialização do Parse mantida
+    // Inicializa o Parse
+    Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
+    Parse.serverURL = "https://parseapi.back4app.com";
 
-    // Variável para controle do carrossel
-    const productSliders = new Map();
+    let cart = []; // Carrinho de compras
+    let revealInstance = null;
 
-    // Função para criar slider de imagens
-    function createImageSlider(containerId, images) {
-      let currentSlide = 0;
-      const container = document.getElementById(containerId);
-      const slider = container.querySelector('.image-slider');
-      const dots = container.querySelectorAll('.slider-dot');
-
-      function updateSlider() {
-        slider.style.transform = `translateX(-${currentSlide * 100}%)`;
-        dots.forEach((dot, index) => {
-          dot.classList.toggle('active', index === currentSlide);
-        });
-      }
-
-      return {
-        next: () => {
-          currentSlide = (currentSlide + 1) % images.length;
-          updateSlider();
-        },
-        prev: () => {
-          currentSlide = (currentSlide - 1 + images.length) % images.length;
-          updateSlider();
-        },
-        goTo: (index) => {
-          currentSlide = index;
-          updateSlider();
-        }
-      };
-    }
-
-    // Carregamento de produtos atualizado
+    // Função para carregar produtos do Parse e criar slides para cada produto
     async function loadProducts() {
       const Produto = Parse.Object.extend("Produto");
       const query = new Parse.Query(Produto);
       try {
         const results = await query.find();
-        const grid = document.getElementById("productGrid");
-        grid.innerHTML = "";
-
-        results.forEach((produto, index) => {
-          const images = produto.get("imagens") || [];
-          const hasImages = images.length > 0;
-          
-          const card = document.createElement("div");
-          card.className = "product-card";
-          card.innerHTML = `
-            <div class="product-images" id="slider-${index}">
-              <div class="image-slider" style="width: ${hasImages ? images.length * 100 : 100}%">
-                ${hasImages ? 
-                  images.map(img => `<img src="${img}" class="product-image" alt="${produto.get("nome")}">`).join('') :
-                  `<img src="https://via.placeholder.com/300x300?text=Sem+Imagem" class="product-image">`
-                }
+        const slidesContainer = document.getElementById("slides-container");
+        slidesContainer.innerHTML = "";
+        if (results.length === 0) {
+          slidesContainer.innerHTML = "<section><h2>Nenhum produto encontrado</h2></section>";
+        } else {
+          results.forEach(produto => {
+            const imgUrl = (produto.get("imagens") && produto.get("imagens")[0]) || "https://via.placeholder.com/200x200?text=Sem+Imagem";
+            const section = document.createElement("section");
+            section.innerHTML = `
+              <div class="product-card">
+                <img src="${imgUrl}" alt="${produto.get("nome")}">
+                <h3>${produto.get("nome")}</h3>
+                <p>R$ ${parseFloat(produto.get("preco")).toFixed(2)}</p>
+                <button onclick="addToCart('${produto.id}', '${produto.get("nome")}', ${parseFloat(produto.get("preco")).toFixed(2)})">Comprar</button>
               </div>
-              <div class="slider-nav">
-                ${hasImages ? 
-                  images.map((_, i) => `<div class="slider-dot ${i === 0 ? 'active' : ''}"></div>`).join('') :
-                  ''
-                }
-              </div>
-            </div>
-            <div class="product-info">
-              <h3>${produto.get("nome")}</h3>
-              <p class="product-price">R$ ${parseFloat(produto.get("preco")).toFixed(2)}</p>
-              ${produto.get("descricao") ? `<p class="product-description">${produto.get("descricao")}</p>` : ''}
-              <div class="product-actions">
-                <button class="buy-button" onclick="addToCart('${produto.id}', '${produto.get("nome")}', ${produto.get("preco")})">Comprar</button>
-              </div>
-            </div>
-          `;
-
-          grid.appendChild(card);
-          
-          if (hasImages) {
-            productSliders.set(`slider-${index}`, createImageSlider(`slider-${index}`, images));
-          }
-        });
-
+            `;
+            slidesContainer.appendChild(section);
+          });
+        }
+        initReveal();
       } catch (error) {
         console.error("Erro ao carregar produtos: ", error);
       }
     }
 
-    // Restante do código mantido com melhorias
-    // ... (funções de autenticação e carrinho mantidas)
+    // Inicializa ou reinicializa o Reveal.js com auto slide
+    function initReveal() {
+      if (revealInstance && typeof revealInstance.destroy === 'function') {
+        revealInstance.destroy();
+      }
+      revealInstance = new Reveal({
+        hash: false,
+        loop: true,
+        autoSlide: 3000, // Troca de slide a cada 3 segundos
+        autoSlideStoppable: false,
+        progress: true,
+        controls: true
+      });
+      revealInstance.initialize();
+    }
 
-    // Atualização da interface do carrinho
+    // Adiciona um produto ao carrinho
+    function addToCart(id, name, price) {
+      cart.push({ id, name, price });
+      alert(name + " adicionado ao carrinho!");
+    }
+
+    // Exibe o modal do carrinho
+    document.getElementById("cartLink").addEventListener("click", function(e) {
+      e.preventDefault();
+      renderCart();
+      document.getElementById("cartModal").style.display = "flex";
+    });
+
+    // Fecha o modal do carrinho
+    document.getElementById("closeCartBtn").addEventListener("click", function() {
+      document.getElementById("cartModal").style.display = "none";
+    });
+
+    // Renderiza os itens do carrinho e calcula o total
     function renderCart() {
       const cartItemsDiv = document.getElementById("cartItems");
       cartItemsDiv.innerHTML = "";
       let total = 0;
-
       cart.forEach((item, index) => {
-        total += item.price;
-        const itemElement = document.createElement("div");
-        itemElement.innerHTML = `
-          <div>
-            <span>${item.name}</span>
-            <small>R$ ${item.price.toFixed(2)}</small>
-          </div>
-          <button onclick="removeFromCart(${index})" class="buy-button" style="background: #e74c3c">
-            Remover
-          </button>
-        `;
-        cartItemsDiv.appendChild(itemElement);
+        total += parseFloat(item.price);
+        const itemDiv = document.createElement("div");
+        itemDiv.innerHTML = `<span>${item.name} - R$ ${parseFloat(item.price).toFixed(2)}</span> <button onclick="removeFromCart(${index})">Remover</button>`;
+        cartItemsDiv.appendChild(itemDiv);
       });
-
       document.getElementById("cartTotal").textContent = total.toFixed(2);
     }
 
-    // Inicialização
-    updateAuthUI();
+    // Remove um item do carrinho
+    function removeFromCart(index) {
+      cart.splice(index, 1);
+      renderCart();
+    }
+
+    // Carrega os produtos quando a página for carregada
     loadProducts();
   </script>
 </body>
