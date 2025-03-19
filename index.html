@@ -3,107 +3,128 @@
 <head>
   <meta charset="UTF-8">
   <title>Produtos - Minha Loja</title>
-  
-  <!-- Estilos do Reveal.js -->
-  <link rel="stylesheet" href="https://unpkg.com/reveal.js/dist/reveal.css">
-  <link rel="stylesheet" href="https://unpkg.com/reveal.js/dist/theme/white.css">
-  
   <style>
-    /* Estilos gerais e do cabeçalho */
+    /* Estilos gerais */
     body {
       font-family: sans-serif;
       margin: 0;
-      padding: 0;
       background: #f4f4f4;
     }
+
+    /* Cabeçalho */
     header {
       background: #007BFF;
       color: white;
-      padding: 10px 20px;
+      padding: 15px 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-    }
-    header .logo h2 {
-      margin: 0;
-    }
-    .auth-area {
-      display: flex;
-      align-items: center;
-    }
-    .auth-area a {
-      margin-left: 10px;
-      color: white;
-      text-decoration: none;
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
 
-    /* Estilos do slideshow */
-    .reveal .slides {
-      text-align: center;
+    .auth-area a {
+      color: white;
+      text-decoration: none;
+      margin-left: 15px;
     }
-    .product-slide {
+
+    /* Container principal */
+    .container {
       padding: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 70vh;
+      max-width: 1200px;
+      margin: 0 auto;
     }
-    .product-slide img {
-      max-width: 100%;
-      max-height: 50vh;
-      object-fit: contain;
-      margin-bottom: 20px;
+
+    /* Grade de produtos */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 25px;
+      margin-top: 20px;
+    }
+
+    /* Card do produto */
+    .product-card {
+      background: white;
       border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+      overflow: hidden;
     }
+
+    /* Carrossel de imagens */
+    .image-carousel {
+      position: relative;
+      height: 300px;
+      overflow-y: auto; /* Barra de rolagem vertical */
+    }
+
+    .carousel-inner {
+      display: flex;
+      transition: transform 0.3s ease;
+    }
+
+    .carousel-image {
+      min-width: 100%;
+      height: 300px;
+      object-fit: cover;
+      border-bottom: 2px solid #eee;
+    }
+
+    /* Controles do carrossel */
+    .carousel-controls {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 5px;
+    }
+
+    .carousel-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.5);
+      cursor: pointer;
+      border: none;
+    }
+
+    .carousel-dot.active {
+      background: white;
+    }
+
+    /* Informações do produto */
     .product-info {
-      text-align: center;
+      padding: 15px;
     }
-    .product-slide button {
-      padding: 12px 24px;
+
+    .product-info h3 {
+      margin: 0 0 10px 0;
+    }
+
+    /* Botão de compra */
+    .buy-btn {
       background: #28a745;
       color: white;
       border: none;
-      border-radius: 25px;
+      padding: 10px 20px;
+      border-radius: 5px;
       cursor: pointer;
-      font-size: 1.2em;
-      transition: transform 0.2s;
-    }
-    .product-slide button:hover {
-      background: #218838;
-      transform: scale(1.05);
+      width: 100%;
+      transition: background 0.3s;
     }
 
-    /* Estilos do Modal do Carrinho */
+    .buy-btn:hover {
+      background: #218838;
+    }
+
+    /* Modal do carrinho */
     #cartModal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.5);
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-    }
-    #cartModal .modal-content {
-      background: white;
-      padding: 30px;
-      border-radius: 10px;
-      width: 90%;
-      max-width: 600px;
-    }
-    #cartItems div {
-      display: flex;
-      justify-content: space-between;
-      padding: 10px 0;
-      border-bottom: 1px solid #eee;
+      /* ... (mantenha o estilo original do modal) ... */
     }
   </style>
-  
-  <!-- SDK do Parse -->
   <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
 </head>
 <body>
@@ -117,128 +138,118 @@
     </div>
   </header>
 
-  <!-- Slideshow de Produtos -->
-  <div class="reveal">
-    <div class="slides" id="productsSlides">
-      <section class="product-slide">
-        <h2>Carregando produtos...</h2>
-      </section>
+  <div class="container">
+    <h1>Produtos</h1>
+    <div id="productGrid" class="product-grid">
+      <!-- Produtos carregados via JavaScript -->
     </div>
   </div>
 
-  <!-- Modal do Carrinho de Compras -->
-  <div id="cartModal">
-    <div class="modal-content">
-      <h2>🛒 Carrinho de Compras</h2>
-      <div id="cartItems"></div>
-      <div style="margin-top: 20px;">
-        <strong>Total: R$ <span id="cartTotal">0.00</span></strong>
-      </div>
-      <button id="closeCartBtn" style="margin-top: 20px;">Continuar Comprando</button>
-    </div>
-  </div>
+  <!-- Modal do Carrinho (mantenha o original) -->
 
-  <!-- Scripts -->
-  <script src="https://unpkg.com/reveal.js/dist/reveal.js"></script>
   <script>
-    // Inicializa o Parse
-    Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
-    Parse.serverURL = "https://parseapi.back4app.com";
+    Parse.initialize("SUA_APP_ID", "SUA_JS_KEY");
+    Parse.serverURL = "https://parseapi.back4app.com/";
 
     let cart = [];
-    let revealInstance = null;
 
-    // Carrega os produtos do Parse
     async function loadProducts() {
       const Produto = Parse.Object.extend("Produto");
       const query = new Parse.Query(Produto);
       
       try {
-        const results = await query.find();
-        const slidesContainer = document.getElementById('productsSlides');
-        slidesContainer.innerHTML = '';
+        const products = await query.find();
+        const grid = document.getElementById('productGrid');
+        grid.innerHTML = '';
 
-        results.forEach(produto => {
-          const slide = document.createElement('section');
-          slide.className = 'product-slide';
-          const imgUrl = (produto.get("imagens") && produto.get("imagens")[0]) || 'https://via.placeholder.com/500x300?text=Sem+Imagem';
+        products.forEach(produto => {
+          const images = produto.get("imagens") || [];
+          const card = document.createElement('div');
+          card.className = 'product-card';
           
-          slide.innerHTML = `
-            <img src="${imgUrl}" alt="${produto.get("nome")}">
+          // HTML do carrossel
+          let carouselHTML = `
+            <div class="image-carousel">
+              <div class="carousel-inner">
+                ${images.map(img => `
+                  <img src="${img.url()}" class="carousel-image" alt="${produto.get('nome')}">
+                `).join('')}
+              </div>
+              <div class="carousel-controls">
+                ${images.map((_, i) => `
+                  <button class="carousel-dot ${i === 0 ? 'active' : ''}" 
+                          data-index="${i}"></button>
+                `).join('')}
+              </div>
+            </div>
+          `;
+
+          // Se não houver imagens
+          if(images.length === 0) {
+            carouselHTML = `
+              <div class="image-carousel">
+                <img src="https://via.placeholder.com/300x300?text=Sem+Imagem" 
+                     class="carousel-image" alt="Sem imagem">
+              </div>
+            `;
+          }
+
+          card.innerHTML = `
+            ${carouselHTML}
             <div class="product-info">
-              <h3>${produto.get("nome")}</h3>
-              <p>R$ ${parseFloat(produto.get("preco")).toFixed(2)}</p>
-              <button onclick="addToCart('${produto.id}', '${produto.get("nome")}', ${produto.get("preco")})">
-                Adicionar ao Carrinho
+              <h3>${produto.get('nome')}</h3>
+              <p>R$ ${produto.get('preco').toFixed(2)}</p>
+              <button class="buy-btn" 
+                      onclick="addToCart('${produto.id}', '${produto.get('nome')}', ${produto.get('preco')})">
+                Comprar
               </button>
             </div>
           `;
-          slidesContainer.appendChild(slide);
+
+          // Adiciona funcionalidade do carrossel
+          if(images.length > 1) {
+            const dots = card.querySelectorAll('.carousel-dot');
+            const inner = card.querySelector('.carousel-inner');
+            let currentIndex = 0;
+
+            dots.forEach((dot, index) => {
+              dot.addEventListener('click', () => {
+                currentIndex = index;
+                updateCarousel();
+              });
+            });
+
+            function updateCarousel() {
+              inner.style.transform = `translateX(-${currentIndex * 100}%)`;
+              dots.forEach(dot => dot.classList.remove('active'));
+              dots[currentIndex].classList.add('active');
+            }
+
+            // Auto-rotate opcional
+            let autoSlide = setInterval(() => {
+              currentIndex = (currentIndex + 1) % images.length;
+              updateCarousel();
+            }, 5000);
+
+            card.addEventListener('mouseenter', () => clearInterval(autoSlide));
+            card.addEventListener('mouseleave', () => {
+              autoSlide = setInterval(() => {
+                currentIndex = (currentIndex + 1) % images.length;
+                updateCarousel();
+              }, 5000);
+            });
+          }
+
+          grid.appendChild(card);
         });
 
-        initReveal();
       } catch (error) {
-        console.error("Erro ao carregar produtos: ", error);
+        console.error('Erro:', error);
       }
     }
 
-    // Inicializa o Reveal.js
-    function initReveal() {
-      if (revealInstance) revealInstance.destroy();
-      
-      revealInstance = new Reveal({
-        hash: true,
-        loop: true,
-        autoSlide: 5000,
-        autoSlideStoppable: false,
-        transition: 'slide',
-        controls: true,
-        progress: true
-      });
-      
-      revealInstance.initialize();
-    }
+    // ... (mantenha as funções do carrinho originais) ...
 
-    // Funções do Carrinho (mantidas as originais com melhorias)
-    function addToCart(id, name, price) {
-      cart.push({ id, name, price: parseFloat(price) });
-      alert(`✅ ${name} adicionado ao carrinho!`);
-    }
-
-    document.getElementById("cartLink").addEventListener("click", (e) => {
-      e.preventDefault();
-      renderCart();
-      document.getElementById("cartModal").style.display = "flex";
-    });
-
-    function renderCart() {
-      const cartItemsDiv = document.getElementById("cartItems");
-      cartItemsDiv.innerHTML = "";
-      let total = 0;
-      
-      cart.forEach((item, index) => {
-        total += item.price;
-        const itemDiv = document.createElement('div');
-        itemDiv.innerHTML = `
-          <span>${item.name} - R$ ${item.price.toFixed(2)}</span>
-          <button onclick="removeFromCart(${index})" style="color: red; border: none; background: none">×</button>
-        `;
-        cartItemsDiv.appendChild(itemDiv);
-      });
-      
-      document.getElementById("cartTotal").textContent = total.toFixed(2);
-    }
-
-    function removeFromCart(index) {
-      cart.splice(index, 1);
-      renderCart();
-    }
-
-    document.getElementById("closeCartBtn").addEventListener("click", () => {
-      document.getElementById("cartModal").style.display = "none";
-    });
-
-    // Inicialização
     loadProducts();
   </script>
 </body>
