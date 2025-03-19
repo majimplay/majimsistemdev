@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>Reveal.js Auto Slide + Upload</title>
+
+  <!-- Reveal.js CSS (core + tema) -->
+  <link rel="stylesheet" href="https://unpkg.com/reveal.js/dist/reveal.css">
+  <link rel="stylesheet" href="https://unpkg.com/reveal.js/dist/theme/white.css">
+
+  <style>
+    .reveal, .reveal * {
+    cursor: default !important;
+     }
+  
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      text-align: center;
+    }
+    .top-bar {
+      margin: 1rem;
+    }
+    #image-input {
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- Barra de upload -->
+  <div class="top-bar">
+    <h2>Envie suas imagens</h2>
+    <input type="file" id="image-input" accept="image/*">
+  </div>
+
+  <!-- Estrutura base do Reveal.js -->
+  <div class="reveal">
+    <div class="slides" id="slides-container">
+      <!-- Slides serão gerados dinamicamente -->
+      <section>
+        <h2>Nenhuma imagem</h2>
+      </section>
+    </div>
+  </div>
+
+  <!-- Scripts Reveal.js -->
+  <script src="https://unpkg.com/reveal.js/dist/reveal.js"></script>
+
+  <script>
+    // Carrega (ou inicia) o array de imagens do localStorage
+    let images = JSON.parse(localStorage.getItem('uploadedImages')) || [];
+
+    // Referência ao container de slides
+    const slidesContainer = document.getElementById('slides-container');
+
+    // Guardaremos a instância do Reveal para poder destruir/reinicializar
+    let revealInstance = null;
+
+    // Função que monta os slides conforme o array 'images'
+    function buildSlides() {
+      // Limpa o container
+      slidesContainer.innerHTML = '';
+
+      // Se não houver imagens, cria um slide placeholder
+      if (images.length === 0) {
+        const noImageSection = document.createElement('section');
+        noImageSection.innerHTML = '<h2>Nenhuma imagem</h2>';
+        slidesContainer.appendChild(noImageSection);
+        return;
+      }
+
+      // Para cada imagem, cria um <section> com <img>
+      images.forEach((src) => {
+        const section = document.createElement('section');
+        section.style.textAlign = 'center';
+
+        const img = document.createElement('img');
+        img.src = src;
+        img.style.maxWidth = '80vw';
+        img.style.maxHeight = '80vh';
+
+        section.appendChild(img);
+        slidesContainer.appendChild(section);
+      });
+    }
+
+    // Função que inicia (ou reinicia) o Reveal.js
+    function initReveal() {
+      // Se já houver uma instância, destruímos antes de recriar
+      if (revealInstance && typeof revealInstance.destroy === 'function') {
+        revealInstance.destroy();
+      }
+
+      // Cria uma nova instância do Reveal
+      revealInstance = new Reveal({
+        // Configurações básicas
+        hash: false,
+        loop: true,
+        autoSlide: 2000,   // Tempo (ms) para mudar de slide automaticamente
+        autoSlideStoppable: false,
+        // Caso queira exibir a barra de progresso no topo
+        // controls: false, // remove botões de navegação
+        // progress: false, // remove barra de progresso
+      });
+
+      // Inicia
+      revealInstance.initialize();
+    }
+
+    // Monta os slides iniciais e inicializa o Reveal
+    buildSlides();
+    initReveal();
+
+    // Lida com o upload de imagens
+    document.getElementById('image-input').addEventListener('change', function(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          // Adiciona a nova imagem ao array
+          images.push(e.target.result);
+
+          // Salva no localStorage
+          localStorage.setItem('uploadedImages', JSON.stringify(images));
+
+          // Reconstrói os slides e reinicializa o Reveal
+          buildSlides();
+          initReveal();
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  </script>
+</body>
+</html>
