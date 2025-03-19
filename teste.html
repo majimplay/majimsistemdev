@@ -41,7 +41,6 @@
   <!-- Nosso script -->
   <script defer>
     document.addEventListener('DOMContentLoaded', function() {
-      // Verifica se a extensão foi carregada
       if (typeof window.AutoScroll === 'undefined') {
         console.error('A extensão AutoScroll não foi carregada.');
       }
@@ -70,11 +69,13 @@
           slidesList.appendChild(placeholder);
         }
         splide = new Splide('#splide', {
-          type     : 'loop',
-          perPage  : 1,
-          gap      : '1rem',
+          type      : 'loop',
+          perPage   : 1,
+          gap       : '1rem',
           autoScroll: {
-            speed: 1,  // Velocidade da rolagem
+            speed: 6,           // Aumenta a velocidade para 2 pixels por frame (ou ajuste conforme necessário)
+            pauseOnHover: false, // Não pausa ao passar o mouse
+            rewind: true,        // Quando chegar ao final, reinicia
           },
         }, {
           AutoScroll: window.AutoScroll  // Referência à extensão carregada
@@ -103,7 +104,7 @@
       // Inicializa o slider ao carregar o DOM
       updateSlider();
 
-      // Configura o evento de upload
+      // Evento para upload de imagens
       document.getElementById('image-input').addEventListener('change', function(event) {
         const file = event.target.files[0];
         if (file) {
