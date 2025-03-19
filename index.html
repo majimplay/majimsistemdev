@@ -4,98 +4,241 @@
   <meta charset="UTF-8">
   <title>Produtos - Minha Loja</title>
   <style>
-    /* (Mantido o mesmo estilo do código anterior) */
+    /* Estilos mantidos do anterior, com melhorias */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f8f9fa;
+    }
+
+    header {
+      background: #007bff;
+      color: white;
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .container {
+      padding: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 2rem;
+    }
+
+    .product-card {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+
+    .image-carousel {
+      height: 300px;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .carousel-inner {
+      display: flex;
+      transition: transform 0.3s ease;
+    }
+
+    .carousel-image {
+      min-width: 100%;
+      height: 300px;
+      object-fit: cover;
+      border-bottom: 2px solid #eee;
+    }
+
+    .carousel-controls {
+      position: absolute;
+      bottom: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .carousel-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.5);
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .carousel-dot.active {
+      background: #fff;
+      transform: scale(1.2);
+    }
+
+    .product-info {
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .buy-btn {
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 25px;
+      cursor: pointer;
+      width: 100%;
+      transition: all 0.3s ease;
+    }
+
+    .buy-btn:hover {
+      background: #218838;
+      transform: translateY(-2px);
+    }
   </style>
   <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
 </head>
 <body>
-  <!-- (Mantida a mesma estrutura HTML anterior) -->
+  <header>
+    <div class="logo">
+      <h2>Tech Store</h2>
+    </div>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="#" id="cartLink">Carrinho</a>
+    </nav>
+  </header>
+
+  <div class="container">
+    <h1>Nossos Produtos</h1>
+    <div id="productGrid" class="product-grid"></div>
+  </div>
 
   <script>
+    // Configuração do Parse
     Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
     Parse.serverURL = "https://parseapi.back4app.com/";
 
     let cart = [];
 
     async function loadProducts() {
-      const Produto = Parse.Object.extend("Produto");
-      const query = new Parse.Query(Produto);
-      
       try {
-        const products = await query.find();
+        const Produto = Parse.Object.extend("Produto");
+        const query = new Parse.Query(Produto);
+        const results = await query.find();
+
         const grid = document.getElementById('productGrid');
+        if (!grid) {
+          console.error('Elemento productGrid não encontrado!');
+          return;
+        }
+
         grid.innerHTML = '';
 
-        products.forEach(produto => {
-          // Correção no acesso às imagens
-          const images = produto.get("imagens") || [];
-          const imageUrls = images.map(img => {
-            // Se for um objeto File do Parse
-            if (img instanceof Parse.File) {
-              return img.url();
-            }
-            // Se já for uma URL string
-            return img;
-          });
-
+        results.forEach((produto, index) => {
           const card = document.createElement('div');
           card.className = 'product-card';
           
-          // HTML do carrossel corrigido
-          let carouselHTML = `
+          // Extrai as imagens diretamente do array de URLs
+          const imagens = produto.get('imagens') || [];
+          
+          // Gera o HTML do carrossel
+          const carouselHTML = `
             <div class="image-carousel">
-              <div class="carousel-inner">
-                ${imageUrls.map(url => `
-                  <img src="${url}" class="carousel-image" alt="${produto.get('nome')}">
+              <div class="carousel-inner" style="width: ${imagens.length * 100}%">
+                ${imagens.map(img => `
+                  <img src="${img}" class="carousel-image" alt="${produto.get('nome')}">
                 `).join('')}
               </div>
-              ${imageUrls.length > 1 ? `
-              <div class="carousel-controls">
-                ${imageUrls.map((_, i) => `
-                  <button class="carousel-dot ${i === 0 ? 'active' : ''}" 
-                          data-index="${i}"></button>
-                `).join('')}
-              </div>` : ''}
+              ${imagens.length > 1 ? `
+                <div class="carousel-controls">
+                  ${imagens.map((_, i) => `
+                    <button class="carousel-dot ${i === 0 ? 'active' : ''}" 
+                            data-index="${i}"></button>
+                  `).join('')}
+                </div>
+              ` : ''}
             </div>
           `;
 
-          if(imageUrls.length === 0) {
-            carouselHTML = `
+          card.innerHTML = `
+            ${imagens.length ? carouselHTML : `
               <div class="image-carousel">
                 <img src="https://via.placeholder.com/300x300?text=Sem+Imagem" 
-                     class="carousel-image" alt="Sem imagem">
+                     class="carousel-image" alt="Produto sem imagem">
               </div>
-            `;
-          }
-
-          card.innerHTML = `
-            ${carouselHTML}
+            `}
             <div class="product-info">
               <h3>${produto.get('nome')}</h3>
               <p>R$ ${produto.get('preco').toFixed(2)}</p>
               <button class="buy-btn" 
                       onclick="addToCart('${produto.id}', '${produto.get('nome')}', ${produto.get('preco')})">
-                Comprar
+                Adicionar ao Carrinho
               </button>
             </div>
           `;
 
-          // Funcionalidade do carrossel (mantida igual)
-          if(imageUrls.length > 1) {
-            // ... (código do carrossel anterior) ...
+          // Adiciona funcionalidade do carrossel se houver múltiplas imagens
+          if (imagens.length > 1) {
+            const dots = card.querySelectorAll('.carousel-dot');
+            const inner = card.querySelector('.carousel-inner');
+            let currentIndex = 0;
+
+            dots.forEach((dot, index) => {
+              dot.addEventListener('click', () => {
+                currentIndex = index;
+                updateCarousel();
+              });
+            });
+
+            const updateCarousel = () => {
+              inner.style.transform = `translateX(-${(currentIndex * 100) / imagens.length}%)`;
+              dots.forEach(dot => dot.classList.remove('active'));
+              dots[currentIndex].classList.add('active');
+            };
+
+            // Auto-slide
+            let interval = setInterval(() => {
+              currentIndex = (currentIndex + 1) % imagens.length;
+              updateCarousel();
+            }, 5000);
+
+            // Pausa no hover
+            card.addEventListener('mouseenter', () => clearInterval(interval));
+            card.addEventListener('mouseleave', () => {
+              interval = setInterval(() => {
+                currentIndex = (currentIndex + 1) % imagens.length;
+                updateCarousel();
+              }, 5000);
+            });
           }
 
           grid.appendChild(card);
         });
 
       } catch (error) {
-        console.error('Erro:', error);
+        console.error('Erro ao carregar produtos:', error);
+        const grid = document.getElementById('productGrid');
+        if (grid) {
+          grid.innerHTML = '<p class="error">Erro ao carregar os produtos. Tente recarregar a página.</p>';
+        }
       }
     }
 
-    // ... (funções do carrinho mantidas) ...
+    // Funções do carrinho (mantidas as anteriores)
+    function addToCart(id, name, price) {
+      cart.push({ id, name, price });
+      alert(`✔️ ${name} adicionado ao carrinho!`);
+    }
 
-    loadProducts();
+    // Inicialização
+    document.addEventListener('DOMContentLoaded', loadProducts);
   </script>
 </body>
 </html>
