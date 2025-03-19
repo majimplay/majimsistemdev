@@ -2,61 +2,92 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Produtos - Minha Loja</title>
+  <title>Produtos - Loja Tech</title>
   <style>
-    /* Estilos mantidos do anterior, com melhorias */
-    body {
-      font-family: Arial, sans-serif;
+    /* Reset e Estilos Gerais */
+    * {
+      box-sizing: border-box;
       margin: 0;
-      background: #f8f9fa;
+      padding: 0;
     }
 
+    body {
+      font-family: 'Arial', sans-serif;
+      background: #f8f9fa;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Cabeçalho Fixo */
     header {
       background: #007bff;
       color: white;
-      padding: 1rem;
+      padding: 1rem 2rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
 
+    /* Container Principal com Scroll */
     .container {
+      flex: 1;
       padding: 2rem;
       max-width: 1200px;
       margin: 0 auto;
+      overflow-y: auto;
     }
 
+    /* Grid de Produtos */
     .product-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
       gap: 2rem;
+      padding: 1rem 0;
     }
 
+    /* Card do Produto */
     .product-card {
       background: white;
       border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      box-shadow: 0 3px 6px rgba(0,0,0,0.1);
       overflow: hidden;
+      transition: transform 0.2s;
+      height: 400px; /* Altura fixa */
+      display: flex;
+      flex-direction: column;
     }
 
-    .image-carousel {
-      height: 300px;
-      overflow-y: auto;
+    .product-card:hover {
+      transform: translateY(-5px);
+    }
+
+    /* Container de Imagens */
+    .image-container {
+      height: 250px;
       position: relative;
+      overflow: hidden;
+      flex-shrink: 0;
     }
 
     .carousel-inner {
       display: flex;
-      transition: transform 0.3s ease;
+      height: 100%;
+      transition: transform 0.5s ease;
     }
 
     .carousel-image {
-      min-width: 100%;
-      height: 300px;
+      width: 100%;
+      height: 100%;
       object-fit: cover;
-      border-bottom: 2px solid #eee;
+      flex-shrink: 0;
     }
 
+    /* Controles do Carrossel */
     .carousel-controls {
       position: absolute;
       bottom: 1rem;
@@ -81,20 +112,38 @@
       transform: scale(1.2);
     }
 
+    /* Informações do Produto */
     .product-info {
-      padding: 1rem;
-      text-align: center;
+      padding: 1.5rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
 
+    .product-info h3 {
+      color: #333;
+      margin-bottom: 0.5rem;
+      font-size: 1.2rem;
+    }
+
+    .price {
+      color: #28a745;
+      font-size: 1.4rem;
+      font-weight: bold;
+    }
+
+    /* Botão de Compra */
     .buy-btn {
       background: #28a745;
       color: white;
       border: none;
-      padding: 0.8rem 1.5rem;
-      border-radius: 25px;
+      padding: 0.8rem;
+      border-radius: 5px;
       cursor: pointer;
-      width: 100%;
+      font-size: 1rem;
       transition: all 0.3s ease;
+      margin-top: 1rem;
     }
 
     .buy-btn:hover {
@@ -106,22 +155,17 @@
 </head>
 <body>
   <header>
-    <div class="logo">
-      <h2>Tech Store</h2>
-    </div>
+    <h1>🛒 Tech Store</h1>
     <nav>
-      <a href="index.html">Home</a>
       <a href="#" id="cartLink">Carrinho</a>
     </nav>
   </header>
 
   <div class="container">
-    <h1>Nossos Produtos</h1>
     <div id="productGrid" class="product-grid"></div>
   </div>
 
   <script>
-    // Configuração do Parse
     Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
     Parse.serverURL = "https://parseapi.back4app.com/";
 
@@ -134,26 +178,21 @@
         const results = await query.find();
 
         const grid = document.getElementById('productGrid');
-        if (!grid) {
-          console.error('Elemento productGrid não encontrado!');
-          return;
-        }
-
         grid.innerHTML = '';
 
-        results.forEach((produto, index) => {
+        results.forEach(produto => {
           const card = document.createElement('div');
           card.className = 'product-card';
           
-          // Extrai as imagens diretamente do array de URLs
           const imagens = produto.get('imagens') || [];
-          
-          // Gera o HTML do carrossel
+          const hasImages = imagens.length > 0;
+
+          // HTML do Carrossel
           const carouselHTML = `
-            <div class="image-carousel">
+            <div class="image-container">
               <div class="carousel-inner" style="width: ${imagens.length * 100}%">
                 ${imagens.map(img => `
-                  <img src="${img}" class="carousel-image" alt="${produto.get('nome')}">
+                  <img src="${img}" class="carousel-image">
                 `).join('')}
               </div>
               ${imagens.length > 1 ? `
@@ -168,23 +207,25 @@
           `;
 
           card.innerHTML = `
-            ${imagens.length ? carouselHTML : `
-              <div class="image-carousel">
-                <img src="https://via.placeholder.com/300x300?text=Sem+Imagem" 
-                     class="carousel-image" alt="Produto sem imagem">
+            ${hasImages ? carouselHTML : `
+              <div class="image-container">
+                <img src="https://via.placeholder.com/300x250?text=Sem+Imagem" 
+                     class="carousel-image">
               </div>
             `}
             <div class="product-info">
-              <h3>${produto.get('nome')}</h3>
-              <p>R$ ${produto.get('preco').toFixed(2)}</p>
+              <div>
+                <h3>${produto.get('nome')}</h3>
+                <p class="price">R$ ${produto.get('preco').toFixed(2)}</p>
+              </div>
               <button class="buy-btn" 
                       onclick="addToCart('${produto.id}', '${produto.get('nome')}', ${produto.get('preco')})">
-                Adicionar ao Carrinho
+                🛒 Adicionar
               </button>
             </div>
           `;
 
-          // Adiciona funcionalidade do carrossel se houver múltiplas imagens
+          // Funcionalidade do Carrossel
           if (imagens.length > 1) {
             const dots = card.querySelectorAll('.carousel-dot');
             const inner = card.querySelector('.carousel-inner');
@@ -199,23 +240,19 @@
 
             const updateCarousel = () => {
               inner.style.transform = `translateX(-${(currentIndex * 100) / imagens.length}%)`;
-              dots.forEach(dot => dot.classList.remove('active'));
+              dots.forEach(d => d.classList.remove('active'));
               dots[currentIndex].classList.add('active');
             };
 
-            // Auto-slide
+            // Auto-rotate
             let interval = setInterval(() => {
               currentIndex = (currentIndex + 1) % imagens.length;
               updateCarousel();
             }, 5000);
 
-            // Pausa no hover
             card.addEventListener('mouseenter', () => clearInterval(interval));
             card.addEventListener('mouseleave', () => {
-              interval = setInterval(() => {
-                currentIndex = (currentIndex + 1) % imagens.length;
-                updateCarousel();
-              }, 5000);
+              interval = setInterval(updateCarousel, 5000);
             });
           }
 
@@ -223,21 +260,17 @@
         });
 
       } catch (error) {
-        console.error('Erro ao carregar produtos:', error);
-        const grid = document.getElementById('productGrid');
-        if (grid) {
-          grid.innerHTML = '<p class="error">Erro ao carregar os produtos. Tente recarregar a página.</p>';
-        }
+        console.error('Erro:', error);
+        grid.innerHTML = '<p style="color: red">Erro ao carregar produtos</p>';
       }
     }
 
-    // Funções do carrinho (mantidas as anteriores)
     function addToCart(id, name, price) {
       cart.push({ id, name, price });
-      alert(`✔️ ${name} adicionado ao carrinho!`);
+      alert(`✅ ${name} adicionado ao carrinho!`);
     }
 
-    // Inicialização
+    // Inicia quando o DOM estiver pronto
     document.addEventListener('DOMContentLoaded', loadProducts);
   </script>
 </body>
