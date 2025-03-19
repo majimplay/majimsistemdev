@@ -29,76 +29,81 @@
   <div id="splide" class="splide">
     <div class="splide__track">
       <ul class="splide__list" id="slides-list">
-        <!-- As imagens serão adicionadas aqui como slides -->
+        <!-- Slides serão adicionados aqui -->
       </ul>
     </div>
   </div>
 
-  <!-- JS do Splide e da extensão Auto Scroll -->
-  <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/js/splide.min.js"></script>
-  <!-- Usando CDN unpkg para a extensão Auto Scroll para evitar o erro MIME -->
-  <script src="https://unpkg.com/@splidejs/splide-extension-auto-scroll@0.5.5/dist/js/splide-extension-auto-scroll.min.js"></script>
+  <!-- Scripts do Splide e da extensão Auto Scroll, carregados com defer -->
+  <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/js/splide.min.js" defer></script>
+  <script src="https://unpkg.com/@splidejs/splide-extension-auto-scroll@0.5.5/dist/js/splide-extension-auto-scroll.min.js" defer></script>
   
-  <script>
-    // Recupera as imagens salvas ou inicia com array vazio
-    let images = JSON.parse(localStorage.getItem('uploadedImages')) || [];
-    const slidesList = document.getElementById('slides-list');
-    let splide;
-
-    // Função para criar um slide com a imagem
-    function createSlide(src) {
-      const li = document.createElement('li');
-      li.className = 'splide__slide';
-      const img = document.createElement('img');
-      img.src = src;
-      li.appendChild(img);
-      return li;
-    }
-
-    // Inicializa o slider com os slides atuais
-    function initializeSlider() {
-      // Se não houver imagens, adiciona um slide placeholder
-      if (slidesList.children.length === 0) {
-        const placeholder = document.createElement('li');
-        placeholder.className = 'splide__slide';
-        placeholder.textContent = 'No Image';
-        slidesList.appendChild(placeholder);
-      }
-      splide = new Splide('#splide', {
-        type     : 'loop',
-        perPage  : 1,
-        gap      : '1rem',
-        autoScroll: {
-          speed: 1,  // Velocidade de rolagem
-        },
-      }, {
-        AutoScroll: AutoScroll  // Monta a extensão AutoScroll
-      }).mount();
-    }
-
-    // Atualiza o slider recriando os slides e reinicializando o Splide
-    function updateSlider() {
-      slidesList.innerHTML = '';
-      if (images.length === 0) {
-        const placeholder = document.createElement('li');
-        placeholder.className = 'splide__slide';
-        placeholder.textContent = 'No Image';
-        slidesList.appendChild(placeholder);
-      } else {
-        images.forEach(src => {
-          slidesList.appendChild(createSlide(src));
-        });
-      }
-      if (splide) {
-        splide.destroy(); // Destroi a instância antiga para reinicializar
-      }
-      initializeSlider();
-    }
-
-    // Quando o DOM estiver carregado, inicializa o slider e configura o evento de upload
+  <!-- Nosso script -->
+  <script defer>
     document.addEventListener('DOMContentLoaded', function() {
+      // Verifica se a extensão foi carregada
+      if (typeof window.AutoScroll === 'undefined') {
+        console.error('A extensão AutoScroll não foi carregada.');
+      }
+
+      // Recupera as imagens salvas ou inicia com um array vazio
+      let images = JSON.parse(localStorage.getItem('uploadedImages')) || [];
+      const slidesList = document.getElementById('slides-list');
+      let splide;
+
+      // Função para criar um slide com a imagem
+      function createSlide(src) {
+        const li = document.createElement('li');
+        li.className = 'splide__slide';
+        const img = document.createElement('img');
+        img.src = src;
+        li.appendChild(img);
+        return li;
+      }
+
+      // Inicializa o slider com os slides atuais
+      function initializeSlider() {
+        if (slidesList.children.length === 0) {
+          const placeholder = document.createElement('li');
+          placeholder.className = 'splide__slide';
+          placeholder.textContent = 'No Image';
+          slidesList.appendChild(placeholder);
+        }
+        splide = new Splide('#splide', {
+          type     : 'loop',
+          perPage  : 1,
+          gap      : '1rem',
+          autoScroll: {
+            speed: 1,  // Velocidade da rolagem
+          },
+        }, {
+          AutoScroll: window.AutoScroll  // Referência à extensão carregada
+        }).mount();
+      }
+
+      // Atualiza o slider recriando os slides e reinicializando o Splide
+      function updateSlider() {
+        slidesList.innerHTML = '';
+        if (images.length === 0) {
+          const placeholder = document.createElement('li');
+          placeholder.className = 'splide__slide';
+          placeholder.textContent = 'No Image';
+          slidesList.appendChild(placeholder);
+        } else {
+          images.forEach(src => {
+            slidesList.appendChild(createSlide(src));
+          });
+        }
+        if (splide) {
+          splide.destroy(); // Destroi a instância antiga para reinicializar
+        }
+        initializeSlider();
+      }
+
+      // Inicializa o slider ao carregar o DOM
       updateSlider();
 
+      // Configura o evento de upload
       document.getElementById('image-input').addEventListener('change', function(event) {
         const file = event.target.files[0];
         if (file) {
