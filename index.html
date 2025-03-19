@@ -5,25 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Produtos - Loja Tech</title>
   <style>
-    /* Reset e Estilos Gerais */
+    /* Reset e estilos gerais */
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
+    
+    html, body {
+      height: 100%;
+      overflow-y: scroll; /* Barra de rolagem sempre visível */
+    }
 
     body {
-      font-family: 'Arial', sans-serif;
+      font-family: Arial, sans-serif;
       background: #f8f9fa;
-      min-height: 100vh;
       display: flex;
       flex-direction: column;
     }
 
-    /* Cabeçalho Fixo */
+    /* Cabeçalho fixo */
     header {
       background: #007bff;
-      color: white;
+      color: #fff;
       padding: 1rem 2rem;
       display: flex;
       justify-content: space-between;
@@ -34,31 +38,30 @@
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
 
-    /* Container Principal com Scroll */
+    /* Container principal */
     .container {
       flex: 1;
       padding: 2rem;
       max-width: 1200px;
       margin: 0 auto;
-      overflow-y: auto;
     }
 
-    /* Grid de Produtos */
+    /* Grid de produtos */
     .product-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
       gap: 2rem;
-      padding: 1rem 0;
+      margin-top: 1rem;
     }
 
-    /* Card do Produto */
+    /* Card do produto */
     .product-card {
-      background: white;
+      background: #fff;
       border-radius: 10px;
       box-shadow: 0 3px 6px rgba(0,0,0,0.1);
       overflow: hidden;
       transition: transform 0.2s;
-      height: 400px; /* Altura fixa */
+      height: 400px; /* Altura fixa para o card */
       display: flex;
       flex-direction: column;
     }
@@ -67,28 +70,31 @@
       transform: translateY(-5px);
     }
 
-    /* Container de Imagens */
+    /* Container da imagem */
     .image-container {
       height: 250px;
       position: relative;
       overflow: hidden;
-      flex-shrink: 0;
+      background: #eee;
     }
 
+    /* Carousel: a linha que contém todas as imagens */
     .carousel-inner {
       display: flex;
-      height: 100%;
       transition: transform 0.5s ease;
+      height: 100%;
+      /* A largura será definida inline com base na quantidade de imagens */
     }
 
+    /* Cada imagem ocupará 100% da largura do container */
     .carousel-image {
+      flex: 0 0 100%;
       width: 100%;
       height: 100%;
       object-fit: cover;
-      flex-shrink: 0;
     }
 
-    /* Controles do Carrossel */
+    /* Controles do carrossel (os pontinhos) */
     .carousel-controls {
       position: absolute;
       bottom: 1rem;
@@ -105,7 +111,7 @@
       background: rgba(255,255,255,0.5);
       border: none;
       cursor: pointer;
-      transition: all 0.3s ease;
+      transition: transform 0.3s ease, background 0.3s ease;
     }
 
     .carousel-dot.active {
@@ -113,19 +119,19 @@
       transform: scale(1.2);
     }
 
-    /* Informações do Produto */
+    /* Informações do produto */
     .product-info {
       padding: 1.5rem;
-      flex: 1;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      flex: 1;
     }
 
     .product-info h3 {
+      font-size: 1.2rem;
       color: #333;
       margin-bottom: 0.5rem;
-      font-size: 1.2rem;
     }
 
     .price {
@@ -134,16 +140,16 @@
       font-weight: bold;
     }
 
-    /* Botão de Compra */
+    /* Botão de compra */
     .buy-btn {
       background: #28a745;
-      color: white;
+      color: #fff;
       border: none;
       padding: 0.8rem;
       border-radius: 5px;
       cursor: pointer;
       font-size: 1rem;
-      transition: all 0.3s ease;
+      transition: background 0.3s, transform 0.3s;
       margin-top: 1rem;
     }
 
@@ -177,86 +183,82 @@
         const Produto = Parse.Object.extend("Produto");
         const query = new Parse.Query(Produto);
         const results = await query.find();
-
         const grid = document.getElementById('productGrid');
         grid.innerHTML = '';
 
         results.forEach(produto => {
           const card = document.createElement('div');
           card.className = 'product-card';
-          
+
           const imagens = produto.get('imagens') || [];
           const hasImages = imagens.length > 0;
 
-          // HTML do Carrossel
-          const carouselHTML = `
-            <div class="image-container">
-              <div class="carousel-inner" style="width: ${imagens.length * 100}%">
-                ${imagens.map(img => `
-                  <img src="${img}" class="carousel-image">
-                `).join('')}
-              </div>
-              ${imagens.length > 1 ? `
-                <div class="carousel-controls">
-                  ${imagens.map((_, i) => `
-                    <button class="carousel-dot ${i === 0 ? 'active' : ''}" 
-                            data-index="${i}"></button>
-                  `).join('')}
+          // Constrói o carrossel se houver imagens
+          let carouselHTML = '';
+          if (hasImages) {
+            carouselHTML = `
+              <div class="image-container">
+                <div class="carousel-inner" style="width: ${imagens.length * 100}%;">
+                  ${imagens.map(img => `<img src="${img}" class="carousel-image">`).join('')}
                 </div>
-              ` : ''}
-            </div>
-          `;
+                ${imagens.length > 1 ? `
+                  <div class="carousel-controls">
+                    ${imagens.map((_, i) => `<button class="carousel-dot ${i === 0 ? 'active' : ''}" data-index="${i}"></button>`).join('')}
+                  </div>
+                ` : ''}
+              </div>
+            `;
+          } else {
+            carouselHTML = `
+              <div class="image-container">
+                <img src="https://via.placeholder.com/300x250?text=Sem+Imagem" class="carousel-image">
+              </div>
+            `;
+          }
 
           card.innerHTML = `
-            ${hasImages ? carouselHTML : `
-              <div class="image-container">
-                <img src="https://via.placeholder.com/300x250?text=Sem+Imagem" 
-                     class="carousel-image">
-              </div>
-            `}
+            ${carouselHTML}
             <div class="product-info">
               <div>
                 <h3>${produto.get('nome')}</h3>
                 <p class="price">R$ ${produto.get('preco').toFixed(2)}</p>
               </div>
-              <button class="buy-btn" 
-                      onclick="addToCart('${produto.id}', '${produto.get('nome')}', ${produto.get('preco')})">
+              <button class="buy-btn" onclick="addToCart('${produto.id}', '${produto.get('nome')}', ${produto.get('preco')})">
                 🛒 Adicionar
               </button>
             </div>
           `;
 
-          // Funcionalidade do Carrossel
+          // Configura o carrossel apenas se houver mais de uma imagem
           if (imagens.length > 1) {
+            const carouselInner = card.querySelector('.carousel-inner');
             const dots = card.querySelectorAll('.carousel-dot');
-            const inner = card.querySelector('.carousel-inner');
             let currentIndex = 0;
+            let autoInterval = setInterval(autoRotate, 5000);
 
-            const updateCarousel = () => {
-              inner.style.transform = `translateX(-${(currentIndex * 100) / imagens.length}%)`;
-              dots.forEach(d => d.classList.remove('active'));
-              dots[currentIndex].classList.add('active');
-            };
+            function updateCarousel() {
+              carouselInner.style.transform = `translateX(-${currentIndex * 100}%)`;
+              dots.forEach((dot, i) => dot.classList.toggle('active', i === currentIndex));
+            }
 
-            // Clique nos pontos do carrossel
-            dots.forEach((dot, index) => {
-              dot.addEventListener('click', () => {
-                currentIndex = index;
-                updateCarousel();
-              });
-            });
-
-            // Função de auto-rotacionar com atualização do índice
-            const autoRotate = () => {
+            function autoRotate() {
               currentIndex = (currentIndex + 1) % imagens.length;
               updateCarousel();
-            };
+            }
 
-            let interval = setInterval(autoRotate, 5000);
-
-            card.addEventListener('mouseenter', () => clearInterval(interval));
+            // Reinicia o auto-rotate após o hover
+            card.addEventListener('mouseenter', () => clearInterval(autoInterval));
             card.addEventListener('mouseleave', () => {
-              interval = setInterval(autoRotate, 5000);
+              clearInterval(autoInterval);
+              autoInterval = setInterval(autoRotate, 5000);
+            });
+
+            // Permite selecionar manualmente a imagem
+            dots.forEach((dot, i) => {
+              dot.addEventListener('click', () => {
+                currentIndex = i;
+                updateCarousel();
+              });
             });
           }
 
@@ -265,7 +267,7 @@
 
       } catch (error) {
         console.error('Erro:', error);
-        document.getElementById('productGrid').innerHTML = '<p style="color: red">Erro ao carregar produtos</p>';
+        document.getElementById('productGrid').innerHTML = '<p style="color: red;">Erro ao carregar produtos</p>';
       }
     }
 
@@ -274,7 +276,6 @@
       alert(`✅ ${name} adicionado ao carrinho!`);
     }
 
-    // Inicia quando o DOM estiver pronto
     document.addEventListener('DOMContentLoaded', loadProducts);
   </script>
 </body>
