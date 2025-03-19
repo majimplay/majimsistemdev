@@ -1,57 +1,64 @@
-import { useState, useEffect } from "react";
-
-export default function ImageUploader() {
-  const [images, setImages] = useState([]);
-  const [currentImage, setCurrentImage] = useState(null);
-  const [index, setIndex] = useState(0);
-
-  useEffect(() => {
-    const storedImages = JSON.parse(localStorage.getItem("uploadedImages")) || [];
-    setImages(storedImages);
-    if (storedImages.length > 0) {
-      setCurrentImage(storedImages[0]);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (images.length > 0) {
-      const interval = setInterval(() => {
-        setIndex((prevIndex) => {
-          const newIndex = (prevIndex + 1) % images.length;
-          setCurrentImage(images[newIndex]);
-          return newIndex;
-        });
-      }, 1000);
-      return () => clearInterval(interval);
-    }
-  }, [images]);
-
-  const handleImageUpload = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const newImages = [...images, e.target.result];
-        setImages(newImages);
-        localStorage.setItem("uploadedImages", JSON.stringify(newImages));
-        if (newImages.length === 1) {
-          setCurrentImage(newImages[0]);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Slider with Local Storage</title>
+    <style>
+        #image-container {
+            width: 256px;
+            height: 256px;
+            border: 2px solid #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
         }
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  return (
-    <div className="p-4 flex flex-col items-center">
-      <input type="file" onChange={handleImageUpload} className="mb-4" />
-      <div className="w-64 h-64 border flex items-center justify-center">
-        {currentImage ? (
-          <img src={currentImage} alt="Uploaded" className="w-full h-full object-cover" />
-        ) : (
-          <span>No Image</span>
-        )}
-      </div>
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+    <input type="file" id="image-input" />
+    <div id="image-container">
+        <span>No Image</span>
     </div>
-  );
-}
+    
+    <script>
+        let images = JSON.parse(localStorage.getItem("uploadedImages")) || [];
+        let index = 0;
+        const imageContainer = document.getElementById("image-container");
+        const imageInput = document.getElementById("image-input");
+
+        function updateImage() {
+            if (images.length > 0) {
+                imageContainer.innerHTML = `<img src="${images[index]}" alt="Uploaded Image">`;
+                index = (index + 1) % images.length;
+            } else {
+                imageContainer.innerHTML = `<span>No Image</span>`;
+            }
+        }
+
+        imageInput.addEventListener("change", (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    images.push(e.target.result);
+                    localStorage.setItem("uploadedImages", JSON.stringify(images));
+                    if (images.length === 1) {
+                        updateImage();
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        setInterval(updateImage, 1000);
+        updateImage();
+    </script>
+</body>
+</html>
