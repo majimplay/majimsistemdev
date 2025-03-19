@@ -1,0 +1,57 @@
+import { useState, useEffect } from "react";
+
+export default function ImageUploader() {
+  const [images, setImages] = useState([]);
+  const [currentImage, setCurrentImage] = useState(null);
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const storedImages = JSON.parse(localStorage.getItem("uploadedImages")) || [];
+    setImages(storedImages);
+    if (storedImages.length > 0) {
+      setCurrentImage(storedImages[0]);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (images.length > 0) {
+      const interval = setInterval(() => {
+        setIndex((prevIndex) => {
+          const newIndex = (prevIndex + 1) % images.length;
+          setCurrentImage(images[newIndex]);
+          return newIndex;
+        });
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [images]);
+
+  const handleImageUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const newImages = [...images, e.target.result];
+        setImages(newImages);
+        localStorage.setItem("uploadedImages", JSON.stringify(newImages));
+        if (newImages.length === 1) {
+          setCurrentImage(newImages[0]);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  return (
+    <div className="p-4 flex flex-col items-center">
+      <input type="file" onChange={handleImageUpload} className="mb-4" />
+      <div className="w-64 h-64 border flex items-center justify-center">
+        {currentImage ? (
+          <img src={currentImage} alt="Uploaded" className="w-full h-full object-cover" />
+        ) : (
+          <span>No Image</span>
+        )}
+      </div>
+    </div>
+  );
+}
