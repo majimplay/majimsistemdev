@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Produtos - Loja Tech</title>
   <style>
     /* Reset e Estilos Gerais */
@@ -231,6 +232,13 @@
             const inner = card.querySelector('.carousel-inner');
             let currentIndex = 0;
 
+            const updateCarousel = () => {
+              inner.style.transform = `translateX(-${(currentIndex * 100) / imagens.length}%)`;
+              dots.forEach(d => d.classList.remove('active'));
+              dots[currentIndex].classList.add('active');
+            };
+
+            // Clique nos pontos do carrossel
             dots.forEach((dot, index) => {
               dot.addEventListener('click', () => {
                 currentIndex = index;
@@ -238,21 +246,17 @@
               });
             });
 
-            const updateCarousel = () => {
-              inner.style.transform = `translateX(-${(currentIndex * 100) / imagens.length}%)`;
-              dots.forEach(d => d.classList.remove('active'));
-              dots[currentIndex].classList.add('active');
-            };
-
-            // Auto-rotate
-            let interval = setInterval(() => {
+            // Função de auto-rotacionar com atualização do índice
+            const autoRotate = () => {
               currentIndex = (currentIndex + 1) % imagens.length;
               updateCarousel();
-            }, 5000);
+            };
+
+            let interval = setInterval(autoRotate, 5000);
 
             card.addEventListener('mouseenter', () => clearInterval(interval));
             card.addEventListener('mouseleave', () => {
-              interval = setInterval(updateCarousel, 5000);
+              interval = setInterval(autoRotate, 5000);
             });
           }
 
@@ -261,7 +265,7 @@
 
       } catch (error) {
         console.error('Erro:', error);
-        grid.innerHTML = '<p style="color: red">Erro ao carregar produtos</p>';
+        document.getElementById('productGrid').innerHTML = '<p style="color: red">Erro ao carregar produtos</p>';
       }
     }
 
