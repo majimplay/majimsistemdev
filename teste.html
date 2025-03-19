@@ -1,64 +1,117 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Slider with Local Storage</title>
-    <style>
-        #image-container {
-            width: 256px;
-            height: 256px;
-            border: 2px solid #000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-        img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Slider de Imagens com Auto Scroll</title>
+  <!-- CSS do Splide -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/css/splide.min.css">
+  <style>
+    #splide {
+      width: 300px;
+      margin: 20px auto;
+    }
+    #splide img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+  </style>
 </head>
 <body>
-    <input type="file" id="image-input" />
-    <div id="image-container">
-        <span>No Image</span>
+  <h2>Envie suas imagens</h2>
+  <input type="file" id="image-input" accept="image/*">
+  <div id="splide" class="splide">
+    <div class="splide__track">
+      <ul class="splide__list" id="slides-list">
+        <!-- As imagens serão adicionadas aqui como slides -->
+      </ul>
     </div>
-    
-    <script>
-        let images = JSON.parse(localStorage.getItem("uploadedImages")) || [];
-        let index = 0;
-        const imageContainer = document.getElementById("image-container");
-        const imageInput = document.getElementById("image-input");
+  </div>
 
-        function updateImage() {
-            if (images.length > 0) {
-                imageContainer.innerHTML = `<img src="${images[index]}" alt="Uploaded Image">`;
-                index = (index + 1) % images.length;
-            } else {
-                imageContainer.innerHTML = `<span>No Image</span>`;
-            }
-        }
+  <!-- JS do Splide e da extensão Auto Scroll -->
+  <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/js/splide.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide-extension-auto-scroll@0.5.5/dist/js/splide-extension-auto-scroll.min.js"></script>
+  
+  <script>
+    // Recupera as imagens salvas ou inicia com array vazio
+    let images = JSON.parse(localStorage.getItem('uploadedImages')) || [];
+    const slidesList = document.getElementById('slides-list');
+    let splide;
 
-        imageInput.addEventListener("change", (event) => {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    images.push(e.target.result);
-                    localStorage.setItem("uploadedImages", JSON.stringify(images));
-                    if (images.length === 1) {
-                        updateImage();
-                    }
-                };
-                reader.readAsDataURL(file);
-            }
+    // Função para criar um slide com a imagem
+    function createSlide(src) {
+      const li = document.createElement('li');
+      li.className = 'splide__slide';
+      const img = document.createElement('img');
+      img.src = src;
+      li.appendChild(img);
+      return li;
+    }
+
+    // Inicializa o slider com os slides atuais
+    function initializeSlider() {
+      // Se não houver imagens, adiciona um slide placeholder
+      if (slidesList.children.length === 0) {
+        const placeholder = document.createElement('li');
+        placeholder.className = 'splide__slide';
+        placeholder.textContent = 'No Image';
+        slidesList.appendChild(placeholder);
+      }
+      splide = new Splide('#splide', {
+        type     : 'loop',
+        perPage  : 1,
+        gap      : '1rem',
+        // Outras configurações podem ser ajustadas conforme necessário
+        autoScroll: {
+          speed: 1,  // Velocidade de rolagem
+        },
+      }, {
+        AutoScroll: AutoScroll  // Monta a extensão AutoScroll
+      }).mount();
+    }
+
+    // Atualiza o slider recriando os slides e reinicializando o Splide
+    function updateSlider() {
+      slidesList.innerHTML = '';
+      if (images.length === 0) {
+        const placeholder = document.createElement('li');
+        placeholder.className = 'splide__slide';
+        placeholder.textContent = 'No Image';
+        slidesList.appendChild(placeholder);
+      } else {
+        images.forEach(src => {
+          slidesList.appendChild(createSlide(src));
         });
+      }
+      if (splide) {
+        splide.destroy(); // Destroi a instância antiga para reinicializar
+      }
+      initializeSlider();
+    }
 
-        setInterval(updateImage, 1000);
-        updateImage();
-    </script>
+    // Quando o DOM estiver carregado, inicializa o slider e configura o evento de upload
+    document.addEventListener('DOMContentLoaded', function() {
+      updateSlider();
+
+      document.getElementById('image-input').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            images.push(e.target.result);
+            localStorage.setItem('uploadedImages', JSON.stringify(images));
+            updateSlider();
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+    });
+  </script>
 </body>
 </html>
