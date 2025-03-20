@@ -191,19 +191,32 @@
     
     let currentUser = Parse.User.current();
     
-    // Redirecionamento se não logado
+    // Redirecionamento se não estiver logado
     if (!currentUser) {
       window.location.href = 'login.html';
     }
+    
+    // Atualiza os dados do usuário ao carregar a página
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        // Busca os dados atualizados do servidor
+        currentUser = await currentUser.fetch();
+        // Atualiza as seções que dependem dos dados do usuário
+        carregarHistoricoPedidos();
+        carregarCarrinho();
 
-    // Preenche formulário com dados do usuário
-    document.getElementById('username').value = currentUser.get('username');
-    document.getElementById('email').value = currentUser.get('email');
-    document.getElementById('cpf').value = currentUser.get('cpf') || '';
-    document.getElementById('endereco').value = currentUser.get('endereco') || '';
-    document.getElementById('telefone').value = currentUser.get('telefone') || '';
-
-    // Atualizar dados
+        // Preenche o formulário com os dados atualizados
+        document.getElementById('username').value = currentUser.get('username');
+        document.getElementById('email').value = currentUser.get('email');
+        document.getElementById('cpf').value = currentUser.get('cpf') || '';
+        document.getElementById('endereco').value = currentUser.get('endereco') || '';
+        document.getElementById('telefone').value = currentUser.get('telefone') || '';
+      } catch (error) {
+        console.error('Erro ao atualizar dados do usuário:', error);
+      }
+    });
+    
+    // Atualizar dados do usuário via formulário
     document.getElementById('updateForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       
@@ -214,7 +227,7 @@
         alert('As novas senhas não conferem!');
         return;
       }
-
+      
       currentUser.set('username', document.getElementById('username').value);
       currentUser.set('email', document.getElementById('email').value);
       currentUser.set('cpf', document.getElementById('cpf').value);
@@ -222,7 +235,7 @@
       currentUser.set('telefone', document.getElementById('telefone').value);
       
       if (newPassword) currentUser.set('password', newPassword);
-
+      
       try {
         await currentUser.save();
         alert('Dados atualizados com sucesso!');
@@ -230,8 +243,8 @@
         alert('Erro ao atualizar: ' + error.message);
       }
     });
-
-    // Carrega carrinho
+    
+    // Carrega o carrinho
     async function carregarCarrinho() {
       const carrinho = currentUser.get('carrinhovetor') || [];
       const carrinhoItens = document.getElementById('carrinhoItens');
@@ -268,7 +281,7 @@
         carrinhoItens.innerHTML = '<p>Erro ao carregar carrinho</p>';
       }
     }
-
+    
     // Remove item do carrinho
     window.removerDoCarrinho = async (produtoId) => {
       const novoCarrinho = currentUser.get('carrinhovetor').filter(id => id !== produtoId);
@@ -281,7 +294,7 @@
         alert('Erro ao remover item: ' + error.message);
       }
     }
-
+    
     // Finalização de compra simulada
     window.finalizarCompraSimulada = async () => {
       const carrinho = currentUser.get('carrinhovetor') || [];
@@ -309,13 +322,13 @@
           status: "SIMULAÇÃO - Concluído"
         };
 
-        // Atualiza histórico
+        // Atualiza histórico e limpa o carrinho
         const historico = [...(currentUser.get('pedidos') || []), novoPedido];
         currentUser.set('pedidos', historico);
         currentUser.set('carrinhovetor', []);
         await currentUser.save();
 
-        // Atualiza interface
+        // Atualiza a interface
         carregarCarrinho();
         carregarHistoricoPedidos();
 
@@ -323,7 +336,7 @@
         alert('Erro na simulação: ' + error.message);
       }
     }
-
+    
     // Carrega histórico de pedidos
     async function carregarHistoricoPedidos() {
       const container = document.getElementById('historicoPedidos');
@@ -341,15 +354,11 @@
             </div>
           `).join('');
     }
-
-    // Voltar para index
+    
+    // Função para voltar para a página inicial
     window.voltarParaIndex = () => {
       window.location.href = 'index.html';
     }
-
-    // Inicialização
-    carregarCarrinho();
-    carregarHistoricoPedidos();
   </script>
 </body>
 </html>
