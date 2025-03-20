@@ -70,6 +70,35 @@
       border-radius: 4px;
       cursor: pointer;
     }
+    .total {
+      margin-top: 20px;
+      font-size: 1.2em;
+      font-weight: bold;
+      text-align: right;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 4px;
+    }
+    .checkout-section {
+      margin-top: 30px;
+      border-top: 2px solid #eee;
+      padding-top: 20px;
+    }
+    .simulacao-alerta {
+      color: #dc3545;
+      background: #fff3cd;
+      padding: 15px;
+      border-radius: 4px;
+      margin: 15px 0;
+      border: 1px solid #ffecb5;
+    }
+    .payment-methods {
+      margin: 15px 0;
+    }
+    .payment-methods label {
+      display: block;
+      margin: 10px 0;
+    }
   </style>
   <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
 </head>
@@ -107,6 +136,32 @@
     <div class="carrinho">
       <h2>Meu Carrinho</h2>
       <div id="carrinhoItens"></div>
+      <div id="carrinhoTotal" class="total"></div>
+      
+      <!-- Seção de Checkout Simulado -->
+      <div class="checkout-section">
+        <div class="simulacao-alerta">
+          ATENÇÃO: Esta é uma simulação de compra para testes. Nenhum pagamento real será processado.
+        </div>
+        
+        <h3>Finalizar Compra Simulada</h3>
+        <div class="payment-methods">
+          <label>
+            <input type="radio" name="payment" value="credit" checked> Cartão de Crédito
+          </label>
+          <label>
+            <input type="radio" name="payment" value="pix"> PIX
+          </label>
+          <label>
+            <input type="radio" name="payment" value="boleto"> Boleto
+          </label>
+        </div>
+        
+        <button class="btn" onclick="finalizarCompraSimulada()" 
+                style="background: #17a2b8;">
+          Finalizar Compra Simulada
+        </button>
+      </div>
     </div>
 
     <button class="btn" style="margin-top: 20px; background: #007bff;" onclick="logout()">Sair</button>
@@ -164,7 +219,10 @@
     async function carregarCarrinho() {
       const carrinho = currentUser.get('carrinhovetor') || [];
       const carrinhoItens = document.getElementById('carrinhoItens');
+      const carrinhoTotal = document.getElementById('carrinhoTotal');
+      
       carrinhoItens.innerHTML = 'Carregando...';
+      carrinhoTotal.innerHTML = '';
 
       try {
         const Produto = Parse.Object.extend('Produto');
@@ -172,14 +230,24 @@
         query.containedIn('objectId', carrinho);
         const produtos = await query.find();
 
-        carrinhoItens.innerHTML = produtos.length === 0 
+        let total = 0;
+        let html = produtos.length === 0 
           ? '<p>Carrinho vazio</p>' 
-          : produtos.map(produto => `
-              <div class="produto">
-                <span>${produto.get('nome')} - R$ ${produto.get('preco').toFixed(2)}</span>
-                <button class="remove-btn" onclick="removerDoCarrinho('${produto.id}')">Remover</button>
-              </div>
-            `).join('');
+          : produtos.map(produto => {
+              const preco = produto.get('preco') || 0;
+              total += preco;
+              return `
+                <div class="produto">
+                  <span>${produto.get('nome')} - R$ ${preco.toFixed(2)}</span>
+                  <button class="remove-btn" onclick="removerDoCarrinho('${produto.id}')">
+                    Remover
+                  </button>
+                </div>
+              `;
+            }).join('');
+
+        carrinhoItens.innerHTML = html;
+        carrinhoTotal.innerHTML = `Total: R$ ${total.toFixed(2)}`;
       } catch (error) {
         carrinhoItens.innerHTML = '<p>Erro ao carregar carrinho</p>';
       }
@@ -195,6 +263,59 @@
         carregarCarrinho();
       } catch (error) {
         alert('Erro ao remover item: ' + error.message);
+      }
+    }
+
+    // Finalização de compra simulada
+    window.finalizarCompraSimulada = async () => {
+      const carrinho = currentUser.get('carrinhovetor') || [];
+      if (carrinho.length === 0) {
+        alert('Carrinho vazio! Adicione itens antes de comprar.');
+        return;
+      }
+
+      const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
+
+      try {
+        const Produto = Parse.Object.extend('Produto');
+        const query = new Parse.Query(Produto);
+        query.containedIn('objectId', carrinho);
+        const produtos = await query.find();
+        const total = produtos.reduce((sum, produto) => sum + (produto.get('preco') || 0), 0);
+
+        // Cria o objeto do pedido
+        const novoPedido = {
+          id: `SIM-${Date.now()}`,
+          data: new Date().toISOString(),
+          produtos: carrinho,
+          total: total,
+          metodoPagamento: paymentMethod,
+          status: "SIMULAÇÃO - Pedido concluído"
+        };
+
+        // Adiciona ao histórico de pedidos
+        const historicoPedidos = currentUser.get('pedidos') || [];
+        historicoPedidos.push(novoPedido);
+        currentUser.set('pedidos', historicoPedidos);
+
+        // Limpa o carrinho
+        currentUser.set('carrinhovetor', []);
+        await currentUser.save();
+
+        // Atualiza interface
+        document.getElementById('carrinhoItens').innerHTML = `
+          <div class="simulacao-alerta">
+            Compra simulada concluída com sucesso!<br>
+            Total simulado: R$ ${total.toFixed(2)}<br>
+            Método de pagamento: ${paymentMethod}<br>
+            ID do Pedido: ${novoPedido.id}
+          </div>
+        `;
+        document.getElementById('carrinhoTotal').innerHTML = '';
+        document.querySelector('.checkout-section').style.display = 'none';
+
+      } catch (error) {
+        alert('Erro na simulação de compra: ' + error.message);
       }
     }
 
