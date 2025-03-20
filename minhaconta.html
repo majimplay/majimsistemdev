@@ -39,19 +39,27 @@
       margin-top: 20px;
       padding: 10px;
       border: none;
-      background: #28a745;
       color: white;
       border-radius: 4px;
       cursor: pointer;
     }
-    .btn:hover {
+    .btn-primary {
+      background: #28a745;
+    }
+    .btn-primary:hover {
       background: #218838;
+    }
+    .btn-secondary {
+      background: #6c757d;
+    }
+    .btn-danger {
+      background: #dc3545;
     }
     .obs {
       font-size: 0.9em;
       color: #555;
     }
-    .carrinho {
+    .carrinho, .historico-pedidos {
       margin-top: 40px;
       border-top: 2px solid #eee;
       padding-top: 20px;
@@ -64,11 +72,8 @@
       border-bottom: 1px solid #eee;
     }
     .remove-btn {
-      background: #dc3545;
       padding: 5px 10px;
-      color: white;
       border-radius: 4px;
-      cursor: pointer;
     }
     .total {
       margin-top: 20px;
@@ -81,8 +86,6 @@
     }
     .checkout-section {
       margin-top: 30px;
-      border-top: 2px solid #eee;
-      padding-top: 20px;
     }
     .simulacao-alerta {
       color: #dc3545;
@@ -98,6 +101,13 @@
     .payment-methods label {
       display: block;
       margin: 10px 0;
+    }
+    .pedido {
+      padding: 15px;
+      margin: 10px 0;
+      background: #f8f9fa;
+      border-radius: 4px;
+      border: 1px solid #eee;
     }
   </style>
   <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
@@ -129,7 +139,7 @@
       <label for="telefone">Telefone</label>
       <input type="text" id="telefone">
       
-      <button type="submit" class="btn">Atualizar Dados</button>
+      <button type="submit" class="btn btn-primary">Atualizar Dados</button>
     </form>
 
     <!-- Seção do Carrinho -->
@@ -157,23 +167,31 @@
           </label>
         </div>
         
-        <button class="btn" onclick="finalizarCompraSimulada()" 
-                style="background: #17a2b8;">
+        <button class="btn btn-primary" onclick="finalizarCompraSimulada()">
           Finalizar Compra Simulada
         </button>
       </div>
     </div>
 
-    <button class="btn" style="margin-top: 20px; background: #007bff;" onclick="logout()">Sair</button>
+    <!-- Histórico de Pedidos -->
+    <div class="historico-pedidos">
+      <h2>Histórico de Pedidos</h2>
+      <div id="historicoPedidos"></div>
+    </div>
+
+    <button class="btn btn-secondary" onclick="voltarParaIndex()">
+      Voltar para Página Inicial
+    </button>
   </div>
 
   <script>
+    // Configuração do Parse
     Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
     Parse.serverURL = "https://parseapi.back4app.com";
     
     let currentUser = Parse.User.current();
     
-    // Redireciona se não estiver logado
+    // Redirecionamento se não logado
     if (!currentUser) {
       window.location.href = 'login.html';
     }
@@ -203,9 +221,7 @@
       currentUser.set('endereco', document.getElementById('endereco').value);
       currentUser.set('telefone', document.getElementById('telefone').value);
       
-      if (newPassword) {
-        currentUser.set('password', newPassword);
-      }
+      if (newPassword) currentUser.set('password', newPassword);
 
       try {
         await currentUser.save();
@@ -239,7 +255,7 @@
               return `
                 <div class="produto">
                   <span>${produto.get('nome')} - R$ ${preco.toFixed(2)}</span>
-                  <button class="remove-btn" onclick="removerDoCarrinho('${produto.id}')">
+                  <button class="remove-btn btn-danger" onclick="removerDoCarrinho('${produto.id}')">
                     Remover
                   </button>
                 </div>
@@ -255,8 +271,8 @@
 
     // Remove item do carrinho
     window.removerDoCarrinho = async (produtoId) => {
-      const carrinho = currentUser.get('carrinhovetor').filter(id => id !== produtoId);
-      currentUser.set('carrinhovetor', carrinho);
+      const novoCarrinho = currentUser.get('carrinhovetor').filter(id => id !== produtoId);
+      currentUser.set('carrinhovetor', novoCarrinho);
       
       try {
         await currentUser.save();
@@ -283,50 +299,57 @@
         const produtos = await query.find();
         const total = produtos.reduce((sum, produto) => sum + (produto.get('preco') || 0), 0);
 
-        // Cria o objeto do pedido
+        // Cria novo pedido
         const novoPedido = {
-          id: `SIM-${Date.now()}`,
+          id: `PED-${Date.now()}`,
           data: new Date().toISOString(),
-          produtos: carrinho,
+          produtos: [...carrinho],
           total: total,
           metodoPagamento: paymentMethod,
-          status: "SIMULAÇÃO - Pedido concluído"
+          status: "SIMULAÇÃO - Concluído"
         };
 
-        // Adiciona ao histórico de pedidos
-        const historicoPedidos = currentUser.get('pedidos') || [];
-        historicoPedidos.push(novoPedido);
-        currentUser.set('pedidos', historicoPedidos);
-
-        // Limpa o carrinho
+        // Atualiza histórico
+        const historico = [...(currentUser.get('pedidos') || []), novoPedido];
+        currentUser.set('pedidos', historico);
         currentUser.set('carrinhovetor', []);
         await currentUser.save();
 
         // Atualiza interface
-        document.getElementById('carrinhoItens').innerHTML = `
-          <div class="simulacao-alerta">
-            Compra simulada concluída com sucesso!<br>
-            Total simulado: R$ ${total.toFixed(2)}<br>
-            Método de pagamento: ${paymentMethod}<br>
-            ID do Pedido: ${novoPedido.id}
-          </div>
-        `;
-        document.getElementById('carrinhoTotal').innerHTML = '';
-        document.querySelector('.checkout-section').style.display = 'none';
+        carregarCarrinho();
+        carregarHistoricoPedidos();
 
       } catch (error) {
-        alert('Erro na simulação de compra: ' + error.message);
+        alert('Erro na simulação: ' + error.message);
       }
     }
 
-    // Logout
-    window.logout = () => {
-      Parse.User.logOut();
-      window.location.href = 'login.html';
+    // Carrega histórico de pedidos
+    async function carregarHistoricoPedidos() {
+      const container = document.getElementById('historicoPedidos');
+      const pedidos = currentUser.get('pedidos') || [];
+      
+      container.innerHTML = pedidos.length === 0 
+        ? '<p>Nenhum pedido encontrado</p>' 
+        : pedidos.reverse().map(pedido => `
+            <div class="pedido">
+              <p><strong>ID:</strong> ${pedido.id}</p>
+              <p><strong>Data:</strong> ${new Date(pedido.data).toLocaleString()}</p>
+              <p><strong>Total:</strong> R$ ${pedido.total.toFixed(2)}</p>
+              <p><strong>Método:</strong> ${pedido.metodoPagamento}</p>
+              <p><strong>Status:</strong> ${pedido.status}</p>
+            </div>
+          `).join('');
     }
 
-    // Carrega carrinho ao iniciar
+    // Voltar para index
+    window.voltarParaIndex = () => {
+      window.location.href = 'index.html';
+    }
+
+    // Inicialização
     carregarCarrinho();
+    carregarHistoricoPedidos();
   </script>
 </body>
 </html>
