@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Minha Conta</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 800px;
+      margin: 50px auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    h1 {
+      text-align: center;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+    label {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    input {
+      padding: 8px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .btn {
+      margin-top: 20px;
+      padding: 10px;
+      border: none;
+      background: #28a745;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .btn:hover {
+      background: #218838;
+    }
+    .obs {
+      font-size: 0.9em;
+      color: #555;
+    }
+    .carrinho {
+      margin-top: 40px;
+      border-top: 2px solid #eee;
+      padding-top: 20px;
+    }
+    .produto {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+    }
+    .remove-btn {
+      background: #dc3545;
+      padding: 5px 10px;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+  </style>
+  <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Minha Conta</h1>
+    
+    <!-- Formulário de Atualização -->
+    <form id="updateForm">
+      <label for="username">Nome de Usuário *</label>
+      <input type="text" id="username" required>
+      
+      <label for="email">Email *</label>
+      <input type="email" id="email" required>
+      
+      <label for="newPassword">Nova Senha <span class="obs">(Deixe em branco para manter a atual)</span></label>
+      <input type="password" id="newPassword">
+      
+      <label for="confirmNewPassword">Confirmar Nova Senha</label>
+      <input type="password" id="confirmNewPassword">
+      
+      <label for="cpf">CPF</label>
+      <input type="text" id="cpf">
+      
+      <label for="endereco">Endereço</label>
+      <input type="text" id="endereco">
+      
+      <label for="telefone">Telefone</label>
+      <input type="text" id="telefone">
+      
+      <button type="submit" class="btn">Atualizar Dados</button>
+    </form>
+
+    <!-- Seção do Carrinho -->
+    <div class="carrinho">
+      <h2>Meu Carrinho</h2>
+      <div id="carrinhoItens"></div>
+    </div>
+
+    <button class="btn" style="margin-top: 20px; background: #007bff;" onclick="logout()">Sair</button>
+  </div>
+
+  <script>
+    Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
+    Parse.serverURL = "https://parseapi.back4app.com";
+    
+    let currentUser = Parse.User.current();
+    
+    // Redireciona se não estiver logado
+    if (!currentUser) {
+      window.location.href = 'login.html';
+    }
+
+    // Preenche formulário com dados do usuário
+    document.getElementById('username').value = currentUser.get('username');
+    document.getElementById('email').value = currentUser.get('email');
+    document.getElementById('cpf').value = currentUser.get('cpf') || '';
+    document.getElementById('endereco').value = currentUser.get('endereco') || '';
+    document.getElementById('telefone').value = currentUser.get('telefone') || '';
+
+    // Atualizar dados
+    document.getElementById('updateForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const newPassword = document.getElementById('newPassword').value;
+      const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+      
+      if (newPassword && newPassword !== confirmNewPassword) {
+        alert('As novas senhas não conferem!');
+        return;
+      }
+
+      currentUser.set('username', document.getElementById('username').value);
+      currentUser.set('email', document.getElementById('email').value);
+      currentUser.set('cpf', document.getElementById('cpf').value);
+      currentUser.set('endereco', document.getElementById('endereco').value);
+      currentUser.set('telefone', document.getElementById('telefone').value);
+      
+      if (newPassword) {
+        currentUser.set('password', newPassword);
+      }
+
+      try {
+        await currentUser.save();
+        alert('Dados atualizados com sucesso!');
+      } catch (error) {
+        alert('Erro ao atualizar: ' + error.message);
+      }
+    });
+
+    // Carrega carrinho
+    async function carregarCarrinho() {
+      const carrinho = currentUser.get('carrinhovetor') || [];
+      const carrinhoItens = document.getElementById('carrinhoItens');
+      carrinhoItens.innerHTML = 'Carregando...';
+
+      try {
+        const Produto = Parse.Object.extend('Produto');
+        const query = new Parse.Query(Produto);
+        query.containedIn('objectId', carrinho);
+        const produtos = await query.find();
+
+        carrinhoItens.innerHTML = produtos.length === 0 
+          ? '<p>Carrinho vazio</p>' 
+          : produtos.map(produto => `
+              <div class="produto">
+                <span>${produto.get('nome')} - R$ ${produto.get('preco').toFixed(2)}</span>
+                <button class="remove-btn" onclick="removerDoCarrinho('${produto.id}')">Remover</button>
+              </div>
+            `).join('');
+      } catch (error) {
+        carrinhoItens.innerHTML = '<p>Erro ao carregar carrinho</p>';
+      }
+    }
+
+    // Remove item do carrinho
+    window.removerDoCarrinho = async (produtoId) => {
+      const carrinho = currentUser.get('carrinhovetor').filter(id => id !== produtoId);
+      currentUser.set('carrinhovetor', carrinho);
+      
+      try {
+        await currentUser.save();
+        carregarCarrinho();
+      } catch (error) {
+        alert('Erro ao remover item: ' + error.message);
+      }
+    }
+
+    // Logout
+    window.logout = () => {
+      Parse.User.logOut();
+      window.location.href = 'login.html';
+    }
+
+    // Carrega carrinho ao iniciar
+    carregarCarrinho();
+  </script>
+</body>
+</html>
