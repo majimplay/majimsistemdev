@@ -58,9 +58,9 @@
     /* Container do carrossel de imagens DENTRO de cada produto */
     .carousel-container {
       position: relative;
-      overflow: hidden; /* esconde imagens que "saem" do container */
+      overflow: hidden; /* esconde partes que "passam" do container */
       width: 100%;
-      height: 180px; /* altura fixa para o carrossel (ajuste conforme necessário) */
+      height: 180px; /* altura fixa do carrossel (ajuste se precisar) */
       margin-bottom: 10px;
     }
 
@@ -71,19 +71,24 @@
     }
 
     .carousel-item {
-      flex: 0 0 100%;
+      flex: 0 0 100%; /* cada “slide” ocupa 100% da largura do container */
       display: flex;
       justify-content: center;
       align-items: center;
       box-sizing: border-box;
     }
 
+    /* Imagem de cada slide */
     .carousel-item img {
       width: 150px;
       height: 150px;
       object-fit: cover;
       border-radius: 5px;
-      /* Ajuste conforme o design */
+      transition: transform 0.3s ease; /* para o efeito de zoom */
+    }
+    /* Ao passar o mouse, aplica zoom */
+    .carousel-item img:hover {
+      transform: scale(1.5); /* aumenta 50% */
     }
 
     /* Botões de navegação do carrossel */
@@ -123,7 +128,7 @@
     Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
     Parse.serverURL = "https://parseapi.back4app.com";
 
-    // Objeto para guardar o índice atual de cada carrossel por produto
+    // Objeto para guardar o índice atual de cada carrossel
     const carouselIndexes = {};
 
     async function loadProducts() {
@@ -157,7 +162,7 @@
             // Para cada imagem, cria um .carousel-item
             carouselItemsHTML = imagens.map(url => `
               <div class="carousel-item">
-                <img src="${url}" alt="${nome}">
+                <a href="imagem.jpg" target="_blank">   <img src="${url}" alt="${nome}">  </a>
               </div>
             `).join("");
           }
@@ -174,9 +179,11 @@
           `;
 
           // Conteúdo do card
+		  const descricao = produto.get("descricao") ;
           card.innerHTML = `
             ${carouselHTML}
             <h3>${nome}</h3>
+			  ${descricao ? `<p>${descricao}</p>` : ""}
             <p>R$ ${preco}</p>
             <button onclick="addToCart('${produtoId}')">Comprar</button>
           `;
@@ -195,12 +202,10 @@
 
     // Função para mover o carrossel de um produto
     function moveCarousel(produtoId, direction) {
-      // Identifica todos os .carousel-item desse produto
       const track = document.getElementById(`track-${produtoId}`);
       const items = track.querySelectorAll(".carousel-item");
       const totalItems = items.length;
 
-      // Atualiza o índice no objeto global
       carouselIndexes[produtoId] += direction;
 
       // Garante que o índice fique dentro dos limites
