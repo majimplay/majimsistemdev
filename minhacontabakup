@@ -110,7 +110,10 @@
       border: 1px solid #eee;
     }
   </style>
+  <!-- Script do Parse -->
   <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
+  <!-- Script do PayPal (modo sandbox ou teste) -->
+  <script src="https://www.paypal.com/sdk/js?client-id=Af7i4HgLoBa3MKob6w_aIklV2bSaeZZlN1jstVM9ZyNvGDLwv2w8DVK2eOo5e4YNLXClbVmQ4oL8l_ei&currency=BRL"></script>
 </head>
 <body>
   <div class="container">
@@ -148,28 +151,14 @@
       <div id="carrinhoItens"></div>
       <div id="carrinhoTotal" class="total"></div>
       
-      <!-- Seção de Checkout Simulado -->
+      <!-- Seção de Checkout -->
       <div class="checkout-section">
         <div class="simulacao-alerta">
           ATENÇÃO: Esta é uma simulação de compra para testes. Nenhum pagamento real será processado.
         </div>
         
-        <h3>Finalizar Compra Simulada</h3>
-        <div class="payment-methods">
-          <label>
-            <input type="radio" name="payment" value="credit" checked> Cartão de Crédito
-          </label>
-          <label>
-            <input type="radio" name="payment" value="pix"> PIX
-          </label>
-          <label>
-            <input type="radio" name="payment" value="boleto"> Boleto
-          </label>
-        </div>
-        
-        <button class="btn btn-primary" onclick="finalizarCompraSimulada()">
-          Finalizar Compra Simulada
-        </button>
+        <!-- Container para o botão do PayPal -->
+        <div id="paypal-button-container"></div>
       </div>
     </div>
 
@@ -190,6 +179,8 @@
     Parse.serverURL = "https://parseapi.back4app.com";
     
     let currentUser = Parse.User.current();
+    // Variável global para armazenar o total do carrinho
+    let totalCarrinho = "0.00";
     
     // Redirecionamento se não estiver logado
     if (!currentUser) {
@@ -244,7 +235,7 @@
       }
     });
     
-    // Carrega o carrinho
+    // Carrega o carrinho e atualiza o total global
     async function carregarCarrinho() {
       const carrinho = currentUser.get('carrinhovetor') || [];
       const carrinhoItens = document.getElementById('carrinhoItens');
@@ -277,6 +268,8 @@
 
         carrinhoItens.innerHTML = html;
         carrinhoTotal.innerHTML = `Total: R$ ${total.toFixed(2)}`;
+        // Atualiza variável global para uso no PayPal
+        totalCarrinho = total.toFixed(2);
       } catch (error) {
         carrinhoItens.innerHTML = '<p>Erro ao carregar carrinho</p>';
       }
@@ -295,7 +288,7 @@
       }
     }
     
-    // Finalização de compra simulada
+    // Finalização de compra simulada (chamada após aprovação do PayPal)
     window.finalizarCompraSimulada = async () => {
       const carrinho = currentUser.get('carrinhovetor') || [];
       if (carrinho.length === 0) {
@@ -303,7 +296,7 @@
         return;
       }
 
-      const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
+      const paymentMethod = "paypal"; // Método definido como PayPal para a simulação
 
       try {
         const Produto = Parse.Object.extend('Produto');
@@ -331,7 +324,7 @@
         // Atualiza a interface
         carregarCarrinho();
         carregarHistoricoPedidos();
-
+        alert('Compra simulada finalizada com sucesso!');
       } catch (error) {
         alert('Erro na simulação: ' + error.message);
       }
@@ -359,6 +352,33 @@
     window.voltarParaIndex = () => {
       window.location.href = 'index.html';
     }
+    
+    // Renderiza o botão do PayPal após o carregamento da página
+    document.addEventListener('DOMContentLoaded', () => {
+      paypal.Buttons({
+        createOrder: function(data, actions) {
+          // Cria a transação com o valor total do carrinho
+          return actions.order.create({
+            purchase_units: [{
+              amount: {
+                value: totalCarrinho || "0.00"
+              }
+            }]
+          });
+        },
+        onApprove: function(data, actions) {
+          return actions.order.capture().then(function(details) {
+            alert('Pagamento de teste aprovado para ' + details.payer.name.given_name);
+            // Finaliza a compra simulada no Parse
+            finalizarCompraSimulada();
+          });
+        },
+        onError: function (err) {
+          console.error('Erro no pagamento: ', err);
+          alert('Erro durante o pagamento. Tente novamente.');
+        }
+      }).render('#paypal-button-container');
+    });
   </script>
 </body>
 </html>
