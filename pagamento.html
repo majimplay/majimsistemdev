@@ -1,165 +1,119 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <title>Pagamento com Stripe (Modo Teste)</title>
-  <script src="https://js.stripe.com/v3/"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-    }
-    h1 {
-      font-size: 28px;
-      margin-bottom: 20px;
-    }
-    label {
-      display: block;
-      font-size: 20px;
-      margin-bottom: 8px;
-    }
-    .form-row {
-      margin-bottom: 20px;
-    }
-    .StripeElement {
-      box-sizing: border-box;
-      height: 50px;
-      padding: 12px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      background-color: #fff;
-      box-shadow: 0 1px 3px 0 #e6ebf1;
-      transition: box-shadow 150ms ease;
-      font-size: 20px;
-    }
-    .StripeElement--focus {
-      box-shadow: 0 1px 3px 0 #cfd7df;
-    }
-    .StripeElement--invalid {
-      border-color: #fa755a;
-    }
-    button {
-      font-size: 20px;
-      padding: 10px 20px;
-      background-color: #6772e5;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #5469d4;
-    }
-    #error-message {
-      color: red;
-      margin-top: 10px;
-      font-size: 18px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagamento com PayPal Sandbox</title>
+    <!-- Adicione o SDK do PayPal -->
+    <script src="https://www.paypal.com/sdk/js?client-id=Af7i4HgLoBa3MKob6w_aIklV2bSaeZZlN1jstVM9ZyNvGDLwv2w8DVK2eOo5e4YNLXClbVmQ4oL8l_ei&currency=BRL"></script>
+    <style>
+        /* Mantenha o mesmo CSS anterior */
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 20px auto; padding: 20px; background-color: #f5f5f5; }
+        .payment-form { background-color: white; padding: 25px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        /* ... (mantenha todo o CSS anterior) ... */
+    </style>
 </head>
 <body>
-  <h1>Pagamento com Stripe (Teste)</h1>
-  <form id="payment-form">
-    <div class="form-row">
-      <label for="card-number">Número do Cartão</label>
-      <div id="card-number" class="StripeElement"></div>
+    <div class="payment-form">
+        <h2>Pagamento de Teste - PayPal</h2>
+        <div id="paypal-button-container"></div>
+        <div class="success-message" id="successMessage">
+            Pagamento aprovado! ID da Transação: <span id="transactionId"></span>
+        </div>
     </div>
-    <div class="form-row">
-      <label for="card-expiry">Data de Validade</label>
-      <div id="card-expiry" class="StripeElement"></div>
+
+    <script>
+        // Configuração do PayPal
+        paypal.Buttons({
+            style: {
+                layout: 'vertical',
+                color:  'blue',
+                shape:  'rect',
+                label:  'paypal'
+            },
+
+            createOrder: function(data, actions) {
+                return actions.order.create({
+                    purchase_units: [{
+                        amount: {
+                            value: '100.00' // Valor fixo para teste
+                        }
+                    }]
+                });
+            },
+
+            onApprove: function(data, actions) {
+                return actions.order.capture().then(function(details) {
+                    document.getElementById('successMessage').style.display = 'block';
+                    document.getElementById('transactionId').textContent = details.id;
+                    console.log('Pagamento completo:', details);
+                });
+            },
+
+            onError: function(err) {
+                console.error(err);
+                alert("Erro no processamento do pagamento");
+            }
+        }).render('#paypal-button-container');
+    </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagamento com PayPal Sandbox</title>
+    <!-- Adicione o SDK do PayPal -->
+    <script src="https://www.paypal.com/sdk/js?client-id=Af7i4HgLoBa3MKob6w_aIklV2bSaeZZlN1jstVM9ZyNvGDLwv2w8DVK2eOo5e4YNLXClbVmQ4oL8l_ei&currency=BRL"></script>
+    <style>
+        /* Mantenha o mesmo CSS anterior */
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 20px auto; padding: 20px; background-color: #f5f5f5; }
+        .payment-form { background-color: white; padding: 25px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        /* ... (mantenha todo o CSS anterior) ... */
+    </style>
+</head>
+<body>
+    <div class="payment-form">
+        <h2>Pagamento de Teste - PayPal</h2>
+        <div id="paypal-button-container"></div>
+        <div class="success-message" id="successMessage">
+            Pagamento aprovado! ID da Transação: <span id="transactionId"></span>
+        </div>
     </div>
-    <div class="form-row">
-      <label for="card-cvc">CVC</label>
-      <div id="card-cvc" class="StripeElement"></div>
-    </div>
-    <button id="submit">Pagar</button>
-    <div id="error-message"></div>
-  </form>
 
-  <script>
-    // Inicialize o Stripe com a chave pública de teste
-    const stripe = Stripe('pk_test_51R4tD8L1dPSHoy7p1icvpj3dab8PWCEPb9p4p1jcZmJhzLmcyD391yHk0owkBmSq4gctrPLch1w7jDInarRY2gou00Dl1TI9Y5');
-    const elements = stripe.elements();
+    <script>
+        // Configuração do PayPal
+        paypal.Buttons({
+            style: {
+                layout: 'vertical',
+                color:  'blue',
+                shape:  'rect',
+                label:  'paypal'
+            },
 
-    // Define o estilo dos elementos
-    const style = {
-      base: {
-        fontSize: '20px',
-        color: "#32325d",
-        fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
-        '::placeholder': {
-          color: '#aab7c4'
-        }
-      }
-    };
+            createOrder: function(data, actions) {
+                return actions.order.create({
+                    purchase_units: [{
+                        amount: {
+                            value: '100.00' // Valor fixo para teste
+                        }
+                    }]
+                });
+            },
 
-    // Cria os elementos individuais
-    const cardNumber = elements.create('cardNumber', { style: style });
-    cardNumber.mount('#card-number');
+            onApprove: function(data, actions) {
+                return actions.order.capture().then(function(details) {
+                    document.getElementById('successMessage').style.display = 'block';
+                    document.getElementById('transactionId').textContent = details.id;
+                    console.log('Pagamento completo:', details);
+                });
+            },
 
-    const cardExpiry = elements.create('cardExpiry', { style: style });
-    cardExpiry.mount('#card-expiry');
-
-    const cardCvc = elements.create('cardCvc', { style: style });
-    cardCvc.mount('#card-cvc');
-
-    // Adiciona listener para depuração no CVC
-    cardCvc.on('change', (event) => {
-      if (event.error) {
-        console.log('Erro no CVC:', event.error.message);
-      } else {
-        console.log('CVC OK');
-      }
-    });
-
-    const form = document.getElementById('payment-form');
-    form.addEventListener('submit', async (event) => {
-      event.preventDefault();
-
-      const { error, paymentMethod } = await stripe.createPaymentMethod({
-        type: 'card',
-        card: cardNumber
-      });
-
-      if (error) {
-        document.getElementById('error-message').textContent = error.message;
-      } else {
-        fetch('/processar-pagamento', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ paymentMethodId: paymentMethod.id })
-        })
-        .then(response => response.json())
-        .then(result => {
-          if (result.error) {
-            document.getElementById('error-message').textContent = result.error;
-          } else if (result.requiresAction) {
-            stripe.handleCardAction(result.paymentIntentClientSecret)
-              .then(function(resultAction) {
-                if(resultAction.error) {
-                  document.getElementById('error-message').textContent = resultAction.error.message;
-                } else {
-                  fetch('/processar-pagamento', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ paymentMethodId: paymentMethod.id, paymentIntentId: result.paymentIntentId })
-                  })
-                  .then(response => response.json())
-                  .then(finalResult => {
-                    if(finalResult.error) {
-                      document.getElementById('error-message').textContent = finalResult.error;
-                    } else {
-                      alert('Pagamento realizado com sucesso!');
-                    }
-                  });
-                }
-              });
-          } else {
-            alert('Pagamento realizado com sucesso!');
-          }
-        });
-      }
-    });
-  </script>
+            onError: function(err) {
+                console.error(err);
+                alert("Erro no processamento do pagamento");
+            }
+        }).render('#paypal-button-container');
+    </script>
 </body>
 </html>
