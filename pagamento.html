@@ -21,7 +21,6 @@
     .form-row {
       margin-bottom: 20px;
     }
-    /* Estilo para os elementos do Stripe */
     .StripeElement {
       box-sizing: border-box;
       height: 50px;
@@ -104,11 +103,19 @@
     const cardCvc = elements.create('cardCvc', { style: style });
     cardCvc.mount('#card-cvc');
 
+    // Adiciona listener para depuração no CVC
+    cardCvc.on('change', (event) => {
+      if (event.error) {
+        console.log('Erro no CVC:', event.error.message);
+      } else {
+        console.log('CVC OK');
+      }
+    });
+
     const form = document.getElementById('payment-form');
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
 
-      // Cria o Payment Method usando o elemento de cardNumber
       const { error, paymentMethod } = await stripe.createPaymentMethod({
         type: 'card',
         card: cardNumber
@@ -117,7 +124,6 @@
       if (error) {
         document.getElementById('error-message').textContent = error.message;
       } else {
-        // Envie o paymentMethod.id para o back-end para processar o pagamento
         fetch('/processar-pagamento', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -128,13 +134,11 @@
           if (result.error) {
             document.getElementById('error-message').textContent = result.error;
           } else if (result.requiresAction) {
-            // Se o Stripe solicitar autenticação adicional (ex.: 3D Secure)
             stripe.handleCardAction(result.paymentIntentClientSecret)
               .then(function(resultAction) {
                 if(resultAction.error) {
                   document.getElementById('error-message').textContent = resultAction.error.message;
                 } else {
-                  // Reenvia os dados ao back-end, se necessário
                   fetch('/processar-pagamento', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
