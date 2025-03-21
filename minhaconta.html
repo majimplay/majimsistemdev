@@ -2,363 +2,274 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Minha Conta</title>
+  <title>Loja Virtual de Teste</title>
+  <script src="https://www.paypal.com/sdk/js?client-id=Af7i4HgLoBa3MKob6w_aIklV2bSaeZZlN1jstVM9ZyNvGDLwv2w8DVK2eOo5e4YNLXClbVmQ4oL8l_ei&currency=BRL"></script>
+  <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
   <style>
     body {
-      font-family: sans-serif;
-      background: #f4f4f4;
+      font-family: 'Arial', sans-serif;
       margin: 0;
-      padding: 0;
-    }
-    .container {
-      max-width: 800px;
-      margin: 50px auto;
-      background: #fff;
       padding: 20px;
+      background: #f5f5f5;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .alert-test {
+      background: #fff3cd;
+      border-left: 4px solid #ffc107;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+
+    .carrinho-section, .user-info {
+      margin: 30px 0;
+      padding: 20px;
+      border: 1px solid #eee;
       border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     }
-    h1 {
-      text-align: center;
-    }
-    form {
-      display: flex;
-      flex-direction: column;
-    }
-    label {
-      margin-top: 10px;
-      font-weight: bold;
-    }
-    input {
-      padding: 8px;
-      margin-top: 5px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    .btn {
-      margin-top: 20px;
-      padding: 10px;
-      border: none;
-      color: white;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    .btn-primary {
-      background: #28a745;
-    }
-    .btn-primary:hover {
-      background: #218838;
-    }
-    .btn-secondary {
-      background: #6c757d;
-    }
-    .btn-danger {
-      background: #dc3545;
-    }
-    .obs {
-      font-size: 0.9em;
-      color: #555;
-    }
-    .carrinho, .historico-pedidos {
-      margin-top: 40px;
-      border-top: 2px solid #eee;
-      padding-top: 20px;
-    }
-    .produto {
+
+    .produto-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 10px;
+      padding: 15px;
       border-bottom: 1px solid #eee;
     }
-    .remove-btn {
-      padding: 5px 10px;
-      border-radius: 4px;
-    }
-    .total {
-      margin-top: 20px;
-      font-size: 1.2em;
-      font-weight: bold;
+
+    .total-section {
       text-align: right;
+      font-size: 1.3em;
+      margin: 20px 0;
       padding: 15px;
       background: #f8f9fa;
-      border-radius: 4px;
     }
-    .checkout-section {
+
+    .payment-instructions {
+      background: #e9f5ff;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    #paypal-button-container {
       margin-top: 30px;
     }
-    .simulacao-alerta {
-      color: #dc3545;
-      background: #fff3cd;
-      padding: 15px;
-      border-radius: 4px;
-      margin: 15px 0;
-      border: 1px solid #ffecb5;
-    }
-    .payment-methods {
-      margin: 15px 0;
-    }
-    .payment-methods label {
-      display: block;
-      margin: 10px 0;
-    }
-    .pedido {
-      padding: 15px;
-      margin: 10px 0;
-      background: #f8f9fa;
-      border-radius: 4px;
-      border: 1px solid #eee;
-    }
   </style>
-  <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
 </head>
 <body>
   <div class="container">
-    <h1>Minha Conta</h1>
-    
-    <!-- Formulário de Atualização -->
-    <form id="updateForm">
-      <label for="username">Nome de Usuário *</label>
-      <input type="text" id="username" required>
-      
-      <label for="email">Email *</label>
-      <input type="email" id="email" required>
-      
-      <label for="newPassword">Nova Senha <span class="obs">(Deixe em branco para manter a atual)</span></label>
-      <input type="password" id="newPassword">
-      
-      <label for="confirmNewPassword">Confirmar Nova Senha</label>
-      <input type="password" id="confirmNewPassword">
-      
-      <label for="cpf">CPF</label>
-      <input type="text" id="cpf">
-      
-      <label for="endereco">Endereço</label>
-      <input type="text" id="endereco">
-      
-      <label for="telefone">Telefone</label>
-      <input type="text" id="telefone">
-      
-      <button type="submit" class="btn btn-primary">Atualizar Dados</button>
-    </form>
+    <div class="alert-test">
+      <h3>Modo de Teste Ativo</h3>
+      <p>Use estas credenciais para testes:</p>
+      <ul>
+        <li>Email: teste.comprador@example.com</li>
+        <li>Senha: Teste12345</li>
+        <li>Cartão: 4032 0347 1850 7894</li>
+        <li>CVV: 123 | Validade: 12/2030</li>
+      </ul>
+    </div>
 
-    <!-- Seção do Carrinho -->
-    <div class="carrinho">
-      <h2>Meu Carrinho</h2>
+    <div class="user-info">
+      <h2>Dados do Usuário</h2>
+      <form id="userForm">
+        <input type="text" placeholder="Nome completo" id="fullName" required>
+        <input type="email" placeholder="Email" id="email" required>
+        <input type="text" placeholder="CPF" id="cpf" required>
+        <button type="submit">Atualizar Dados</button>
+      </form>
+    </div>
+
+    <div class="carrinho-section">
+      <h2>Carrinho de Compras</h2>
       <div id="carrinhoItens"></div>
-      <div id="carrinhoTotal" class="total"></div>
-      
-      <!-- Seção de Checkout Simulado -->
-      <div class="checkout-section">
-        <div class="simulacao-alerta">
-          ATENÇÃO: Esta é uma simulação de compra para testes. Nenhum pagamento real será processado.
-        </div>
-        
-        <h3>Finalizar Compra Simulada</h3>
-        <div class="payment-methods">
-          <label>
-            <input type="radio" name="payment" value="credit" checked> Cartão de Crédito
-          </label>
-          <label>
-            <input type="radio" name="payment" value="pix"> PIX
-          </label>
-          <label>
-            <input type="radio" name="payment" value="boleto"> Boleto
-          </label>
-        </div>
-        
-        <button class="btn btn-primary" onclick="finalizarCompraSimulada()">
-          Finalizar Compra Simulada
-        </button>
+      <div class="total-section">
+        Total: R$ <span id="totalCarrinho">0.00</span>
       </div>
+      
+      <div class="payment-instructions">
+        <h3>Instruções para Pagamento:</h3>
+        <ol>
+          <li>Clique no botão do PayPal abaixo</li>
+          <li>Use o email: sb-abc123@personal.example.com</li>
+          <li>Senha: TestePaypal123</li>
+          <li>Complete o pagamento com o cartão de teste</li>
+        </ol>
+      </div>
+
+      <div id="paypal-button-container"></div>
     </div>
 
-    <!-- Histórico de Pedidos -->
-    <div class="historico-pedidos">
+    <div class="order-history">
       <h2>Histórico de Pedidos</h2>
-      <div id="historicoPedidos"></div>
+      <div id="pedidosList"></div>
     </div>
-
-    <button class="btn btn-secondary" onclick="voltarParaIndex()">
-      Voltar para Página Inicial
-    </button>
   </div>
 
   <script>
     // Configuração do Parse
     Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
     Parse.serverURL = "https://parseapi.back4app.com";
-    
-    let currentUser = Parse.User.current();
-    
-    // Redirecionamento se não estiver logado
-    if (!currentUser) {
-      window.location.href = 'login.html';
-    }
-    
-    // Atualiza os dados do usuário ao carregar a página
-    document.addEventListener('DOMContentLoaded', async () => {
-      try {
-        // Busca os dados atualizados do servidor
-        currentUser = await currentUser.fetch();
-        // Atualiza as seções que dependem dos dados do usuário
-        carregarHistoricoPedidos();
-        carregarCarrinho();
 
-        // Preenche o formulário com os dados atualizados
-        document.getElementById('username').value = currentUser.get('username');
-        document.getElementById('email').value = currentUser.get('email');
-        document.getElementById('cpf').value = currentUser.get('cpf') || '';
-        document.getElementById('endereco').value = currentUser.get('endereco') || '';
-        document.getElementById('telefone').value = currentUser.get('telefone') || '';
-      } catch (error) {
-        console.error('Erro ao atualizar dados do usuário:', error);
-      }
-    });
-    
-    // Atualizar dados do usuário via formulário
-    document.getElementById('updateForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      const newPassword = document.getElementById('newPassword').value;
-      const confirmNewPassword = document.getElementById('confirmNewPassword').value;
-      
-      if (newPassword && newPassword !== confirmNewPassword) {
-        alert('As novas senhas não conferem!');
-        return;
-      }
-      
-      currentUser.set('username', document.getElementById('username').value);
-      currentUser.set('email', document.getElementById('email').value);
-      currentUser.set('cpf', document.getElementById('cpf').value);
-      currentUser.set('endereco', document.getElementById('endereco').value);
-      currentUser.set('telefone', document.getElementById('telefone').value);
-      
-      if (newPassword) currentUser.set('password', newPassword);
-      
-      try {
-        await currentUser.save();
-        alert('Dados atualizados com sucesso!');
-      } catch (error) {
-        alert('Erro ao atualizar: ' + error.message);
-      }
-    });
-    
-    // Carrega o carrinho
-    async function carregarCarrinho() {
-      const carrinho = currentUser.get('carrinhovetor') || [];
-      const carrinhoItens = document.getElementById('carrinhoItens');
-      const carrinhoTotal = document.getElementById('carrinhoTotal');
-      
-      carrinhoItens.innerHTML = 'Carregando...';
-      carrinhoTotal.innerHTML = '';
+    let currentUser = null;
 
+    // Funções principais
+    const initApp = async () => {
+      currentUser = Parse.User.current();
+      
+      if (!currentUser) {
+        // Cria usuário de teste temporário
+        const user = new Parse.User();
+        user.set('username', 'teste.comprador@example.com');
+        user.set('email', 'teste.comprador@example.com');
+        user.set('password', 'Teste12345');
+        user.set('carrinho', []);
+        user.set('pedidos', []);
+        
+        try {
+          currentUser = await user.signUp();
+          loadUserData();
+          loadCarrinho();
+          loadPedidos();
+        } catch (error) {
+          console.error('Erro ao criar usuário:', error);
+        }
+      } else {
+        loadUserData();
+        loadCarrinho();
+        loadPedidos();
+      }
+    };
+
+    const loadUserData = () => {
+      document.getElementById('fullName').value = currentUser.get('fullName') || '';
+      document.getElementById('email').value = currentUser.get('email') || '';
+      document.getElementById('cpf').value = currentUser.get('cpf') || '';
+    };
+
+    const loadCarrinho = async () => {
+      const carrinho = currentUser.get('carrinho') || [];
+      const Produto = Parse.Object.extend('Produto');
+      const query = new Parse.Query(Produto);
+      
       try {
-        const Produto = Parse.Object.extend('Produto');
-        const query = new Parse.Query(Produto);
-        query.containedIn('objectId', carrinho);
         const produtos = await query.find();
+        const carrinhoItens = produtos.filter(p => carrinho.includes(p.id));
+        const total = carrinhoItens.reduce((sum, p) => sum + (p.get('preco') || 0), 0);
 
-        let total = 0;
-        let html = produtos.length === 0 
-          ? '<p>Carrinho vazio</p>' 
-          : produtos.map(produto => {
-              const preco = produto.get('preco') || 0;
-              total += preco;
-              return `
-                <div class="produto">
-                  <span>${produto.get('nome')} - R$ ${preco.toFixed(2)}</span>
-                  <button class="remove-btn btn-danger" onclick="removerDoCarrinho('${produto.id}')">
-                    Remover
-                  </button>
-                </div>
-              `;
-            }).join('');
-
-        carrinhoItens.innerHTML = html;
-        carrinhoTotal.innerHTML = `Total: R$ ${total.toFixed(2)}`;
-      } catch (error) {
-        carrinhoItens.innerHTML = '<p>Erro ao carregar carrinho</p>';
-      }
-    }
-    
-    // Remove item do carrinho
-    window.removerDoCarrinho = async (produtoId) => {
-      const novoCarrinho = currentUser.get('carrinhovetor').filter(id => id !== produtoId);
-      currentUser.set('carrinhovetor', novoCarrinho);
-      
-      try {
-        await currentUser.save();
-        carregarCarrinho();
-      } catch (error) {
-        alert('Erro ao remover item: ' + error.message);
-      }
-    }
-    
-    // Finalização de compra simulada
-    window.finalizarCompraSimulada = async () => {
-      const carrinho = currentUser.get('carrinhovetor') || [];
-      if (carrinho.length === 0) {
-        alert('Carrinho vazio! Adicione itens antes de comprar.');
-        return;
-      }
-
-      const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
-
-      try {
-        const Produto = Parse.Object.extend('Produto');
-        const query = new Parse.Query(Produto);
-        query.containedIn('objectId', carrinho);
-        const produtos = await query.find();
-        const total = produtos.reduce((sum, produto) => sum + (produto.get('preco') || 0), 0);
-
-        // Cria novo pedido
-        const novoPedido = {
-          id: `PED-${Date.now()}`,
-          data: new Date().toISOString(),
-          produtos: [...carrinho],
-          total: total,
-          metodoPagamento: paymentMethod,
-          status: "SIMULAÇÃO - Concluído"
-        };
-
-        // Atualiza histórico e limpa o carrinho
-        const historico = [...(currentUser.get('pedidos') || []), novoPedido];
-        currentUser.set('pedidos', historico);
-        currentUser.set('carrinhovetor', []);
-        await currentUser.save();
-
-        // Atualiza a interface
-        carregarCarrinho();
-        carregarHistoricoPedidos();
-
-      } catch (error) {
-        alert('Erro na simulação: ' + error.message);
-      }
-    }
-    
-    // Carrega histórico de pedidos
-    async function carregarHistoricoPedidos() {
-      const container = document.getElementById('historicoPedidos');
-      const pedidos = currentUser.get('pedidos') || [];
-      
-      container.innerHTML = pedidos.length === 0 
-        ? '<p>Nenhum pedido encontrado</p>' 
-        : pedidos.reverse().map(pedido => `
-            <div class="pedido">
-              <p><strong>ID:</strong> ${pedido.id}</p>
-              <p><strong>Data:</strong> ${new Date(pedido.data).toLocaleString()}</p>
-              <p><strong>Total:</strong> R$ ${pedido.total.toFixed(2)}</p>
-              <p><strong>Método:</strong> ${pedido.metodoPagamento}</p>
-              <p><strong>Status:</strong> ${pedido.status}</p>
+        document.getElementById('carrinhoItens').innerHTML = carrinhoItens
+          .map(p => `
+            <div class="produto-item">
+              <span>${p.get('nome')} - R$ ${p.get('preco').toFixed(2)}</span>
+              <button onclick="removerItem('${p.id}')">Remover</button>
             </div>
           `).join('');
-    }
-    
-    // Função para voltar para a página inicial
-    window.voltarParaIndex = () => {
-      window.location.href = 'index.html';
-    }
+
+        document.getElementById('totalCarrinho').textContent = total.toFixed(2);
+      } catch (error) {
+        console.error('Erro ao carregar carrinho:', error);
+      }
+    };
+
+    const loadPedidos = () => {
+      const pedidos = currentUser.get('pedidos') || [];
+      document.getElementById('pedidosList').innerHTML = pedidos
+        .map(p => `
+          <div class="pedido-item">
+            <p>ID: ${p.id} | Valor: R$ ${p.valor} | Status: ${p.status}</p>
+          </div>
+        `).join('');
+    };
+
+    // Integração PayPal
+    paypal.Buttons({
+      createOrder: async (data, actions) => {
+        const carrinho = currentUser.get('carrinho') || [];
+        const Produto = Parse.Object.extend('Produto');
+        const query = new Parse.Query(Produto);
+        
+        const produtos = await query.find();
+        const total = produtos
+          .filter(p => carrinho.includes(p.id))
+          .reduce((sum, p) => sum + (p.get('preco') || 0), 0);
+
+        return actions.order.create({
+          purchase_units: [{
+            amount: {
+              value: total.toFixed(2),
+              currency_code: 'BRL'
+            }
+          }]
+        });
+      },
+
+      onApprove: async (data, actions) => {
+        const details = await actions.order.capture();
+        
+        const novoPedido = {
+          id: details.id,
+          valor: details.purchase_units[0].amount.value,
+          data: new Date().toISOString(),
+          status: 'Completo'
+        };
+
+        currentUser.add('pedidos', novoPedido);
+        currentUser.set('carrinho', []);
+        await currentUser.save();
+
+        loadCarrinho();
+        loadPedidos();
+        
+        alert(`Pagamento concluído!\nID: ${details.id}`);
+      }
+    }).render('#paypal-button-container');
+
+    // Event Listeners
+    document.getElementById('userForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      currentUser.set('fullName', document.getElementById('fullName').value);
+      currentUser.set('email', document.getElementById('email').value);
+      currentUser.set('cpf', document.getElementById('cpf').value);
+      
+      try {
+        await currentUser.save();
+        alert('Dados atualizados!');
+      } catch (error) {
+        alert('Erro ao salvar: ' + error.message);
+      }
+    });
+
+    window.removerItem = async (produtoId) => {
+      const novoCarrinho = currentUser.get('carrinho').filter(id => id !== produtoId);
+      currentUser.set('carrinho', novoCarrinho);
+      await currentUser.save();
+      loadCarrinho();
+    };
+
+    // Inicialização
+    initApp();
   </script>
 </body>
 </html>
