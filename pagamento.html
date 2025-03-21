@@ -2,51 +2,154 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Pagamento com Stripe - Ambiente de Teste</title>
+  <title>Pagamento com Stripe (Modo Teste)</title>
   <script src="https://js.stripe.com/v3/"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 28px;
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      font-size: 20px;
+      margin-bottom: 8px;
+    }
+    .form-row {
+      margin-bottom: 20px;
+    }
+    /* Estilo para os elementos do Stripe */
+    .StripeElement {
+      box-sizing: border-box;
+      height: 50px;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background-color: #fff;
+      box-shadow: 0 1px 3px 0 #e6ebf1;
+      transition: box-shadow 150ms ease;
+      font-size: 20px;
+    }
+    .StripeElement--focus {
+      box-shadow: 0 1px 3px 0 #cfd7df;
+    }
+    .StripeElement--invalid {
+      border-color: #fa755a;
+    }
+    button {
+      font-size: 20px;
+      padding: 10px 20px;
+      background-color: #6772e5;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #5469d4;
+    }
+    #error-message {
+      color: red;
+      margin-top: 10px;
+      font-size: 18px;
+    }
+  </style>
 </head>
 <body>
-  <h1>Pagamento com Stripe (Modo Teste)</h1>
+  <h1>Pagamento com Stripe (Teste)</h1>
   <form id="payment-form">
-    <div id="card-element"><!-- O Stripe insere o elemento do cartão aqui --></div>
+    <div class="form-row">
+      <label for="card-number">Número do Cartão</label>
+      <div id="card-number" class="StripeElement"></div>
+    </div>
+    <div class="form-row">
+      <label for="card-expiry">Data de Validade</label>
+      <div id="card-expiry" class="StripeElement"></div>
+    </div>
+    <div class="form-row">
+      <label for="card-cvc">CVC</label>
+      <div id="card-cvc" class="StripeElement"></div>
+    </div>
     <button id="submit">Pagar</button>
     <div id="error-message"></div>
   </form>
 
   <script>
-    // Inicialize o Stripe com sua chave pública de teste
+    // Inicialize o Stripe com a chave pública de teste
     const stripe = Stripe('pk_test_51R4tD8L1dPSHoy7p1icvpj3dab8PWCEPb9p4p1jcZmJhzLmcyD391yHk0owkBmSq4gctrPLch1w7jDInarRY2gou00Dl1TI9Y5');
     const elements = stripe.elements();
-    const cardElement = elements.create('card');
-    cardElement.mount('#card-element');
+
+    // Define o estilo dos elementos
+    const style = {
+      base: {
+        fontSize: '20px',
+        color: "#32325d",
+        fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
+        '::placeholder': {
+          color: '#aab7c4'
+        }
+      }
+    };
+
+    // Cria os elementos individuais
+    const cardNumber = elements.create('cardNumber', { style: style });
+    cardNumber.mount('#card-number');
+
+    const cardExpiry = elements.create('cardExpiry', { style: style });
+    cardExpiry.mount('#card-expiry');
+
+    const cardCvc = elements.create('cardCvc', { style: style });
+    cardCvc.mount('#card-cvc');
 
     const form = document.getElementById('payment-form');
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
-      
+
+      // Cria o Payment Method usando o elemento de cardNumber
       const { error, paymentMethod } = await stripe.createPaymentMethod({
         type: 'card',
-        card: cardElement,
+        card: cardNumber
       });
-      
+
       if (error) {
         document.getElementById('error-message').textContent = error.message;
       } else {
-        // Envia o paymentMethod.id para o back-end para processar o pagamento
+        // Envie o paymentMethod.id para o back-end para processar o pagamento
         fetch('/processar-pagamento', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ paymentMethodId: paymentMethod.id }),
+          body: JSON.stringify({ paymentMethodId: paymentMethod.id })
         })
         .then(response => response.json())
         .then(result => {
           if (result.error) {
             document.getElementById('error-message').textContent = result.error;
           } else if (result.requiresAction) {
-            // Caso seja necessário um passo adicional (ex: autenticação 3D Secure)
-            // Você pode usar stripe.handleCardAction(result.paymentIntentClientSecret)
-            // para lidar com esse fluxo e reenviar o resultado ao seu back-end
-            document.getElementById('error-message').textContent = 'Ação adicional é necessária para autenticar o pagamento.';
+            // Se o Stripe solicitar autenticação adicional (ex.: 3D Secure)
+            stripe.handleCardAction(result.paymentIntentClientSecret)
+              .then(function(resultAction) {
+                if(resultAction.error) {
+                  document.getElementById('error-message').textContent = resultAction.error.message;
+                } else {
+                  // Reenvia os dados ao back-end, se necessário
+                  fetch('/processar-pagamento', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ paymentMethodId: paymentMethod.id, paymentIntentId: result.paymentIntentId })
+                  })
+                  .then(response => response.json())
+                  .then(finalResult => {
+                    if(finalResult.error) {
+                      document.getElementById('error-message').textContent = finalResult.error;
+                    } else {
+                      alert('Pagamento realizado com sucesso!');
+                    }
+                  });
+                }
+              });
           } else {
             alert('Pagamento realizado com sucesso!');
           }
