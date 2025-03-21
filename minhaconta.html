@@ -139,6 +139,10 @@
       <label for="endereco">Endereço</label>
       <input type="text" id="endereco">
       
+      <!-- Novo campo CEP -->
+      <label for="cep">CEP</label>
+      <input type="text" id="cep">
+      
       <label for="telefone">Telefone</label>
       <input type="text" id="telefone">
       
@@ -201,6 +205,7 @@
         document.getElementById('email').value = currentUser.get('email');
         document.getElementById('cpf').value = currentUser.get('cpf') || '';
         document.getElementById('endereco').value = currentUser.get('endereco') || '';
+        document.getElementById('cep').value = currentUser.get('cep') || '';
         document.getElementById('telefone').value = currentUser.get('telefone') || '';
       } catch (error) {
         console.error('Erro ao atualizar dados do usuário:', error);
@@ -223,6 +228,7 @@
       currentUser.set('email', document.getElementById('email').value);
       currentUser.set('cpf', document.getElementById('cpf').value);
       currentUser.set('endereco', document.getElementById('endereco').value);
+      currentUser.set('cep', document.getElementById('cep').value);
       currentUser.set('telefone', document.getElementById('telefone').value);
       
       if (newPassword) currentUser.set('password', newPassword);
