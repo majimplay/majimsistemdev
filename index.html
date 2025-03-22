@@ -175,6 +175,18 @@
     .carousel-button.next {
       right: 5px;
     }
+    /* Estilo do botão Painel de Controle */
+    #adminPanelButton {
+      display: none;
+      margin: 20px auto;
+      padding: 10px 20px;
+      background: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 16px;
+    }
   </style>
   <!-- SDK do Parse -->
   <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
@@ -204,8 +216,11 @@
     </div>
   </header>
 
-  <!-- Conteúdo principal: exibição dos produtos com carrossel -->
+  <!-- Conteúdo principal -->
   <div class="container">
+    <!-- Botão Painel de Controle (visível apenas para admin) -->
+    <button id="adminPanelButton" onclick="window.location.href='painelcompleto.html'">Painel de Controle</button>
+
     <h1>Produtos à Venda</h1>
     <div id="productGrid" class="product-grid">
       <!-- Cards de produtos serão adicionados dinamicamente -->
@@ -228,9 +243,16 @@
         document.getElementById("userArea").style.display = "flex";
         // Adiciona o emoji de boas-vindas
         document.getElementById("welcomeUser").textContent = "Bem-vindo 😘, " + currentUser.get("username") + "!";
+        // Verifica se o usuário é admin (propriedade "isAdmin" definida como true)
+        if (currentUser.get("isAdmin") === true) {
+          document.getElementById("adminPanelButton").style.display = "block";
+        } else {
+          document.getElementById("adminPanelButton").style.display = "none";
+        }
       } else {
         document.getElementById("loginArea").style.display = "flex";
         document.getElementById("userArea").style.display = "none";
+        document.getElementById("adminPanelButton").style.display = "none";
       }
     }
 
