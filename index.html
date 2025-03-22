@@ -97,12 +97,12 @@
       margin: 20px auto;
       padding: 20px;
     }
-    /* Estilo para a mensagem de boas-vindas */
+    /* Mensagem de boas-vindas */
     #userWelcome {
       margin: 20px;
       font-size: 18px;
     }
-    /* Botão Painel de Controle (visível apenas para admin) */
+    /* Botão Painel de Controle (apenas para admin) */
     #adminPanelButton {
       display: none;
       margin: 20px;
@@ -114,13 +114,32 @@
       cursor: pointer;
       font-size: 16px;
     }
-    /* Exemplo de formulário de produtos */
-    #productForm {
-      margin: 20px;
-      padding: 20px;
-      background: #fff;
+    /* Exemplo de seção de produtos (listagem de produtos) */
+    #productGrid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 20px;
+    }
+    .product-card {
+      background: white;
+      padding: 15px;
       border-radius: 5px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    .product-card h3 {
+      margin: 10px 0;
+    }
+    .product-card p {
+      font-weight: bold;
+    }
+    .product-card button {
+      background: #28a745;
+      color: white;
+    }
+    .product-card button:hover {
+      background: #218838;
+      border-color: #1e7e34;
     }
   </style>
   <!-- SDK do Parse -->
@@ -152,15 +171,20 @@
 
   <!-- Conteúdo principal -->
   <div class="container">
-    <!-- Mensagem de boas-vindas com status de visualização -->
+    <!-- Mensagem de boas-vindas e status -->
     <div id="userWelcome"></div>
-    <!-- Botão Painel de Controle para Admin -->
+    <!-- Botão Painel de Controle para admin -->
     <button id="adminPanelButton" onclick="window.location.href='painelcompleto.html'">Painel de Controle</button>
-    <!-- Formulário de produtos (exemplo) -->
-    <div id="productForm">
-      <h1>Produtos à Venda</h1>
-      <!-- Conteúdo dos produtos aqui -->
-      <p>Aqui vão os produtos cadastrados.</p>
+    
+    <!-- Seção de produtos (sempre visível) -->
+    <div id="productGrid">
+      <!-- Os produtos serão carregados dinamicamente aqui -->
+      <div class="product-card">
+        <h3>Produto Exemplo</h3>
+        <p>R$ 99,99</p>
+        <button onclick="alert('Comprar!')">Comprar</button>
+      </div>
+      <!-- Adicione mais produtos conforme necessário -->
     </div>
   </div>
 
@@ -170,39 +194,31 @@
     Parse.serverURL = "https://parseapi.back4app.com";
 
     // Função que verifica se o usuário é admin.
-    // Nesta implementação, assumimos que o usuário possui um atributo "isAdmin"
+    // Aqui assumimos que o atributo "isAdmin" do usuário indica se ele é administrador.
     async function checkIfUserIsAdmin(user) {
-      // Em uma implementação real, você pode realizar uma consulta na classe Role do Parse.
       return user.get("isAdmin") === true;
     }
 
-    // Função para atualizar a interface de acordo com o status do usuário
+    // Atualiza a interface com base no status do usuário
     async function updateUserMode() {
-      let readOnly = false;
       const user = Parse.User.current();
       if (user) {
-        // Se estiver logado, verifica se é admin
         const isAdminLocal = await checkIfUserIsAdmin(user);
         if (isAdminLocal) {
-          readOnly = false;
+          // Se for admin, mostra mensagem de boas-vindas e o botão do painel
           document.getElementById('userWelcome').innerHTML = `Bem-vindo, <strong>${user.get("username")}</strong>!`;
           document.getElementById('adminPanelButton').style.display = 'block';
         } else {
-          readOnly = true;
+          // Se não for admin, exibe mensagem de visualização somente
           document.getElementById('userWelcome').innerHTML = `Olá, <strong>${user.get("username")}</strong>! Visualização somente.`;
-          document.getElementById('productForm').style.display = 'none';
           document.getElementById('adminPanelButton').style.display = 'none';
         }
       } else {
-        // Se não estiver logado, define modo somente visualização
-        readOnly = true;
-        document.getElementById('productForm').style.display = 'none';
+        // Se não estiver logado, exibe mensagem padrão
         document.getElementById('userWelcome').innerHTML = `Visualização somente.`;
         document.getElementById('adminPanelButton').style.display = 'none';
       }
     }
-
-    // Eventos de login, logout e outras interações
 
     // Função de login
     document.getElementById("loginBtn").addEventListener("click", async function() {
