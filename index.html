@@ -55,7 +55,8 @@
       background: #218838;
       border-color: #1e7e34;
     }
-    .login-form a, .user-info a {
+    /* Links de Esqueci a Senha e Registrar */
+    .login-form a {
       margin-left: 10px;
       color: white;
       text-decoration: none;
@@ -64,7 +65,20 @@
       border-radius: 3px;
       transition: background-color 0.3s, border-color 0.3s;
     }
-    .login-form a:hover, .user-info a:hover {
+    .login-form a:hover {
+      background-color: rgba(255,255,255,0.2);
+      border-color: #fff;
+    }
+    .user-info a {
+      margin-left: 10px;
+      color: white;
+      text-decoration: none;
+      padding: 5px 10px;
+      border: 2px solid transparent;
+      border-radius: 3px;
+      transition: background-color 0.3s, border-color 0.3s;
+    }
+    .user-info a:hover {
       background-color: rgba(255,255,255,0.2);
       border-color: #fff;
     }
@@ -77,46 +91,21 @@
       background: #c82333;
       border-color: #bd2130;
     }
-    /* Container e produtos */
+    /* Container principal */
     .container {
       max-width: 1000px;
       margin: 20px auto;
       padding: 20px;
     }
-    .container h1 {
-      text-align: center;
-      margin-bottom: 20px;
+    /* Estilo para a mensagem de boas-vindas */
+    #userWelcome {
+      margin: 20px;
+      font-size: 18px;
     }
-    .product-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-      gap: 20px;
-    }
-    .product-card {
-      background: white;
-      padding: 15px;
-      border-radius: 5px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      text-align: center;
-    }
-    .product-card h3 {
-      margin: 10px 0;
-    }
-    .product-card p {
-      font-weight: bold;
-    }
-    .product-card button {
-      background: #28a745;
-      color: white;
-    }
-    .product-card button:hover {
-      background: #218838;
-      border-color: #1e7e34;
-    }
-    /* Botão Painel de Controle */
+    /* Botão Painel de Controle (visível apenas para admin) */
     #adminPanelButton {
       display: none;
-      margin: 20px auto;
+      margin: 20px;
       padding: 10px 20px;
       background: #007BFF;
       color: white;
@@ -125,14 +114,13 @@
       cursor: pointer;
       font-size: 16px;
     }
-    /* Formulário de produto (exemplo para admins) */
+    /* Exemplo de formulário de produtos */
     #productForm {
-      display: block;
-      margin: 20px auto;
-      padding: 10px;
-      background: #e2e2e2;
-      max-width: 500px;
+      margin: 20px;
+      padding: 20px;
+      background: #fff;
       border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
   </style>
   <!-- SDK do Parse -->
@@ -142,7 +130,7 @@
   <!-- Cabeçalho -->
   <header>
     <div class="logo">
-      <h2>Minha Loja 🎁</h2>
+      <h2>Minha Loja🎁</h2>
     </div>
     <div class="auth-area">
       <!-- Área de login (usuário não autenticado) -->
@@ -155,7 +143,7 @@
       </div>
       <!-- Área do usuário autenticado -->
       <div id="userArea" class="user-info" style="display:none;">
-        <span id="userWelcome"></span>
+        <span id="welcomeUser"></span>
         <a href="minhaconta.html" id="minhaContaLink" rel="noopener noreferrer">Minha Conta 🛒</a>
         <button id="logoutBtn">Sair 🚘</button>
       </div>
@@ -164,24 +152,15 @@
 
   <!-- Conteúdo principal -->
   <div class="container">
-    <!-- Botão para Painel de Controle (visível somente para admin) -->
-    <button id="adminPanelButton" onclick="window.location.href='painelcompleto.html'">
-      Painel de Controle
-    </button>
-
-    <h1>Produtos à Venda</h1>
-    <!-- Exemplo de formulário para cadastro/edição de produtos (apenas para admin) -->
+    <!-- Mensagem de boas-vindas com status de visualização -->
+    <div id="userWelcome"></div>
+    <!-- Botão Painel de Controle para Admin -->
+    <button id="adminPanelButton" onclick="window.location.href='painelcompleto.html'">Painel de Controle</button>
+    <!-- Formulário de produtos (exemplo) -->
     <div id="productForm">
-      <h2>Cadastro de Produto</h2>
-      <!-- Campos do formulário -->
-      <input type="text" placeholder="Nome do Produto">
-      <input type="number" placeholder="Preço">
-      <button>Salvar Produto</button>
-    </div>
-
-    <!-- Grid dos produtos -->
-    <div id="productGrid" class="product-grid">
-      <!-- Os cards dos produtos serão adicionados dinamicamente -->
+      <h1>Produtos à Venda</h1>
+      <!-- Conteúdo dos produtos aqui -->
+      <p>Aqui vão os produtos cadastrados.</p>
     </div>
   </div>
 
@@ -190,48 +169,40 @@
     Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
     Parse.serverURL = "https://parseapi.back4app.com";
 
-    /* Função para checar se o usuário é admin.
-       Aqui, assume-se que o objeto usuário possui a propriedade "isAdmin" definida como true para administradores. */
+    // Função que verifica se o usuário é admin.
+    // Nesta implementação, assumimos que o usuário possui um atributo "isAdmin"
     async function checkIfUserIsAdmin(user) {
-      // Implemente aqui a sua lógica de verificação
+      // Em uma implementação real, você pode realizar uma consulta na classe Role do Parse.
       return user.get("isAdmin") === true;
     }
 
-    /* Atualiza a interface com base no status do usuário e define o modo somente visualização */
-    async function updateAuthUI() {
+    // Função para atualizar a interface de acordo com o status do usuário
+    async function updateUserMode() {
       let readOnly = false;
       const user = Parse.User.current();
-
       if (user) {
-        // Exibe a área do usuário logado e oculta a área de login
-        document.getElementById("loginArea").style.display = "none";
-        document.getElementById("userArea").style.display = "flex";
-
-        // Verifica se o usuário é admin
+        // Se estiver logado, verifica se é admin
         const isAdminLocal = await checkIfUserIsAdmin(user);
         if (isAdminLocal) {
           readOnly = false;
           document.getElementById('userWelcome').innerHTML = `Bem-vindo, <strong>${user.get("username")}</strong>!`;
-          // Exibe o botão do Painel de Controle e o formulário de produto
           document.getElementById('adminPanelButton').style.display = 'block';
-          document.getElementById('productForm').style.display = 'block';
         } else {
           readOnly = true;
           document.getElementById('userWelcome').innerHTML = `Olá, <strong>${user.get("username")}</strong>! Visualização somente.`;
-          // Oculta o botão do Painel de Controle e o formulário de produto
-          document.getElementById('adminPanelButton').style.display = 'none';
           document.getElementById('productForm').style.display = 'none';
+          document.getElementById('adminPanelButton').style.display = 'none';
         }
       } else {
-        // Se não estiver logado, define modo somente visualização e oculta elementos de admin
+        // Se não estiver logado, define modo somente visualização
         readOnly = true;
-        document.getElementById("loginArea").style.display = "block";
-        document.getElementById("userArea").style.display = "none";
+        document.getElementById('productForm').style.display = 'none';
         document.getElementById('userWelcome').innerHTML = `Visualização somente.`;
         document.getElementById('adminPanelButton').style.display = 'none';
-        document.getElementById('productForm').style.display = 'none';
       }
     }
+
+    // Eventos de login, logout e outras interações
 
     // Função de login
     document.getElementById("loginBtn").addEventListener("click", async function() {
@@ -239,47 +210,30 @@
       const password = document.getElementById("passwordInput").value;
       try {
         await Parse.User.logIn(username, password);
+        document.getElementById("loginArea").style.display = "none";
+        document.getElementById("userArea").style.display = "flex";
         alert("Login realizado com sucesso!");
-        updateAuthUI();
-        // Aqui você pode carregar os produtos, se necessário
+        updateUserMode();
       } catch (error) {
         alert("Erro no login: " + error.message);
       }
-    });
-
-    // Recuperação de senha
-    document.getElementById("forgotPasswordLink").addEventListener("click", async function(e) {
-      e.preventDefault();
-      const email = prompt("Digite seu email para recuperação de senha:");
-      if (email) {
-        try {
-          await Parse.User.requestPasswordReset(email);
-          alert("Email de recuperação enviado!");
-        } catch (error) {
-          alert("Erro: " + error.message);
-        }
-      }
-    });
-
-    // Redireciona para a página de registro
-    document.getElementById("registerLink").addEventListener("click", function(e) {
-      e.preventDefault();
-      window.location.href = "registro.html";
     });
 
     // Função de logout
     document.getElementById("logoutBtn").addEventListener("click", async function() {
       try {
         await Parse.User.logOut();
+        document.getElementById("loginArea").style.display = "flex";
+        document.getElementById("userArea").style.display = "none";
+        updateUserMode();
         alert("Você saiu da conta.");
-        updateAuthUI();
       } catch (error) {
         alert("Erro ao sair: " + error.message);
       }
     });
 
-    // Chama a atualização da interface ao carregar a página
-    updateAuthUI();
+    // Atualiza a interface ao carregar a página
+    updateUserMode();
   </script>
 </body>
 </html>
