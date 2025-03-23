@@ -46,7 +46,7 @@
       cursor: pointer;
       transition: background-color 0.3s, border-color 0.3s;
     }
-    /* Botão Entrar (login tradicional) */
+    /* Botão Entrar */
     .login-form button {
       background: #28a745;
       color: white;
@@ -55,7 +55,7 @@
       background: #218838;
       border-color: #1e7e34;
     }
-    /* Link de Esqueci a Senha */
+    /* Link de Esqueci a Senha e Registrar (estilizados como botões) */
     .login-form a {
       margin-left: 10px;
       color: white;
@@ -90,30 +90,6 @@
     .user-info button:hover {
       background: #c82333;
       border-color: #bd2130;
-    }
-    /* Estilos do botão Google */
-    .google-btn {
-      background: white;
-      color: #757575;
-      border: 1px solid #757575;
-      padding: 12px 24px;
-      border-radius: 4px;
-      font-family: 'Roboto', sans-serif;
-      font-weight: 500;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      transition: background-color 0.3s;
-      margin-left: 10px;
-    }
-    .google-btn:hover {
-      background: #f8f8f8;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .google-icon {
-      width: 18px;
-      height: 18px;
-      margin-right: 12px;
     }
     /* Container e produtos */
     .container {
@@ -200,35 +176,63 @@
       right: 5px;
     }
 	
-    /* Estilos do painel admin */
-    .admin-panel {
-      display: none;
-      justify-content: center;
-      margin: 10px 0;
-      padding: 10px;
-      background: rgba(0,123,255,0.1);
-    }
-    .admin-panel-btn {
-      padding: 8px 15px;
-      background: #007BFF;
-      color: white;
-      text-decoration: none;
-      border-radius: 5px;
-      border: 2px solid transparent;
+	 /* Estilos do painel admin */
+  .admin-panel {
+    display: none;
+    justify-content: center;
+    margin: 10px 0;
+    padding: 10px;
+    background: rgba(0,123,255,0.1);
+  }
+  
+  .admin-panel-btn {
+    padding: 8px 15px;
+    background: #007BFF;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    font-weight: bold;
+  }
+
+  .admin-panel-btn:hover {
+    background: #0056b3;
+    border-color: #004085;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  }
+ /* Novos estilos para o botão do Google */
+  .google-btn {
+      background: white;
+      color: #757575;
+      border: 2px solid #ddd;
+      padding: 5px 10px;
+      border-radius: 3px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
       transition: all 0.3s ease;
-      font-weight: bold;
+      margin-left: 10px;
     }
-    .admin-panel-btn:hover {
-      background: #0056b3;
-      border-color: #004085;
-      transform: translateY(-2px);
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+
+    .google-btn:hover {
+      background: #f8f8f8;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
+
+    .google-icon {
+      width: 16px;
+      height: 16px;
+      margin-right: 8px;
+    }
+	  
+</style>
+	
   </style>
   <!-- SDK do Parse -->
   <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
-  <!-- Cliente do Google Sign In -->
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
+	  <script src="https://accounts.google.com/gsi/client"></script>
 </head>
 <body>
   <!-- Cabeçalho -->
@@ -243,16 +247,14 @@
         <input type="password" id="passwordInput" placeholder="Senha">
         <button id="loginBtn">Entrar 🔑</button>
         <a href="#" id="forgotPasswordLink" rel="noopener noreferrer">Esqueci a senha 🤦‍♀️</a>
-        <!-- Botão de registro removido e substituído pelo login social com Google -->
-        <button class="google-btn" onclick="handleGoogleSignIn()">
+            <button id="googleLoginBtn" class="google-btn">
           <svg class="google-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
             <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
             <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
             <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
             <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-            <path fill="none" d="M0 0h48v48H0z"/>
           </svg>
-          Entrar com Google
+          Entrar com Gogo
         </button>
       </div>
       <!-- Área do usuário autenticado -->
@@ -266,8 +268,8 @@
   </header>
   
   <div id="adminPanel" class="admin-panel">
-    <a href="painelcompleto.html" class="admin-panel-btn" rel="noopener noreferrer">Painel de Controle 👑</a>
-  </div>
+  <a href="painelcompleto.html" class="admin-panel-btn" rel="noopener noreferrer">Painel de Controle 👑</a>
+</div>
 
   <!-- Conteúdo principal: exibição dos produtos com carrossel -->
   <div class="container">
@@ -281,34 +283,86 @@
     // Inicializa o Parse
     Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
     Parse.serverURL = "https://parseapi.back4app.com";
+ // Configuração do cliente Google
+    let googleClient;
 
-    // Funções administrativas
-    async function checkIfUserIsAdmin(user) {
-      const roleQuery = new Parse.Query(Parse.Role);
-      roleQuery.equalTo("name", "admin");
-      roleQuery.equalTo("users", user);
-      const count = await roleQuery.count();
-      return count > 0;
+    function initializeGoogleSignIn() {
+      googleClient = google.accounts.oauth2.initTokenClient({
+        client_id: '21514234895-keiqos567ifvs4hjkg3l1q5mvun8lri0.apps.googleusercontent.com',
+        scope: 'email profile openid',
+        callback: async (response) => {
+          if (response.error) {
+            alert('Erro no login: ' + response.error);
+            return;
+          }
+          
+          try {
+            // Decodifica o ID Token para obter informações do usuário
+            const [header, payload, signature] = response.id_token.split('.');
+            const decodedPayload = JSON.parse(atob(payload));
+            
+            const authData = {
+              id: decodedPayload.sub,
+              access_token: response.access_token,
+              id_token: response.id_token
+            };
+
+            // Login com Parse usando dados do Google
+            const user = await Parse.User.logInWith('google', { authData });
+            
+            // Atualiza a UI e segurança
+            updateAuthUI();
+            await toggleAdminButton();
+            alert('Bem-vindo via Google!');
+            loadProducts();
+          } catch (error) {
+            alert('Erro na autenticação: ' + error.message);
+          }
+        }
+      });
     }
 
-    async function toggleAdminButton() {
-      const adminPanel = document.getElementById("adminPanel");
-      const currentUser = Parse.User.current();
-      
-      if (currentUser) {
-        const isAdmin = await checkIfUserIsAdmin(currentUser);
-        adminPanel.style.display = isAdmin ? "flex" : "none";
-      } else {
-        adminPanel.style.display = "none";
-      }
-    }
+    // Inicializa o cliente Google ao carregar a página
+    initializeGoogleSignIn();
 
-    // Gerencia a interface de autenticação
+    // Event listeners
+    document.getElementById('googleLoginBtn').addEventListener('click', () => {
+      googleClient.requestAccessToken();
+    });
+
+// Adicione estas funções adimin ao JavaScript
+async function checkIfUserIsAdmin(user) {
+  const roleQuery = new Parse.Query(Parse.Role);
+  roleQuery.equalTo("name", "admin");
+  roleQuery.equalTo("users", user);
+  const count = await roleQuery.count();
+  return count > 0;
+}
+
+async function toggleAdminButton() {
+  const adminPanel = document.getElementById("adminPanel");
+  const currentUser = Parse.User.current();
+  
+  if (currentUser) {
+    const isAdmin = await checkIfUserIsAdmin(currentUser);
+    adminPanel.style.display = isAdmin ? "flex" : "none";
+  } else {
+    adminPanel.style.display = "none";
+  }
+}
+
+
+
+    // Guarda o índice atual de cada carrossel
+    const carouselIndexes = {};
+
+    // Atualiza a interface de autenticação
     function updateAuthUI() {
       const currentUser = Parse.User.current();
       if (currentUser) {
         document.getElementById("loginArea").style.display = "none";
         document.getElementById("userArea").style.display = "flex";
+        // Adiciona o emoji de boas-vindas
         document.getElementById("welcomeUser").textContent = "Bem-vindo 😘, " + currentUser.get("username") + "!";
       } else {
         document.getElementById("loginArea").style.display = "flex";
@@ -337,7 +391,7 @@
           const card = document.createElement("div");
           card.className = "product-card";
 
-          // Itens do carrossel
+          // Cria os itens do carrossel
           let carouselItemsHTML = "";
           if (imagens.length === 0) {
             carouselItemsHTML = `
@@ -348,9 +402,7 @@
           } else {
             carouselItemsHTML = imagens.map(url => `
               <div class="carousel-item">
-                <a href="${url}" target="_blank" rel="noopener noreferrer">
-                  <img src="${url}" alt="${nome}">
-                </a>
+                <a href="${url}" target="_blank" rel="noopener noreferrer"><img src="${url}" alt="${nome}"></a>
               </div>
             `).join("");
           }
@@ -366,6 +418,7 @@
             </div>
           `;
 
+          // Conteúdo do card
           card.innerHTML = `
             ${carouselHTML}
             <h3>${nome}</h3>
@@ -374,7 +427,7 @@
             <button onclick="addToCart('${produtoId}')">Comprar</button>
           `;
 
-          // Inicializa o índice do carrossel para este produto
+          // Índice inicial do carrossel para este produto
           carouselIndexes[produtoId] = 0;
           grid.appendChild(card);
         });
@@ -384,8 +437,7 @@
       }
     }
 
-    // Gerenciamento do carrossel
-    const carouselIndexes = {};
+    // Move o carrossel de um produto
     function moveCarousel(produtoId, direction) {
       const track = document.getElementById(`track-${produtoId}`);
       const items = track.querySelectorAll(".carousel-item");
@@ -401,7 +453,7 @@
       track.style.transform = `translateX(${offset}%)`;
     }
 
-    // Adiciona produto ao carrinho
+    // Adiciona o ID do produto ao carrinho do usuário (armazenado no atributo "carrinhovetor")
     async function addToCart(productId) {
       const currentUser = Parse.User.current();
       if (!currentUser) {
@@ -419,14 +471,14 @@
       }
     }
 
-    // Login tradicional
+    // Função de login
     document.getElementById("loginBtn").addEventListener("click", async function() {
       const username = document.getElementById("usernameInput").value;
       const password = document.getElementById("passwordInput").value;
       try {
         await Parse.User.logIn(username, password);
         updateAuthUI();
-        await toggleAdminButton();
+		 await toggleAdminButton();
         alert("Login realizado com sucesso!");
         loadProducts();
       } catch (error) {
@@ -448,62 +500,27 @@
       }
     });
 
-    // Logout
+    // Redireciona para a página de registro
+    document.getElementById("registerLink").addEventListener("click", function(e) {
+      e.preventDefault();
+      window.location.href = "registro.html";
+    });
+
+    // Função de logout
     document.getElementById("logoutBtn").addEventListener("click", async function() {
       try {
         await Parse.User.logOut();
         updateAuthUI();
-        await toggleAdminButton();
+		await toggleAdminButton();
         alert("Você saiu da conta.");
       } catch (error) {
         alert("Erro ao sair: " + error.message);
       }
     });
 
-    // Função de login via Google
-    let googleClient;
-    window.onload = function() {
-      // Inicializa o cliente Google para código de autorização
-      googleClient = google.accounts.oauth2.initCodeClient({
-        client_id: '21514234895-keiqos567ifvs4hjkg3l1q5mvun8lri0.apps.googleusercontent.com',
-        scope: 'email profile openid',
-        ux_mode: 'popup',
-        callback: async (response) => {
-          // Aqui você deve enviar o código para o seu endpoint seguro que fará a troca por tokens e realizará
-          // o registro ou login automático do usuário no Parse Back4App.
-          console.log('Código de autorização recebido:', response.code);
-          
-          try {
-            // Exemplo: Envie o código para o backend via fetch.
-            const res = await fetch('/seu-endpoint-login', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({ code: response.code })
-            });
-            const data = await res.json();
-            // Suponha que seu backend retorne os dados do usuário e realize o login no Parse.
-            console.log('Usuário logado com Google:', data);
-            // Atualize a interface de usuário e recarregue os produtos.
-            updateAuthUI();
-            await toggleAdminButton();
-            loadProducts();
-          } catch (error) {
-            console.error("Erro no login com Google:", error);
-            alert("Erro no login com Google: " + error.message);
-          }
-        }
-      });
-    };
-
-    function handleGoogleSignIn() {
-      googleClient.requestCode();
-    }
-
     // Inicializa a página
     updateAuthUI();
-    toggleAdminButton().catch(error => console.error(error));
+	toggleAdminButton().catch(error => console.error(error));
     loadProducts();
   </script>
 </body>
