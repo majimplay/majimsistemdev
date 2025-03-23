@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>Minha Loja Virtual</title>
   <style>
-    /* Estilos gerais */
+    /* Estilos mantidos da versão anterior */
     body {
       font-family: sans-serif;
       margin: 0;
@@ -36,7 +36,6 @@
       border: none;
       border-radius: 3px;
     }
-    /* Botões com borda e efeito hover */
     .login-form button,
     .user-info button,
     .product-card button {
@@ -46,7 +45,6 @@
       cursor: pointer;
       transition: background-color 0.3s, border-color 0.3s;
     }
-    /* Botão Entrar */
     .login-form button {
       background: #28a745;
       color: white;
@@ -55,7 +53,6 @@
       background: #218838;
       border-color: #1e7e34;
     }
-    /* Link de Esqueci a Senha e Registrar (estilizados como botões) */
     .login-form a {
       margin-left: 10px;
       color: white;
@@ -91,7 +88,6 @@
       background: #c82333;
       border-color: #bd2130;
     }
-    /* Container e produtos */
     .container {
       max-width: 1000px;
       margin: 20px auto;
@@ -127,7 +123,6 @@
       background: #218838;
       border-color: #1e7e34;
     }
-    /* Estilos do carrossel de imagens */
     .carousel-container {
       position: relative;
       overflow: hidden;
@@ -175,274 +170,281 @@
     .carousel-button.next {
       right: 5px;
     }
-	
-	 /* Estilos do painel admin */
-  .admin-panel {
-    display: none;
-    justify-content: center;
-    margin: 10px 0;
-    padding: 10px;
-    background: rgba(0,123,255,0.1);
-  }
-  
-  .admin-panel-btn {
-    padding: 8px 15px;
-    background: #007BFF;
-    color: white;
-    text-decoration: none;
-    border-radius: 5px;
-    border: 2px solid transparent;
-    transition: all 0.3s ease;
-    font-weight: bold;
-  }
-
-  .admin-panel-btn:hover {
-    background: #0056b3;
-    border-color: #004085;
-    transform: translateY(-2px);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-  }
-</style>
-	
+    .admin-panel {
+      display: none;
+      justify-content: center;
+      margin: 10px 0;
+      padding: 10px;
+      background: rgba(0,123,255,0.1);
+    }
+    .admin-panel-btn {
+      padding: 8px 15px;
+      background: #007BFF;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      border: 2px solid transparent;
+      transition: all 0.3s ease;
+      font-weight: bold;
+    }
+    .admin-panel-btn:hover {
+      background: #0056b3;
+      border-color: #004085;
+      transform: translateY(-2px);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    .google-btn {
+      background: white;
+      color: #757575;
+      border: 2px solid #ddd;
+      padding: 5px 10px;
+      border-radius: 3px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      transition: all 0.3s ease;
+      margin-left: 10px;
+    }
+    .google-btn:hover {
+      background: #f8f8f8;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .google-icon {
+      width: 16px;
+      height: 16px;
+      margin-right: 8px;
+    }
   </style>
-  <!-- SDK do Parse -->
   <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
+  <script src="https://accounts.google.com/gsi/client"></script>
 </head>
 <body>
-  <!-- Cabeçalho -->
   <header>
     <div class="logo">
       <h2>Minha Loja🎁</h2>
     </div>
     <div class="auth-area">
-      <!-- Área de login (usuário não autenticado) -->
       <div id="loginArea" class="login-form">
         <input type="text" id="usernameInput" placeholder="Nome">
         <input type="password" id="passwordInput" placeholder="Senha">
         <button id="loginBtn">Entrar 🔑</button>
         <a href="#" id="forgotPasswordLink" rel="noopener noreferrer">Esqueci a senha 🤦‍♀️</a>
-        <a href="registro.html" id="registerLink" rel="noopener noreferrer">Registrar 🎫</a>
+        <button id="googleLoginBtn" class="google-btn">
+          <svg class="google-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+          </svg>
+          Entrar com Gogo
+        </button>
       </div>
-      <!-- Área do usuário autenticado -->
       <div id="userArea" class="user-info" style="display:none;">
         <span id="welcomeUser"></span>
-        <!-- Botão Minha Conta em vez do carrinho -->
         <a href="minhaconta.html" id="minhaContaLink" rel="noopener noreferrer">Minha Conta 🛒</a>
         <button id="logoutBtn">Sair 🚘</button>
       </div>
     </div>
   </header>
-  
-  <div id="adminPanel" class="admin-panel">
-  <a href="painelcompleto.html" class="admin-panel-btn" rel="noopener noreferrer">Painel de Controle 👑</a>
-</div>
 
-  <!-- Conteúdo principal: exibição dos produtos com carrossel -->
+  <div id="adminPanel" class="admin-panel">
+    <a href="painelcompleto.html" class="admin-panel-btn" rel="noopener noreferrer">Painel de Controle 👑</a>
+  </div>
+
   <div class="container">
     <h1>Produtos à Venda</h1>
-    <div id="productGrid" class="product-grid">
-      <!-- Cards de produtos serão adicionados dinamicamente -->
-    </div>
+    <div id="productGrid" class="product-grid"></div>
   </div>
 
   <script>
-    // Inicializa o Parse
+    // Configuração do Parse
     Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
     Parse.serverURL = "https://parseapi.back4app.com";
 
-
-// Adicione estas funções adimin ao JavaScript
-async function checkIfUserIsAdmin(user) {
-  const roleQuery = new Parse.Query(Parse.Role);
-  roleQuery.equalTo("name", "admin");
-  roleQuery.equalTo("users", user);
-  const count = await roleQuery.count();
-  return count > 0;
-}
-
-async function toggleAdminButton() {
-  const adminPanel = document.getElementById("adminPanel");
-  const currentUser = Parse.User.current();
-  
-  if (currentUser) {
-    const isAdmin = await checkIfUserIsAdmin(currentUser);
-    adminPanel.style.display = isAdmin ? "flex" : "none";
-  } else {
-    adminPanel.style.display = "none";
-  }
-}
-
-
-
-    // Guarda o índice atual de cada carrossel
+    // Variáveis globais
+    let googleClient;
     const carouselIndexes = {};
 
-    // Atualiza a interface de autenticação
-    function updateAuthUI() {
-      const currentUser = Parse.User.current();
-      if (currentUser) {
-        document.getElementById("loginArea").style.display = "none";
-        document.getElementById("userArea").style.display = "flex";
-        // Adiciona o emoji de boas-vindas
-        document.getElementById("welcomeUser").textContent = "Bem-vindo 😘, " + currentUser.get("username") + "!";
-      } else {
-        document.getElementById("loginArea").style.display = "flex";
-        document.getElementById("userArea").style.display = "none";
+    // Inicialização do Google Sign-In
+    function initializeGoogleSignIn() {
+      googleClient = google.accounts.oauth2.initTokenClient({
+        client_id: '     21514234895-keiqos567ifvs4hjkg3l1q5mvun8lri0.apps.googleusercontent.com ',
+        scope: 'email profile openid',
+        callback: async (response) => {
+          if (response.error) {
+            console.error('Erro Google:', response.error);
+            return;
+          }
+
+          try {
+            const { access_token, id_token } = response;
+            const authData = {
+              id: parseJwt(id_token).sub,
+              access_token: access_token,
+              id_token: id_token
+            };
+
+            const user = await Parse.User.logInWith('google', { authData });
+            await handleSuccessfulLogin(user);
+          } catch (error) {
+            console.error('Erro completo:', error);
+            alert('Erro na autenticação: ' + error.message);
+          }
+        }
+      });
+    }
+
+    // Função para decodificar JWT
+    function parseJwt(token) {
+      try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        return JSON.parse(atob(base64));
+      } catch (e) {
+        return null;
       }
     }
 
-    // Carrega os produtos do Parse e exibe com carrossel
-    async function loadProducts() {
-      const Produto = Parse.Object.extend("Produto");
-      const query = new Parse.Query(Produto);
+    // Gerenciamento de login
+    async function handleSuccessfulLogin(user) {
+      updateAuthUI();
+      await toggleAdminButton();
+      await loadProducts();
+      alert(`Bem-vindo ${user.get('username')}!`);
+    }
 
+    // Carregar produtos
+    async function loadProducts() {
       try {
+        const Produto = Parse.Object.extend("Produto");
+        const query = new Parse.Query(Produto);
         const results = await query.find();
+
         const grid = document.getElementById("productGrid");
-        grid.innerHTML = "";
+        grid.innerHTML = '';
 
         results.forEach(produto => {
-          const produtoId = produto.id;
-          const imagens = produto.get("imagens") || [];
-          const nome = produto.get("nome");
-          const preco = parseFloat(produto.get("preco")).toFixed(2);
-          const descricao = produto.get("descricao");
-
-          // Cria o container do card do produto
-          const card = document.createElement("div");
-          card.className = "product-card";
-
-          // Cria os itens do carrossel
-          let carouselItemsHTML = "";
-          if (imagens.length === 0) {
-            carouselItemsHTML = `
-              <div class="carousel-item">
-                <img src="https://via.placeholder.com/150?text=Sem+Imagem" alt="Sem Imagem">
-              </div>
-            `;
-          } else {
-            carouselItemsHTML = imagens.map(url => `
-              <div class="carousel-item">
-                <a href="${url}" target="_blank" rel="noopener noreferrer"><img src="${url}" alt="${nome}"></a>
-              </div>
-            `).join("");
-          }
-
-          // Cria o carrossel
-          const carouselHTML = `
-            <div class="carousel-container">
-              <button class="carousel-button prev" onclick="moveCarousel('${produtoId}', -1)">&#10094;</button>
-              <div class="carousel-track" id="track-${produtoId}">
-                ${carouselItemsHTML}
-              </div>
-              <button class="carousel-button next" onclick="moveCarousel('${produtoId}', 1)">&#10095;</button>
-            </div>
-          `;
-
-          // Conteúdo do card
-          card.innerHTML = `
-            ${carouselHTML}
-            <h3>${nome}</h3>
-            ${descricao ? `<p>${descricao}</p>` : ""}
-            <p>R$ ${preco}</p>
-            <button onclick="addToCart('${produtoId}')">Comprar</button>
-          `;
-
-          // Índice inicial do carrossel para este produto
-          carouselIndexes[produtoId] = 0;
+          const card = createProductCard(produto);
           grid.appendChild(card);
+          carouselIndexes[produto.id] = 0;
         });
 
       } catch (error) {
-        console.error("Erro ao carregar produtos: ", error);
+        console.error("Erro ao carregar produtos:", error);
+        alert("Erro ao carregar produtos!");
       }
     }
 
-    // Move o carrossel de um produto
+    // Criar card de produto
+    function createProductCard(produto) {
+      const card = document.createElement("div");
+      card.className = "product-card";
+      
+      const images = produto.get("imagens") || [];
+      const carouselHTML = createCarouselHTML(produto.id, images);
+      
+      card.innerHTML = `
+        ${carouselHTML}
+        <h3>${produto.get("nome")}</h3>
+        <p>R$ ${parseFloat(produto.get("preco")).toFixed(2)}</p>
+        ${produto.get("descricao") ? `<p>${produto.get("descricao")}</p>` : ''}
+        <button onclick="addToCart('${produto.id}')">Comprar</button>
+      `;
+
+      return card;
+    }
+
+    // Criar carrossel
+    function createCarouselHTML(produtoId, images) {
+      const items = images.length > 0 ? 
+        images.map(url => `
+          <div class="carousel-item">
+            <img src="${url}" alt="Produto">
+          </div>
+        `).join('') : 
+        `<div class="carousel-item">
+          <img src="https://via.placeholder.com/150?text=Sem+Imagem" alt="Sem Imagem">
+        </div>`;
+
+      return `
+        <div class="carousel-container">
+          <button class="carousel-button prev" onclick="moveCarousel('${produtoId}', -1)">&#10094;</button>
+          <div class="carousel-track" id="track-${produtoId}">
+            ${items}
+          </div>
+          <button class="carousel-button next" onclick="moveCarousel('${produtoId}', 1)">&#10095;</button>
+        </div>
+      `;
+    }
+
+    // Funções auxiliares
     function moveCarousel(produtoId, direction) {
       const track = document.getElementById(`track-${produtoId}`);
       const items = track.querySelectorAll(".carousel-item");
       const totalItems = items.length;
 
-      carouselIndexes[produtoId] += direction;
-      if (carouselIndexes[produtoId] < 0) {
-        carouselIndexes[produtoId] = 0;
-      } else if (carouselIndexes[produtoId] > totalItems - 1) {
-        carouselIndexes[produtoId] = totalItems - 1;
-      }
-      const offset = -carouselIndexes[produtoId] * 100;
-      track.style.transform = `translateX(${offset}%)`;
+      carouselIndexes[produtoId] = (carouselIndexes[produtoId] + direction + totalItems) % totalItems;
+      track.style.transform = `translateX(-${carouselIndexes[produtoId] * 100}%)`;
     }
 
-    // Adiciona o ID do produto ao carrinho do usuário (armazenado no atributo "carrinhovetor")
-    async function addToCart(productId) {
-      const currentUser = Parse.User.current();
-      if (!currentUser) {
-        alert("Você precisa estar logado para adicionar produtos ao carrinho.");
-        return;
-      }
-      try {
-        let carrinho = currentUser.get("carrinhovetor") || [];
-        carrinho.push(productId);
-        currentUser.set("carrinhovetor", carrinho);
-        await currentUser.save();
-        alert("Produto adicionado ao carrinho!");
-      } catch (error) {
-        console.error("Erro ao adicionar ao carrinho: ", error);
-      }
+    async function toggleAdminButton() {
+      const adminPanel = document.getElementById("adminPanel");
+      const user = Parse.User.current();
+      adminPanel.style.display = user && await checkIfUserIsAdmin(user) ? "flex" : "none";
     }
 
-    // Função de login
-    document.getElementById("loginBtn").addEventListener("click", async function() {
-      const username = document.getElementById("usernameInput").value;
-      const password = document.getElementById("passwordInput").value;
+    async function checkIfUserIsAdmin(user) {
+      const roleQuery = new Parse.Query(Parse.Role);
+      roleQuery.equalTo("name", "admin");
+      roleQuery.equalTo("users", user);
+      return (await roleQuery.count()) > 0;
+    }
+
+    // Event Listeners
+    document.getElementById('googleLoginBtn').addEventListener('click', () => {
+      googleClient.requestAccessToken();
+    });
+
+    document.getElementById('loginBtn').addEventListener('click', async () => {
       try {
-        await Parse.User.logIn(username, password);
-        updateAuthUI();
-		 await toggleAdminButton();
-        alert("Login realizado com sucesso!");
-        loadProducts();
+        const user = await Parse.User.logIn(
+          document.getElementById('usernameInput').value,
+          document.getElementById('passwordInput').value
+        );
+        await handleSuccessfulLogin(user);
       } catch (error) {
-        alert("Erro no login: " + error.message);
+        alert('Erro no login: ' + error.message);
       }
     });
 
-    // Recuperação de senha
-    document.getElementById("forgotPasswordLink").addEventListener("click", async function(e) {
-      e.preventDefault();
-      const email = prompt("Digite seu email para recuperação de senha:");
-      if (email) {
-        try {
-          await Parse.User.requestPasswordReset(email);
-          alert("Email de recuperação enviado!");
-        } catch (error) {
-          alert("Erro: " + error.message);
-        }
-      }
-    });
-
-    // Redireciona para a página de registro
-    document.getElementById("registerLink").addEventListener("click", function(e) {
-      e.preventDefault();
-      window.location.href = "registro.html";
-    });
-
-    // Função de logout
-    document.getElementById("logoutBtn").addEventListener("click", async function() {
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
       try {
         await Parse.User.logOut();
         updateAuthUI();
-		await toggleAdminButton();
-        alert("Você saiu da conta.");
+        await toggleAdminButton();
+        alert('Logout realizado!');
       } catch (error) {
-        alert("Erro ao sair: " + error.message);
+        alert('Erro ao sair: ' + error.message);
       }
     });
 
-    // Inicializa a página
-    updateAuthUI();
-	toggleAdminButton().catch(error => console.error(error));
-    loadProducts();
+    // Inicialização
+    function updateAuthUI() {
+      const user = Parse.User.current();
+      document.getElementById('loginArea').style.display = user ? 'none' : 'flex';
+      document.getElementById('userArea').style.display = user ? 'flex' : 'none';
+      if (user) {
+        document.getElementById('welcomeUser').textContent = `Bem-vindo 😘, ${user.get('username')}!`;
+      }
+    }
+
+    // Iniciar aplicação
+    document.addEventListener('DOMContentLoaded', () => {
+      initializeGoogleSignIn();
+      updateAuthUI();
+      toggleAdminButton();
+      loadProducts();
+    });
   </script>
 </body>
 </html>
