@@ -369,4 +369,82 @@
       return `
         <div class="carousel-container">
           <button class="carousel-button prev" onclick="moveCarousel('${produtoId}', -1)">&#10094;</button>
-         
+          <div class="carousel-track" id="track-${produtoId}">
+            ${items}
+          </div>
+          <button class="carousel-button next" onclick="moveCarousel('${produtoId}', 1)">&#10095;</button>
+        </div>
+      `;
+    }
+
+    // Funções auxiliares
+    function moveCarousel(produtoId, direction) {
+      const track = document.getElementById(`track-${produtoId}`);
+      const items = track.querySelectorAll(".carousel-item");
+      const totalItems = items.length;
+
+      carouselIndexes[produtoId] = (carouselIndexes[produtoId] + direction + totalItems) % totalItems;
+      track.style.transform = `translateX(-${carouselIndexes[produtoId] * 100}%)`;
+    }
+
+    async function toggleAdminButton() {
+      const adminPanel = document.getElementById("adminPanel");
+      const user = Parse.User.current();
+      adminPanel.style.display = user && await checkIfUserIsAdmin(user) ? "flex" : "none";
+    }
+
+    async function checkIfUserIsAdmin(user) {
+      const roleQuery = new Parse.Query(Parse.Role);
+      roleQuery.equalTo("name", "admin");
+      roleQuery.equalTo("users", user);
+      return (await roleQuery.count()) > 0;
+    }
+
+    // Event Listeners
+    document.getElementById('googleLoginBtn').addEventListener('click', () => {
+      googleClient.requestAccessToken();
+    });
+
+    document.getElementById('loginBtn').addEventListener('click', async () => {
+      try {
+        const user = await Parse.User.logIn(
+          document.getElementById('usernameInput').value,
+          document.getElementById('passwordInput').value
+        );
+        await handleSuccessfulLogin(user);
+      } catch (error) {
+        alert('Erro no login: ' + error.message);
+      }
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      try {
+        await Parse.User.logOut();
+        updateAuthUI();
+        await toggleAdminButton();
+        alert('Logout realizado!');
+      } catch (error) {
+        alert('Erro ao sair: ' + error.message);
+      }
+    });
+
+    // Inicialização
+    function updateAuthUI() {
+      const user = Parse.User.current();
+      document.getElementById('loginArea').style.display = user ? 'none' : 'flex';
+      document.getElementById('userArea').style.display = user ? 'flex' : 'none';
+      if (user) {
+        document.getElementById('welcomeUser').textContent = `Bem-vindo 😘, ${user.get('username')}!`;
+      }
+    }
+
+    // Iniciar aplicação
+    document.addEventListener('DOMContentLoaded', () => {
+      initializeGoogleSignIn();
+      updateAuthUI();
+      toggleAdminButton();
+      loadProducts();
+    });
+  </script>
+</body>
+</html>
