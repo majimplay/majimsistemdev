@@ -175,6 +175,35 @@
     .carousel-button.next {
       right: 5px;
     }
+	
+	 /* Estilos do painel admin */
+  .admin-panel {
+    display: none;
+    justify-content: center;
+    margin: 10px 0;
+    padding: 10px;
+    background: rgba(0,123,255,0.1);
+  }
+  
+  .admin-panel-btn {
+    padding: 8px 15px;
+    background: #007BFF;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    font-weight: bold;
+  }
+
+  .admin-panel-btn:hover {
+    background: #0056b3;
+    border-color: #004085;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  }
+</style>
+	
   </style>
   <!-- SDK do Parse -->
   <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
@@ -203,6 +232,10 @@
       </div>
     </div>
   </header>
+  
+  <div id="adminPanel" class="admin-panel">
+  <a href="painelcompleto.html" class="admin-panel-btn" rel="noopener noreferrer">Painel de Controle 👑</a>
+</div>
 
   <!-- Conteúdo principal: exibição dos produtos com carrossel -->
   <div class="container">
@@ -216,6 +249,30 @@
     // Inicializa o Parse
     Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
     Parse.serverURL = "https://parseapi.back4app.com";
+
+
+// Adicione estas funções adimin ao JavaScript
+async function checkIfUserIsAdmin(user) {
+  const roleQuery = new Parse.Query(Parse.Role);
+  roleQuery.equalTo("name", "admin");
+  roleQuery.equalTo("users", user);
+  const count = await roleQuery.count();
+  return count > 0;
+}
+
+async function toggleAdminButton() {
+  const adminPanel = document.getElementById("adminPanel");
+  const currentUser = Parse.User.current();
+  
+  if (currentUser) {
+    const isAdmin = await checkIfUserIsAdmin(currentUser);
+    adminPanel.style.display = isAdmin ? "flex" : "none";
+  } else {
+    adminPanel.style.display = "none";
+  }
+}
+
+
 
     // Guarda o índice atual de cada carrossel
     const carouselIndexes = {};
@@ -342,6 +399,7 @@
       try {
         await Parse.User.logIn(username, password);
         updateAuthUI();
+		 await toggleAdminButton();
         alert("Login realizado com sucesso!");
         loadProducts();
       } catch (error) {
@@ -374,6 +432,7 @@
       try {
         await Parse.User.logOut();
         updateAuthUI();
+		await toggleAdminButton();
         alert("Você saiu da conta.");
       } catch (error) {
         alert("Erro ao sair: " + error.message);
@@ -382,6 +441,7 @@
 
     // Inicializa a página
     updateAuthUI();
+	toggleAdminButton().catch(error => console.error(error));
     loadProducts();
   </script>
 </body>
