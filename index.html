@@ -271,11 +271,17 @@
         client_id:'21514234895-keiqos567ifvs4hjkg3l1q5mvun8lri0.apps.googleusercontent.com',
         scope: 'email profile openid',
         callback: async (response) => {
+          console.log(response); // Verifique o conteúdo da resposta
           if (response.error) {
             console.error('Erro Google:', response.error);
             return;
           }
-
+// Certifique-se de que id_token existe
+ if (!response.id_token) {
+    console.error("id_token não encontrado na resposta");
+    return;
+  }
+          
           try {
             const { access_token, id_token } = response;
             const authData = {
