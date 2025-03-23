@@ -217,6 +217,56 @@
   </style>
   <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
   <script src="https://accounts.google.com/gsi/client"></script>
+  <script>
+  function handleCredentialResponse(response) {
+    // response.credential contém o id_token
+    const id_token = response.credential;
+    const decodedToken = parseJwt(id_token);
+    if (!decodedToken) {
+      console.error("Falha ao decodificar o id_token");
+      return;
+    }
+    const authData = {
+      id: decodedToken.sub,  // Identificador do usuário
+      id_token: id_token,
+      access_token: ""  // Se necessário, você pode não precisar do access_token
+    };
+
+    // Agora, você pode usar authData para logar o usuário no Parse:
+    Parse.User.logInWith('google', { authData })
+      .then(user => {
+        console.log("Usuário logado:", user);
+        // Resto do fluxo...
+      })
+      .catch(error => {
+        console.error("Erro no login com Google:", error);
+      });
+  }
+
+  window.onload = function () {
+    google.accounts.id.initialize({
+      client_id: 'SEU_CLIENT_ID_AQUI',
+      callback: handleCredentialResponse,
+      // Outras opções se necessário
+    });
+    google.accounts.id.renderButton(
+      document.getElementById("googleLoginBtn"),
+      { theme: "outline", size: "large" }  // Personalize o botão se necessário
+    );
+  };
+
+  function parseJwt(token) {
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      return JSON.parse(atob(base64));
+    } catch (e) {
+      console.error("Erro ao decodificar JWT:", e);
+      return null;
+    }
+  }
+</script>
+  
 </head>
 <body>
   <header>
