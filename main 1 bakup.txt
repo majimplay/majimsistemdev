@@ -1,0 +1,19 @@
+Parse.Cloud.define("getUserCount", async (request) => {
+  // Aqui, sim, podemos usar o Master Key
+  const query = new Parse.Query("_User");
+  query.limit(1000);
+  const results = await query.find({ useMasterKey: true });
+  return results.length;
+});
+
+
+Parse.Cloud.define('isAdmin', async (request) => {
+    const user = request.user;
+    if (!user) throw new Error('Acesso negado');
+    
+    const query = new Parse.Query(Parse.Role)
+        .equalTo('name', 'admin')
+        .equalTo('users', user);
+
+    return query.count().then(count => count > 0);
+});
