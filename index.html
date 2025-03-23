@@ -70,6 +70,7 @@
         callback: async (response) => {
           console.log('Código de autorização:', response.code);
           /* 
+          
             Normalmente, você enviaria esse código para seu backend para trocar por tokens
             e obter os dados reais do usuário. Para exemplificar, simulamos os dados:
           */
@@ -80,36 +81,32 @@
             picture: "https://via.placeholder.com/150"
           };
 
-          try {
-            // Tenta encontrar um usuário cadastrado com o email recebido
-            const query = new Parse.Query(Parse.User);
-            query.equalTo("email", dadosUsuario.email);
-            let user = await query.first();
+try {
+  // Chama a função que consulta o usuário por email
+  const result = await Parse.Cloud.run("getUserByEmail", { email: dadosUsuario.email });
+  
+  if (result.exists) {
+    alert("Usuário encontrado. Efetuando login...");
+    // Redirecione ou armazene a sessão do usuário
+    window.location.href = "index.html";
+  } else {
+    // Se não existir, cria um novo usuário com os dados do Google
+    const randomPassword = Math.random().toString(36).slice(-8);
+    const user = new Parse.User();
+    user.set("username", dadosUsuario.email);
+    user.set("email", dadosUsuario.email);
+    user.set("password", randomPassword); // Senha gerada automaticamente
+    user.set("nome", dadosUsuario.nome);
+    user.set("googleId", dadosUsuario.id);
+    user.set("picture", dadosUsuario.picture);
 
-            if (user) {
-              // Se o usuário já existe, considere-o como logado (ou recupere a sessão, se aplicável)
-              alert("Usuário encontrado. Efetuando login...");
-              // Aqui você pode implementar a lógica de login, por exemplo,
-              // armazenar dados na sessão ou redirecionar para a área de membros.
-              window.location.href = "index.html";
-            } else {
-              // Se o usuário não existe, cria um novo registro usando os dados do Google
-              const randomPassword = Math.random().toString(36).slice(-8);
-              user = new Parse.User();
-              user.set("username", dadosUsuario.email);
-              user.set("email", dadosUsuario.email);
-              user.set("password", randomPassword); // Senha gerada automaticamente
-              user.set("nome", dadosUsuario.nome);
-              user.set("googleId", dadosUsuario.id);
-              user.set("picture", dadosUsuario.picture);
-
-              await user.signUp();
-              alert("Usuário registrado e logado com sucesso!");
-              window.location.href = "index.html";
-            }
-          } catch (error) {
-            alert("Erro: " + error.message);
-          }
+    await user.signUp();
+    alert("Usuário registrado e logado com sucesso!");
+    window.location.href = "index.html";
+  }
+} catch (error) {
+  alert("Erro: " + error.message);
+}
         }
       });
     }
