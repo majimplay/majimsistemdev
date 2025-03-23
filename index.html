@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>Minha Loja Virtual</title>
   <style>
-    /* Estilos gerais */
+    /* Estilos mantidos da versão anterior */
     body {
       font-family: sans-serif;
       margin: 0;
@@ -36,7 +36,6 @@
       border: none;
       border-radius: 3px;
     }
-    /* Botões com borda e efeito hover */
     .login-form button,
     .user-info button,
     .product-card button {
@@ -46,7 +45,6 @@
       cursor: pointer;
       transition: background-color 0.3s, border-color 0.3s;
     }
-    /* Botão Entrar */
     .login-form button {
       background: #28a745;
       color: white;
@@ -55,7 +53,6 @@
       background: #218838;
       border-color: #1e7e34;
     }
-    /* Link de Esqueci a Senha */
     .login-form a {
       margin-left: 10px;
       color: white;
@@ -91,7 +88,6 @@
       background: #c82333;
       border-color: #bd2130;
     }
-    /* Container e produtos */
     .container {
       max-width: 1000px;
       margin: 20px auto;
@@ -127,7 +123,6 @@
       background: #218838;
       border-color: #1e7e34;
     }
-    /* Estilos do carrossel de imagens */
     .carousel-container {
       position: relative;
       overflow: hidden;
@@ -175,7 +170,6 @@
     .carousel-button.next {
       right: 5px;
     }
-    /* Estilos do painel admin */
     .admin-panel {
       display: none;
       justify-content: center;
@@ -199,7 +193,6 @@
       transform: translateY(-2px);
       box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     }
-    /* Estilos do botão do Google */
     .google-btn {
       background: white;
       color: #757575;
@@ -222,7 +215,6 @@
       margin-right: 8px;
     }
   </style>
-  <!-- SDKs necessários -->
   <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
   <script src="https://accounts.google.com/gsi/client"></script>
 </head>
@@ -232,13 +224,11 @@
       <h2>Minha Loja🎁</h2>
     </div>
     <div class="auth-area">
-      <!-- Área de login (usuário não autenticado) -->
       <div id="loginArea" class="login-form">
         <input type="text" id="usernameInput" placeholder="Nome">
         <input type="password" id="passwordInput" placeholder="Senha">
         <button id="loginBtn">Entrar 🔑</button>
         <a href="#" id="forgotPasswordLink" rel="noopener noreferrer">Esqueci a senha 🤦‍♀️</a>
-        <!-- Botão do Google substituindo o registro -->
         <button id="googleLoginBtn" class="google-btn">
           <svg class="google-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
             <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
@@ -249,7 +239,6 @@
           Entrar com Gogo
         </button>
       </div>
-      <!-- Área do usuário autenticado -->
       <div id="userArea" class="user-info" style="display:none;">
         <span id="welcomeUser"></span>
         <a href="minhaconta.html" id="minhaContaLink" rel="noopener noreferrer">Minha Conta 🛒</a>
@@ -262,68 +251,122 @@
     <a href="painelcompleto.html" class="admin-panel-btn" rel="noopener noreferrer">Painel de Controle 👑</a>
   </div>
 
-  <!-- Conteúdo principal: exibição dos produtos com carrossel -->
   <div class="container">
     <h1>Produtos à Venda</h1>
-    <div id="productGrid" class="product-grid">
-      <!-- Cards de produtos serão adicionados dinamicamente -->
-    </div>
+    <div id="productGrid" class="product-grid"></div>
   </div>
 
   <script>
-    // Inicializa o Parse
+    // Configuração do Parse
     Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
     Parse.serverURL = "https://parseapi.back4app.com";
 
-    // Configuração do cliente Google
+    // Variáveis globais
     let googleClient;
+    const carouselIndexes = {};
 
+    // Inicialização do Google Sign-In
     function initializeGoogleSignIn() {
       googleClient = google.accounts.oauth2.initTokenClient({
-        client_id: '21514234895-keiqos567ifvs4hjkg3l1q5mvun8lri0.apps.googleusercontent.com',
+        client_id: 'SEU_CLIENT_ID.apps.googleusercontent.com',
         scope: 'email profile openid',
         callback: async (response) => {
           if (response.error) {
-            alert('Erro no login: ' + response.error);
+            console.error('Erro Google:', response.error);
             return;
           }
 
           try {
-            // Decodifica o ID Token para obter informações do usuário
-            const [header, payload, signature] = response.id_token.split('.');
-            const decodedPayload = JSON.parse(atob(payload));
-
+            const { access_token, id_token } = response;
             const authData = {
-              id: decodedPayload.sub,
-              access_token: response.access_token,
-              id_token: response.id_token
+              id: parseJwt(id_token).sub,
+              access_token: access_token,
+              id_token: id_token
             };
 
-            // Login com Parse usando dados do Google
             const user = await Parse.User.logInWith('google', { authData });
-
-            // Atualiza a UI e segurança
-            updateAuthUI();
-            await toggleAdminButton();
-            alert('Bem-vindo via Google!');
-            loadProducts();
+            await handleSuccessfulLogin(user);
           } catch (error) {
+            console.error('Erro completo:', error);
             alert('Erro na autenticação: ' + error.message);
           }
         }
       });
     }
 
-    // Inicializa o cliente Google ao carregar a página
-    initializeGoogleSignIn();
+    // Função para decodificar JWT
+    function parseJwt(token) {
+      try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        return JSON.parse(atob(base64));
+      } catch (e) {
+        return null;
+      }
+    }
 
-    // Event listeners
-    document.getElementById('googleLoginBtn').addEventListener('click', () => {
-      googleClient.requestAccessToken();
-    });
+    // Gerenciamento de login
+    async function handleSuccessfulLogin(user) {
+      updateAuthUI();
+      await toggleAdminButton();
+      await loadProducts();
+      alert(`Bem-vindo ${user.get('username')}!`);
+    }
 
-    // Funções restantes (updateAuthUI, loadProducts, etc.) permanecem iguais
-    // ... [O restante do JavaScript permanece igual] ...
-  </script>
-</body>
-</html>
+    // Carregar produtos
+    async function loadProducts() {
+      try {
+        const Produto = Parse.Object.extend("Produto");
+        const query = new Parse.Query(Produto);
+        const results = await query.find();
+
+        const grid = document.getElementById("productGrid");
+        grid.innerHTML = '';
+
+        results.forEach(produto => {
+          const card = createProductCard(produto);
+          grid.appendChild(card);
+          carouselIndexes[produto.id] = 0;
+        });
+
+      } catch (error) {
+        console.error("Erro ao carregar produtos:", error);
+        alert("Erro ao carregar produtos!");
+      }
+    }
+
+    // Criar card de produto
+    function createProductCard(produto) {
+      const card = document.createElement("div");
+      card.className = "product-card";
+      
+      const images = produto.get("imagens") || [];
+      const carouselHTML = createCarouselHTML(produto.id, images);
+      
+      card.innerHTML = `
+        ${carouselHTML}
+        <h3>${produto.get("nome")}</h3>
+        <p>R$ ${parseFloat(produto.get("preco")).toFixed(2)}</p>
+        ${produto.get("descricao") ? `<p>${produto.get("descricao")}</p>` : ''}
+        <button onclick="addToCart('${produto.id}')">Comprar</button>
+      `;
+
+      return card;
+    }
+
+    // Criar carrossel
+    function createCarouselHTML(produtoId, images) {
+      const items = images.length > 0 ? 
+        images.map(url => `
+          <div class="carousel-item">
+            <img src="${url}" alt="Produto">
+          </div>
+        `).join('') : 
+        `<div class="carousel-item">
+          <img src="https://via.placeholder.com/150?text=Sem+Imagem" alt="Sem Imagem">
+        </div>`;
+
+      return `
+        <div class="carousel-container">
+          <button class="carousel-button prev" onclick="moveCarousel('${produtoId}', -1)">&#10094;</button>
+         
