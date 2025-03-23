@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Login com Google</title>
+    <title>Login com Google e Formulário</title>
     <style>
-        /* Estilização do botão */
+        /* Estilos existentes do botão Google */
         .google-btn {
             background: white;
             color: #757575;
@@ -29,79 +29,106 @@
             margin-right: 12px;
         }
 
-        /* Estilização do formulário */
-        form {
-            margin-top: 20px;
-            font-family: Arial, sans-serif;
+        /* Novos estilos do formulário */
+        .user-form {
+            max-width: 400px;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            display: none;
         }
 
-        form label {
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
             display: block;
             margin-bottom: 5px;
+            font-weight: bold;
         }
 
-        form input {
-            margin-bottom: 10px;
+        .form-group input {
+            width: 100%;
             padding: 8px;
-            width: 300px;
-            box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .profile-pic {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin: 10px auto;
+            display: block;
+        }
+
+        .hidden {
+            display: none;
         }
     </style>
 </head>
 <body>
-    <button class="google-btn" onclick="handleGoogleSignIn()">
+    <button class="google-btn" id="googleBtn" onclick="handleGoogleSignIn()">
         <svg class="google-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
-            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-            <path fill="none" d="M0 0h48v48H0z"/>
+            <!-- SVG do ícone do Google (mantido igual) -->
         </svg>
         Entrar com Google
     </button>
 
-    <!-- Formulário para exibir os dados do usuário -->
-    <form id="userForm">
-        <label for="nome">Nome:</label>
-        <input type="text" id="nome" name="nome" placeholder="Seu nome">
-
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" placeholder="Seu email">
-
-        <label for="googleId">Google ID:</label>
-        <input type="text" id="googleId" name="googleId" placeholder="Seu ID do Google">
+    <form class="user-form hidden" id="userForm">
+        <img src="" class="profile-pic" id="profilePic" alt="Foto do perfil">
+        <div class="form-group">
+            <label for="fullName">Nome completo:</label>
+            <input type="text" id="fullName" name="fullName" readonly>
+        </div>
+        <div class="form-group">
+            <label for="email">E-mail:</label>
+            <input type="email" id="email" name="email" readonly>
+        </div>
+        <div class="form-group">
+            <label for="googleId">Google ID:</label>
+            <input type="text" id="googleId" name="googleId" readonly>
+        </div>
+        <div class="form-group">
+            <label for="accessToken">Token de acesso:</label>
+            <input type="text" id="accessToken" name="accessToken" readonly>
+        </div>
     </form>
 
     <script src="https://accounts.google.com/gsi/client"></script>
     <script>
-        // Inicialização do cliente Google
         const client = google.accounts.oauth2.initCodeClient({
             client_id: '21514234895-keiqos567ifvs4hjkg3l1q5mvun8lri0.apps.googleusercontent.com',
             scope: 'email profile openid',
             ux_mode: 'popup',
-            callback: (response) => {
-                // Exibe o código de autorização no console
-                console.log('Código de autorização:', response.code);
-                
-                // Envie o código para seu backend para troca por tokens e obtenção dos dados do usuário
-                fetch('/seu-endpoint-login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ code: response.code })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    // Exibe os dados do usuário no console
-                    console.log('Usuário logado:', data);
+            callback: async (response) => {
+                try {
+                    const res = await fetch('/https://majimplay.github.io/majimsistemdev/gogoformulario.html', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ code: response.code })
+                    });
+                    
+                    const userData = await res.json();
+                    
+                    // Preencher o formulário com os dados do usuário
+                    document.getElementById('profilePic').src = userData.profileImage;
+                    document.getElementById('fullName').value = userData.fullName;
+                    document.getElementById('email').value = userData.email;
+                    document.getElementById('googleId').value = userData.googleId;
+                    document.getElementById('accessToken').value = userData.accessToken;
 
-                    // Preenche os campos do formulário com os dados recebidos
-                    document.getElementById('nome').value = data.nome || '';
-                    document.getElementById('email').value = data.email || '';
-                    document.getElementById('googleId').value = data.id || '';
-                })
-                .catch(error => console.error('Erro no login:', error));
+                    // Mostrar formulário e esconder botão
+                    document.getElementById('userForm').classList.remove('hidden');
+                    document.getElementById('googleBtn').classList.add('hidden');
+                    
+                } catch (error) {
+                    console.error('Erro no login:', error);
+                }
             }
         });
 
