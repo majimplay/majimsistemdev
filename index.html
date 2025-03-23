@@ -4,50 +4,7 @@
   <meta charset="UTF-8">
   <title>Registro de Usuário com Google</title>
   <style>
-    body {
-      font-family: sans-serif;
-      background: #f4f4f4;
-      margin: 0;
-      padding: 0;
-    }
-    .container {
-      max-width: 500px;
-      margin: 30px auto;
-      background: #fff;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    }
-    h1, h2 {
-      text-align: center;
-    }
-    form {
-      display: flex;
-      flex-direction: column;
-    }
-    label {
-      margin-top: 10px;
-      font-weight: bold;
-    }
-    input {
-      padding: 8px;
-      margin-top: 5px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    .btn {
-      margin-top: 20px;
-      padding: 10px;
-      border: none;
-      background: #28a745;
-      color: white;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    .btn:hover {
-      background: #218838;
-    }
-    /* Estilo para o botão do login com Google */
+    /* Seus estilos aqui */
     .google-btn {
       background: white;
       color: #757575;
@@ -71,126 +28,72 @@
       height: 18px;
       margin-right: 12px;
     }
-    .obs {
-      font-size: 0.9em;
-      color: #555;
-    }
   </style>
-  <!-- SDK do Parse para comunicação com o Back4App -->
+  <!-- Inclua o SDK do Parse se necessário -->
   <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
-  <!-- Biblioteca do Google Identity Services -->
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <!-- Carrega o script do Google e chama initGoogleSignIn() quando carregado -->
+  <script src="https://accounts.google.com/gsi/client" async defer onload="initGoogleSignIn()"></script>
 </head>
 <body>
-  <div class="container">
-    <h1>Registrar Conta</h1>
-    <!-- Botão de Login com Google -->
-    <button class="google-btn" onclick="handleGoogleSignIn()">
-      <svg class="google-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
-          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-          <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-          <path fill="none" d="M0 0h48v48H0z"/>
-      </svg>
-      Entrar com Google
-    </button>
+  <!-- Botão de Login com Google -->
+  <button class="google-btn" onclick="handleGoogleSignIn()">
+    <svg class="google-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+      <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+      <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+      <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+      <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+      <path fill="none" d="M0 0h48v48H0z"/>
+    </svg>
+    Entrar com Google
+  </button>
 
-    <!-- Formulário de Registro -->
-    <form id="registerForm">
-      <label for="username">Nome de Usuário *</label>
-      <input type="text" id="username" required>
-      
-      <label for="email">Email *</label>
-      <input type="email" id="email" required>
-      
-      <label for="password">Senha *</label>
-      <input type="password" id="password" required>
-      
-      <label for="confirmPassword">Confirmar Senha *</label>
-      <input type="password" id="confirmPassword" required>
-      
-      <label for="cpf">CPF <span class="obs">(Opcional)</span></label>
-      <input type="text" id="cpf" placeholder="Somente números ou com pontuação">
-      
-      <label for="endereco">Endereço <span class="obs">(Opcional)</span></label>
-      <input type="text" id="endereco" placeholder="Rua, número, bairro, cidade...">
-      
-      <label for="telefone">Telefone <span class="obs">(Opcional)</span></label>
-      <input type="text" id="telefone" placeholder="(XX) XXXX-XXXX">
-      
-      <button type="submit" class="btn">Registrar</button>
-    </form>
-  </div>
+  <!-- Seu formulário ou outros elementos -->
+  <form id="registerForm">
+    <label for="username">Nome de Usuário *</label>
+    <input type="text" id="username" required>
+    
+    <label for="email">Email *</label>
+    <input type="email" id="email" required>
+    
+    <!-- Outros campos do formulário -->
+    <button type="submit" class="btn">Registrar</button>
+  </form>
 
   <script>
-    // Inicializa o Parse com suas credenciais Back4App
-    Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
-    Parse.serverURL = "https://parseapi.back4app.com";
-    
-    // Inicialização do cliente do Google
-    const client = google.accounts.oauth2.initCodeClient({
-      client_id: '21514234895-keiqos567ifvs4hjkg3l1q5mvun8lri0.apps.googleusercontent.com',
-      scope: 'email profile openid',
-      ux_mode: 'popup',
-      callback: async (response) => {
-        // Aqui você receberá o código de autorização do Google
-        console.log('Código de autorização:', response.code);
-        
-        // Exemplo: Envie o código para seu backend ou use-o para buscar dados do perfil do usuário.
-        // Nesta demonstração, simularemos uma resposta com dados fictícios retornados do seu servidor.
-        // Substitua esta parte pela chamada real ao seu endpoint que troca o code pelo perfil do usuário.
-        const dadosUsuario = {
-          nome: "Nome Exemplo",
-          email: "exemplo@gmail.com",
-          id: "1234567890"
-        };
+    // Variável global para o cliente do Google
+    let client;
 
-        // Preenche os campos do formulário com os dados do Google
-        document.getElementById('username').value = dadosUsuario.nome;
-        document.getElementById('email').value = dadosUsuario.email;
-        // Caso deseje salvar o ID do Google em algum campo oculto ou similar, crie e preencha o campo
-        console.log("Dados do Google preenchidos no formulário.");
-      }
-    });
-
-    function handleGoogleSignIn() {
-      client.requestCode();
+    // Função chamada quando o script do Google é carregado
+    function initGoogleSignIn() {
+      // Inicializa o cliente do Google
+      client = google.accounts.oauth2.initCodeClient({
+        client_id: '21514234895-keiqos567ifvs4hjkg3l1q5mvun8lri0.apps.googleusercontent.com',
+        scope: 'email profile openid',
+        ux_mode: 'popup',
+        callback: (response) => {
+          console.log('Código de autorização:', response.code);
+          // Simule a obtenção dos dados do usuário (ou envie para o backend para troca de tokens)
+          const dadosUsuario = {
+            nome: "Nome Exemplo",
+            email: "exemplo@gmail.com",
+            id: "1234567890"
+          };
+          // Preenche o formulário com os dados obtidos
+          document.getElementById('username').value = dadosUsuario.nome;
+          document.getElementById('email').value = dadosUsuario.email;
+          console.log("Dados do Google preenchidos no formulário.");
+        }
+      });
     }
 
-    // Manipula o envio do formulário de registro utilizando o Parse (Back4App)
-    document.getElementById("registerForm").addEventListener("submit", async function(e) {
-      e.preventDefault();
-      const username = document.getElementById("username").value.trim();
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value;
-      const confirmPassword = document.getElementById("confirmPassword").value;
-      const cpf = document.getElementById("cpf").value.trim();
-      const endereco = document.getElementById("endereco").value.trim();
-      const telefone = document.getElementById("telefone").value.trim();
-      
-      if(password !== confirmPassword) {
-        alert("As senhas não conferem.");
-        return;
+    // Função chamada quando o botão de login é clicado
+    function handleGoogleSignIn() {
+      if(client) {
+        client.requestCode();
+      } else {
+        console.error("Google client não foi inicializado ainda.");
       }
-      
-      const user = new Parse.User();
-      user.set("username", username);
-      user.set("email", email);
-      user.set("password", password);
-      // Campos opcionais
-      if(cpf !== "") user.set("cpf", cpf);
-      if(endereco !== "") user.set("endereco", endereco);
-      if(telefone !== "") user.set("telefone", telefone);
-      
-      try {
-        await user.signUp();
-        alert("Registro realizado com sucesso!");
-        window.location.href = "index.html";
-      } catch(error) {
-        alert("Erro no registro: " + error.message);
-      }
-    });
+    }
   </script>
 </body>
 </html>
