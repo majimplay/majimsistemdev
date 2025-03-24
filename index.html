@@ -67,46 +67,51 @@
         client_id: '21514234895-keiqos567ifvs4hjkg3l1q5mvun8lri0.apps.googleusercontent.com',
         scope: 'email profile openid',
         ux_mode: 'popup',
+        // Ao receber o código, envia-o para o backend para obter os dados reais do usuário
         callback: async (response) => {
           console.log('Código de autorização:', response.code);
-          /* 
-          
-            Normalmente, você enviaria esse código para seu backend para trocar por tokens
-            e obter os dados reais do usuário. Para exemplificar, simulamos os dados:
-          */
-          const dadosUsuario = {
-            nome: "Nome Exemplo",
-            email: "exemplo@gmail.com",
-            id: "1234567890",  // ID do usuário fornecido pelo Google
-            picture: "https://via.placeholder.com/150"
-          };
 
-try {
-  // Chama a função que consulta o usuário por email
-  const result = await Parse.Cloud.run("getUserByEmail", { email: dadosUsuario.email });
-  
-  if (result.exists) {
-    alert("Usuário encontrado. Efetuando login...");
-    // Redirecione ou armazene a sessão do usuário
-    window.location.href = "index.html";
-  } else {
-    // Se não existir, cria um novo usuário com os dados do Google
-    const randomPassword = Math.random().toString(36).slice(-8);
-    const user = new Parse.User();
-    user.set("username", dadosUsuario.email);
-    user.set("email", dadosUsuario.email);
-    user.set("password", randomPassword); // Senha gerada automaticamente
-    user.set("nome", dadosUsuario.nome);
-    user.set("googleId", dadosUsuario.id);
-    user.set("picture", dadosUsuario.picture);
+          try {
+            // Envia o código para o seu backend (por exemplo, uma Cloud Function no Back4App)
+            // que troca o código pelo token e extrai os dados reais do usuário.
+            const tokenResponse = await fetch('https://seu-backend.com/exchange-code', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ code: response.code })
+            });
+            const tokenData = await tokenResponse.json();
+            // tokenData.userData deve conter os dados reais do usuário, como:
+            // { nome, email, id, picture, given_name, family_name, etc. }
+            const dadosUsuario = tokenData.userData;
+            console.log("Dados reais do usuário:", dadosUsuario);
 
-    await user.signUp();
-    alert("Usuário registrado e logado com sucesso!");
-    window.location.href = "index.html";
-  }
-} catch (error) {
-  alert("Erro: " + error.message);
-}
+            // Agora, verifique se o usuário já existe no Back4App usando uma Cloud Function,
+            // conforme já demonstrado anteriormente, ou outro mecanismo seguro.
+            const result = await Parse.Cloud.run("getUserByEmail", { email: dadosUsuario.email });
+            let user;
+            if (result.exists) {
+              alert("Usuário encontrado. Efetuando login...");
+              // Lógica para login: aqui você pode armazenar a sessão ou redirecionar o usuário
+              window.location.href = "index.html";
+            } else {
+              // Se o usuário não existir, cria um novo registro com os dados reais obtidos
+              const randomPassword = Math.random().toString(36).slice(-8);
+              user = new Parse.User();
+              user.set("username", dadosUsuario.email);
+              user.set("email", dadosUsuario.email);
+              user.set("password", randomPassword);
+              user.set("nome", dadosUsuario.name);         // Nome completo
+              user.set("googleId", dadosUsuario.sub);        // ID do usuário (sub)
+              user.set("picture", dadosUsuario.picture);     // URL da foto do perfil
+              // Você pode adicionar outros campos conforme os dados recebidos
+
+              await user.signUp();
+              alert("Usuário registrado e logado com sucesso!");
+              window.location.href = "index.html";
+            }
+          } catch (error) {
+            alert("Erro: " + error.message);
+          }
         }
       });
     }
