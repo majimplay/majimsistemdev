@@ -2,9 +2,17 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Registro de Usuário com Google</title>
+  <title>Login com Google e Back4App</title>
   <style>
-    /* Seus estilos aqui */
+    body {
+      font-family: sans-serif;
+      background: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
     .google-btn {
       background: white;
       color: #757575;
@@ -17,7 +25,6 @@
       display: flex;
       align-items: center;
       transition: background-color 0.3s;
-      margin: 0 auto 20px;
     }
     .google-btn:hover {
       background: #f8f8f8;
@@ -29,13 +36,12 @@
       margin-right: 12px;
     }
   </style>
-  <!-- Inclua o SDK do Parse se necessário -->
+  <!-- SDK do Parse para conectar com o Back4App -->
   <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
-  <!-- Carrega o script do Google e chama initGoogleSignIn() quando carregado -->
+  <!-- Biblioteca do Google Identity Services -->
   <script src="https://accounts.google.com/gsi/client" async defer onload="initGoogleSignIn()"></script>
 </head>
 <body>
-  <!-- Botão de Login com Google -->
   <button class="google-btn" onclick="handleGoogleSignIn()">
     <svg class="google-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
       <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
@@ -47,48 +53,72 @@
     Entrar com Google
   </button>
 
-  <!-- Seu formulário ou outros elementos -->
-  <form id="registerForm">
-    <label for="username">Nome de Usuário *</label>
-    <input type="text" id="username" required>
-    
-    <label for="email">Email *</label>
-    <input type="email" id="email" required>
-    
-    <!-- Outros campos do formulário -->
-    <button type="submit" class="btn">Registrar</button>
-  </form>
-
   <script>
+    // Inicializa o Parse com suas credenciais do Back4App
+    Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
+    Parse.serverURL = "https://parseapi.back4app.com";
+
     // Variável global para o cliente do Google
     let client;
 
-    // Função chamada quando o script do Google é carregado
+    // Função chamada quando o script do Google carrega
     function initGoogleSignIn() {
-      // Inicializa o cliente do Google
       client = google.accounts.oauth2.initCodeClient({
         client_id: '21514234895-keiqos567ifvs4hjkg3l1q5mvun8lri0.apps.googleusercontent.com',
         scope: 'email profile openid',
         ux_mode: 'popup',
-        callback: (response) => {
+        // Ao receber o código, envia-o para o backend para obter os dados reais do usuário
+        callback: async (response) => {
           console.log('Código de autorização:', response.code);
-          // Simule a obtenção dos dados do usuário (ou envie para o backend para troca de tokens)
-          const dadosUsuario = {
-            nome: "Nome Exemplo",
-            email: "exemplo@gmail.com",
-            id: "1234567890"
-          };
-          // Preenche o formulário com os dados obtidos
-          document.getElementById('username').value = dadosUsuario.nome;
-          document.getElementById('email').value = dadosUsuario.email;
-          console.log("Dados do Google preenchidos no formulário.");
+
+          try {
+            // Envia o código para o seu backend (por exemplo, uma Cloud Function no Back4App)
+            // que troca o código pelo token e extrai os dados reais do usuário.
+            const tokenResponse = await fetch('https://seu-backend.com/exchange-code', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ code: response.code })
+            });
+            const tokenData = await tokenResponse.json();
+            // tokenData.userData deve conter os dados reais do usuário, como:
+            // { nome, email, id, picture, given_name, family_name, etc. }
+            const dadosUsuario = tokenData.userData;
+            console.log("Dados reais do usuário:", dadosUsuario);
+
+            // Agora, verifique se o usuário já existe no Back4App usando uma Cloud Function,
+            // conforme já demonstrado anteriormente, ou outro mecanismo seguro.
+            const result = await Parse.Cloud.run("getUserByEmail", { email: dadosUsuario.email });
+            let user;
+            if (result.exists) {
+              alert("Usuário encontrado. Efetuando login...");
+              // Lógica para login: aqui você pode armazenar a sessão ou redirecionar o usuário
+              window.location.href = "index.html";
+            } else {
+              // Se o usuário não existir, cria um novo registro com os dados reais obtidos
+              const randomPassword = Math.random().toString(36).slice(-8);
+              user = new Parse.User();
+              user.set("username", dadosUsuario.email);
+              user.set("email", dadosUsuario.email);
+              user.set("password", randomPassword);
+              user.set("nome", dadosUsuario.name);         // Nome completo
+              user.set("googleId", dadosUsuario.sub);        // ID do usuário (sub)
+              user.set("picture", dadosUsuario.picture);     // URL da foto do perfil
+              // Você pode adicionar outros campos conforme os dados recebidos
+
+              await user.signUp();
+              alert("Usuário registrado e logado com sucesso!");
+              window.location.href = "index.html";
+            }
+          } catch (error) {
+            alert("Erro: " + error.message);
+          }
         }
       });
     }
 
-    // Função chamada quando o botão de login é clicado
+    // Função acionada pelo clique no botão do Google
     function handleGoogleSignIn() {
-      if(client) {
+      if (client) {
         client.requestCode();
       } else {
         console.error("Google client não foi inicializado ainda.");
