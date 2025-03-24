@@ -102,7 +102,6 @@
       background: #f0f8ff;
       border-radius: 4px;
     }
-    /* Novos estilos adicionados */
     .order-controls {
       display: flex;
       flex-direction: column;
@@ -180,7 +179,6 @@
     </table>
   </div>
 
-  <!-- Formulário de Endereço -->
   <button class="toggle-address" onclick="toggleAddressForm()">Alterar CEP/Endereço</button>
   <div class="address-form" id="addressForm">
     <h3>Configurações de Endereço</h3>
@@ -200,6 +198,15 @@
     Parse.serverURL = "https://parseapi.back4app.com";
 
     const Produto = Parse.Object.extend("Produto");
+
+    // Função Debounce para edição em tempo real
+    function debounce(func, timeout = 300) {
+      let timer;
+      return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => { func.apply(this, args); }, timeout);
+      };
+    }
 
     async function initPage() {
       const user = Parse.User.current();
@@ -294,6 +301,17 @@
       }
     }
 
+    async function updateProductField(id, fieldName, value) {
+      const query = new Parse.Query(Produto);
+      try {
+        const produto = await query.get(id);
+        produto.set(fieldName, value);
+        await produto.save();
+      } catch (error) {
+        alert("Erro ao atualizar: " + error.message);
+      }
+    }
+
     async function moveProductUp(id) {
       const query = new Parse.Query(Produto);
       const currentProduct = await query.get(id);
@@ -368,12 +386,80 @@
       }
     });
 
+    async function deleteProduct(id) {
+      if (!confirm("Deseja realmente excluir este produto?")) return;
+      const query = new Parse.Query(Produto);
+      try {
+        const produto = await query.get(id);
+        await produto.destroy();
+        loadProducts();
+      } catch (error) {
+        alert("Erro ao excluir produto: " + error.message);
+      }
+    }
+
+    function editProduct(id) {
+      window.location.href = `editar.html?id=${id}`;
+    }
+
+    async function addImage(produtoId) {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        try {
+          const parseFile = new Parse.File(file.name, file);
+          await parseFile.save();
+          const query = new Parse.Query(Produto);
+          const produto = await query.get(produtoId);
+          const imagens = produto.get("imagens") || [];
+          imagens.push(parseFile.url());
+          produto.set("imagens", imagens);
+          await produto.save();
+          loadProducts();
+        } catch (error) {
+          alert("Erro ao adicionar imagem: " + error.message);
+        }
+      };
+      input.click();
+    }
+
+    async function removeImage(produtoId, index) {
+      if (!confirm("Deseja realmente remover esta imagem?")) return;
+      try {
+        const query = new Parse.Query(Produto);
+        const produto = await query.get(produtoId);
+        let imagens = produto.get("imagens") || [];
+        imagens.splice(index, 1);
+        produto.set("imagens", imagens);
+        await produto.save();
+        loadProducts();
+      } catch (error) {
+        alert("Erro ao remover imagem: " + error.message);
+      }
+    }
+
+    document.getElementById('productImage').addEventListener('change', function(event) {
+      const file = event.target.files[0];
+      const preview = document.getElementById('imagePreview');
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          preview.src = e.target.result;
+          preview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      } else {
+        preview.src = '';
+        preview.style.display = 'none';
+      }
+    });
+
     function toggleAddressForm() {
       document.getElementById('addressForm').classList.toggle('show');
     }
-
-    // Restante das funções permanecem iguais (updateProductField, debounce, deleteProduct, etc.)
-    // ... (Manter as demais funções como no código original) ...
 
     initPage();
   </script>
