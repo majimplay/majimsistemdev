@@ -292,22 +292,23 @@ async function toggleAdminButton() {
     }
 
     // Carrega os produtos do Parse e exibe com carrossel
-    async function loadProducts() {
-      const Produto = Parse.Object.extend("Produto");
-      const query = new Parse.Query(Produto);
+  async function loadProducts() {
+  const Produto = Parse.Object.extend("Produto");
+  const query = new Parse.Query(Produto);
+  query.ascending("order"); // Ordenação pelo campo order
 
-      try {
-        const results = await query.find();
-        const grid = document.getElementById("productGrid");
-        grid.innerHTML = "";
+  try {
+    const results = await query.find();
+    const grid = document.getElementById("productGrid");
+    grid.innerHTML = "";
 
-        results.forEach(produto => {
-          const produtoId = produto.id;
-          const imagens = produto.get("imagens") || [];
-          const nome = produto.get("nome");
-          const preco = parseFloat(produto.get("preco")).toFixed(2);
-          const descricao = produto.get("descricao");
-
+    results.forEach(produto => {
+      const produtoId = produto.id;
+      const imagens = produto.get("imagens") || [];
+      const nome = produto.get("nome");
+      const preco = parseFloat(produto.get("preco")).toFixed(2);
+      const descricao = produto.get("descricao");
+	    
           // Cria o container do card do produto
           const card = document.createElement("div");
           card.className = "product-card";
