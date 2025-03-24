@@ -202,17 +202,6 @@
     transform: translateY(-2px);
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
   }
-	   .product-order-badge {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      background: rgba(0,123,255,0.9);
-      color: white;
-      padding: 5px 10px;
-      border-radius: 15px;
-      font-size: 0.8em;
-      z-index: 2;
-      }
 </style>
 	
   </style>
@@ -304,48 +293,40 @@ async function toggleAdminButton() {
 
     // Carrega os produtos do Parse e exibe com carrossel
     async function loadProducts() {
-      try {
-        const Produto = Parse.Object.extend("Produto");
-        const query = new Parse.Query(Produto);
-        query.ascending("order"); // Ordenação pelo campo 'order'
-        
-        const results = await query.find();
+      const Produto = Parse.Object.extend("Produto");
+      const query = new Parse.Query(Produto);
 
+      try {
+        const results = await query.find();
         const grid = document.getElementById("productGrid");
-        grid.innerHTML = '';
+        grid.innerHTML = "";
 
         results.forEach(produto => {
-          const card = createProductCard(produto);
-          grid.appendChild(card);
-          carouselIndexes[produto.id] = 0;
-        });
+          const produtoId = produto.id;
+          const imagens = produto.get("imagens") || [];
+          const nome = produto.get("nome");
+          const preco = parseFloat(produto.get("preco")).toFixed(2);
+          const descricao = produto.get("descricao");
 
-      } catch (error) {
-        console.error("Erro ao carregar produtos:", error);
-        alert("Erro ao carregar produtos!");
-      }
-    }
+          // Cria o container do card do produto
+          const card = document.createElement("div");
+          card.className = "product-card";
 
-    // Criar card de produto
-    function createProductCard(produto) {
-      const card = document.createElement("div");
-      card.className = "product-card";
-      
-      const images = produto.get("imagens") || [];
-      const carouselHTML = createCarouselHTML(produto.id, images);
-      
-      card.innerHTML = `
-        <div class="product-order-badge">Posição #${produto.get("order")}</div>
-        ${carouselHTML}
-        <h3>${produto.get("nome")}</h3>
-        <p>R$ ${parseFloat(produto.get("preco")).toFixed(2)}</p>
-        ${produto.get("descricao") ? `<p>${produto.get("descricao")}</p>` : ''}
-        <button onclick="addToCart('${produto.id}')">Comprar</button>
-      `;
-
-      return card;
-    }
-
+          // Cria os itens do carrossel
+          let carouselItemsHTML = "";
+          if (imagens.length === 0) {
+            carouselItemsHTML = `
+              <div class="carousel-item">
+                <img src="https://via.placeholder.com/150?text=Sem+Imagem" alt="Sem Imagem">
+              </div>
+            `;
+          } else {
+            carouselItemsHTML = imagens.map(url => `
+              <div class="carousel-item">
+                <a href="${url}" target="_blank" rel="noopener noreferrer"><img src="${url}" alt="${nome}"></a>
+              </div>
+            `).join("");
+          }
 
           // Cria o carrossel
           const carouselHTML = `
