@@ -1,0 +1,52 @@
+// Configurações de segurança
+Parse.Cloud.define('isAdmin', async (request) => {
+    // Verificação reforçada
+    if (!request.user) {
+        throw new Parse.Error(141, 'Sessão inválida');
+    }
+
+    // Atualizar dados do usuário
+    await request.user.fetch({ useMasterKey: true });
+
+    // Query segura
+    const roleQuery = new Parse.Query(Parse.Role)
+        .equalTo('name', 'admin')
+        .equalTo('users', request.user);
+
+    const count = await roleQuery.count({ useMasterKey: true });
+    
+    // Auditoria
+    Parse.Cloud.logger.info(`Verificação admin - User: ${request.user.id} | IP: ${request.ip} | Admin: ${count > 0}`);
+    
+    return count > 0;
+});
+ // emeio
+Parse.Cloud.define("getUserByEmail", async (request) => {
+  const email = request.params.email;
+  const query = new Parse.Query(Parse.User);
+  query.equalTo("email", email);
+  const user = await query.first({ useMasterKey: true });
+  if (user) {
+    return { exists: true, userId: user.id };
+  } else {
+    return { exists: false };
+  }
+});
+
+// Middleware de segurança global
+Parse.Cloud.beforeFind((request) => {
+    if (request.className === '_User' && !request.master) {
+        throw new Parse.Error(119, 'Operação proibida');
+    }
+});
+
+// Função com proteção adicional
+Parse.Cloud.define("getUserCount", async (request) => {
+    if (!request.master) {
+        const isAdmin = await Parse.Cloud.run('isAdmin', {}, { sessionToken: request.user.getSessionToken() });
+        if (!isAdmin) throw new Parse.Error(119, 'Acesso negado');
+    }
+    
+    const query = new Parse.Query("_User");
+    return query.count({ useMasterKey: true });
+});
