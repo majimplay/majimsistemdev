@@ -86,6 +86,21 @@
     // Event Listener para o botão
     document.getElementById('googleSignInButton')
       .addEventListener('click', handleGoogleSignIn);
+
+    // Teste manual da Cloud Function
+async function testCloudFunction() {
+  try {
+    const result = await Parse.Cloud.run('handleGoogleAuth', {
+      code: 'test-code' // Simula um código
+    });
+    console.log('Resposta da Cloud Function:', result);
+  } catch (error) {
+    console.error('Erro no teste:', error);
+  }
+}
+
+// Chame a função manualmente no console
+testCloudFunction();
   </script>
 </body>
 </html>
