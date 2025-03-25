@@ -47,7 +47,19 @@
       });
       client.requestCode();
     }
-
+    
+// Após receber a resposta da Cloud Function
+if (result.sessionToken) {
+  // Fazer login com o token da sessão
+  try {
+    await Parse.User.become(result.sessionToken);
+    const currentUser = Parse.User.current();
+    console.log("Usuário logado:", currentUser);
+    window.location.href = '/dashboard.html';
+  } catch (error) {
+    console.error('Erro no login:', error);
+  }
+}
     document.getElementById('googleSignInButton').addEventListener('click', handleGoogleSignIn);
   </script>
 </body>
