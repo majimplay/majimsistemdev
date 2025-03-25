@@ -246,55 +246,16 @@
   </div>
 
   <script>
+ <script>
     // Inicializa o Parse
     Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
     Parse.serverURL = "https://parseapi.back4app.com";
 
-
-// Adicione estas funções adimin ao JavaScript
-async function checkIfUserIsAdmin(user) {
-  const roleQuery = new Parse.Query(Parse.Role);
-  roleQuery.equalTo("name", "admin");
-  roleQuery.equalTo("users", user);
-  const count = await roleQuery.count();
-  return count > 0;
-}
-
-async function toggleAdminButton() {
-  const adminPanel = document.getElementById("adminPanel");
-  const currentUser = Parse.User.current();
-  
-  if (currentUser) {
-    const isAdmin = await checkIfUserIsAdmin(currentUser);
-    adminPanel.style.display = isAdmin ? "flex" : "none";
-  } else {
-    adminPanel.style.display = "none";
-  }
-}
-
-
-
-    // Guarda o índice atual de cada carrossel
-    const carouselIndexes = {};
-
-    // Atualiza a interface de autenticação
-    function updateAuthUI() {
-      const currentUser = Parse.User.current();
-      if (currentUser) {
-        document.getElementById("loginArea").style.display = "none";
-        document.getElementById("userArea").style.display = "flex";
-        // Adiciona o emoji de boas-vindas
-        document.getElementById("welcomeUser").textContent = "Bem-vindo 😘, " + currentUser.get("username") + "!";
-      } else {
-        document.getElementById("loginArea").style.display = "flex";
-        document.getElementById("userArea").style.display = "none";
-      }
-    }
-
-    // Carrega os produtos do Parse e exibe com carrossel
+    // Função modificada para ordenação correta
     async function loadProducts() {
       const Produto = Parse.Object.extend("Produto");
       const query = new Parse.Query(Produto);
+      query.ascending("order"); // LINHA ADICIONADA PARA ORDENAÇÃO
 
       try {
         const results = await query.find();
