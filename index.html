@@ -59,7 +59,7 @@
     async function handleGoogleSignIn() {
       const client = google.accounts.oauth2.initCodeClient({
         client_id: '21514234895-keiqos567ifvs4hjkg3l1q5mvun8lri0.apps.googleusercontent.com',
-        scope: 'email profile openid',
+        scope: 'openid email profile',
         ux_mode: 'popup',
         callback: async (response) => {
           try {
