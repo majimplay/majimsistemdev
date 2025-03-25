@@ -36,7 +36,6 @@
       border: none;
       border-radius: 3px;
     }
-    /* Botões com borda e efeito hover */
     .login-form button,
     .user-info button,
     .product-card button {
@@ -46,7 +45,6 @@
       cursor: pointer;
       transition: background-color 0.3s, border-color 0.3s;
     }
-    /* Botão Entrar */
     .login-form button {
       background: #28a745;
       color: white;
@@ -55,7 +53,6 @@
       background: #218838;
       border-color: #1e7e34;
     }
-    /* Link de Esqueci a Senha e Registrar (estilizados como botões) */
     .login-form a {
       margin-left: 10px;
       color: white;
@@ -91,7 +88,6 @@
       background: #c82333;
       border-color: #bd2130;
     }
-    /* Container e produtos */
     .container {
       max-width: 1000px;
       margin: 20px auto;
@@ -127,7 +123,6 @@
       background: #218838;
       border-color: #1e7e34;
     }
-    /* Estilos do carrossel de imagens */
     .carousel-container {
       position: relative;
       overflow: hidden;
@@ -175,47 +170,37 @@
     .carousel-button.next {
       right: 5px;
     }
-	
-	 /* Estilos do painel admin */
-  .admin-panel {
-    display: none;
-    justify-content: center;
-    margin: 10px 0;
-    padding: 10px;
-    background: rgba(0,123,255,0.1);
-  }
-  
-  .admin-panel-btn {
-    padding: 8px 15px;
-    background: #007BFF;
-    color: white;
-    text-decoration: none;
-    border-radius: 5px;
-    border: 2px solid transparent;
-    transition: all 0.3s ease;
-    font-weight: bold;
-  }
-
-  .admin-panel-btn:hover {
-    background: #0056b3;
-    border-color: #004085;
-    transform: translateY(-2px);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-  }
-</style>
-	
+    .admin-panel {
+      display: none;
+      justify-content: center;
+      margin: 10px 0;
+      padding: 10px;
+      background: rgba(0,123,255,0.1);
+    }
+    .admin-panel-btn {
+      padding: 8px 15px;
+      background: #007BFF;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      border: 2px solid transparent;
+      transition: all 0.3s ease;
+      font-weight: bold;
+    }
+    .admin-panel-btn:hover {
+      background: #0056b3;
+      border-color: #004085;
+      transform: translateY(-2px);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
   </style>
-  <!-- SDK do Parse -->
-  <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
 </head>
 <body>
-  <!-- Cabeçalho -->
   <header>
     <div class="logo">
       <h2>Minha Loja🎁</h2>
     </div>
     <div class="auth-area">
-      <!-- Área de login (usuário não autenticado) -->
       <div id="loginArea" class="login-form">
         <input type="text" id="usernameInput" placeholder="Nome">
         <input type="password" id="passwordInput" placeholder="Senha">
@@ -223,10 +208,8 @@
         <a href="#" id="forgotPasswordLink" rel="noopener noreferrer">Esqueci a senha 🤦‍♀️</a>
         <a href="registro.html" id="registerLink" rel="noopener noreferrer">Registrar 🎫</a>
       </div>
-      <!-- Área do usuário autenticado -->
       <div id="userArea" class="user-info" style="display:none;">
         <span id="welcomeUser"></span>
-        <!-- Botão Minha Conta em vez do carrinho -->
         <a href="minhaconta.html" id="minhaContaLink" rel="noopener noreferrer">Minha Conta 🛒</a>
         <button id="logoutBtn">Sair 🚘</button>
       </div>
@@ -234,30 +217,59 @@
   </header>
   
   <div id="adminPanel" class="admin-panel">
-  <a href="painelcompleto.html" class="admin-panel-btn" rel="noopener noreferrer">Painel de Controle 👑</a>
-</div>
+    <a href="painelcompleto.html" class="admin-panel-btn" rel="noopener noreferrer">Painel de Controle 👑</a>
+  </div>
 
-  <!-- Conteúdo principal: exibição dos produtos com carrossel -->
   <div class="container">
     <h1>Produtos à Venda</h1>
-    <div id="productGrid" class="product-grid">
-      <!-- Cards de produtos serão adicionados dinamicamente -->
-    </div>
+    <div id="productGrid" class="product-grid"></div>
   </div>
 
   <script>
- <script>
     // Inicializa o Parse
     Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
     Parse.serverURL = "https://parseapi.back4app.com";
 
-    // Função modificada para ordenação correta
-    async function loadProducts() {
-      const Produto = Parse.Object.extend("Produto");
-      const query = new Parse.Query(Produto);
-      query.ascending("order"); // LINHA ADICIONADA PARA ORDENAÇÃO
+    // Variável ESSENCIAL que estava faltando
+    const carouselIndexes = {};
 
+    async function checkIfUserIsAdmin(user) {
+      const roleQuery = new Parse.Query(Parse.Role);
+      roleQuery.equalTo("name", "admin");
+      roleQuery.equalTo("users", user);
+      return await roleQuery.count() > 0;
+    }
+
+    async function toggleAdminButton() {
+      const adminPanel = document.getElementById("adminPanel");
+      const currentUser = Parse.User.current();
+      if (currentUser) {
+        const isAdmin = await checkIfUserIsAdmin(currentUser);
+        adminPanel.style.display = isAdmin ? "flex" : "none";
+      } else {
+        adminPanel.style.display = "none";
+      }
+    }
+
+    function updateAuthUI() {
+      const currentUser = Parse.User.current();
+      if (currentUser) {
+        document.getElementById("loginArea").style.display = "none";
+        document.getElementById("userArea").style.display = "flex";
+        document.getElementById("welcomeUser").textContent = "Bem-vindo 😘, " + currentUser.get("username") + "!";
+      } else {
+        document.getElementById("loginArea").style.display = "flex";
+        document.getElementById("userArea").style.display = "none";
+      }
+    }
+
+    // Função de carregamento de produtos CORRIGIDA
+    async function loadProducts() {
       try {
+        const Produto = Parse.Object.extend("Produto");
+        const query = new Parse.Query(Produto);
+        query.ascending("order"); // Ordenação pelo campo order
+
         const results = await query.find();
         const grid = document.getElementById("productGrid");
         grid.innerHTML = "";
@@ -265,111 +277,91 @@
         results.forEach(produto => {
           const produtoId = produto.id;
           const imagens = produto.get("imagens") || [];
-          const nome = produto.get("nome");
-          const preco = parseFloat(produto.get("preco")).toFixed(2);
+          const nome = produto.get("nome") || "Produto sem nome";
+          const preco = produto.get("preco") ? parseFloat(produto.get("preco")).toFixed(2) : "0.00";
           const descricao = produto.get("descricao");
 
-          // Cria o container do card do produto
           const card = document.createElement("div");
           card.className = "product-card";
 
-          // Cria os itens do carrossel
-          let carouselItemsHTML = "";
-          if (imagens.length === 0) {
-            carouselItemsHTML = `
+          let carouselItemsHTML = imagens.length === 0 ? 
+            `<div class="carousel-item"><img src="https://via.placeholder.com/150?text=Sem+Imagem" alt="Sem Imagem"></div>` :
+            imagens.map(url => `
               <div class="carousel-item">
-                <img src="https://via.placeholder.com/150?text=Sem+Imagem" alt="Sem Imagem">
-              </div>
-            `;
-          } else {
-            carouselItemsHTML = imagens.map(url => `
-              <div class="carousel-item">
-                <a href="${url}" target="_blank" rel="noopener noreferrer"><img src="${url}" alt="${nome}"></a>
+                <a href="${url}" target="_blank" rel="noopener noreferrer">
+                  <img src="${url}" alt="${nome}">
+                </a>
               </div>
             `).join("");
-          }
 
-          // Cria o carrossel
-          const carouselHTML = `
+          card.innerHTML = `
             <div class="carousel-container">
               <button class="carousel-button prev" onclick="moveCarousel('${produtoId}', -1)">&#10094;</button>
-              <div class="carousel-track" id="track-${produtoId}">
-                ${carouselItemsHTML}
-              </div>
+              <div class="carousel-track" id="track-${produtoId}">${carouselItemsHTML}</div>
               <button class="carousel-button next" onclick="moveCarousel('${produtoId}', 1)">&#10095;</button>
             </div>
-          `;
-
-          // Conteúdo do card
-          card.innerHTML = `
-            ${carouselHTML}
             <h3>${nome}</h3>
-            ${descricao ? `<p>${descricao}</p>` : ""}
+            ${descricao ? `<p>${descricao}</p>` : ''}
             <p>R$ ${preco}</p>
             <button onclick="addToCart('${produtoId}')">Comprar</button>
           `;
 
-          // Índice inicial do carrossel para este produto
           carouselIndexes[produtoId] = 0;
           grid.appendChild(card);
         });
 
       } catch (error) {
-        console.error("Erro ao carregar produtos: ", error);
+        console.error("Erro ao carregar produtos:", error);
+        alert("Erro ao carregar produtos. Verifique o console para detalhes.");
       }
     }
 
-    // Move o carrossel de um produto
     function moveCarousel(produtoId, direction) {
       const track = document.getElementById(`track-${produtoId}`);
+      if (!track) return;
+
       const items = track.querySelectorAll(".carousel-item");
       const totalItems = items.length;
+      if (totalItems === 0) return;
 
-      carouselIndexes[produtoId] += direction;
-      if (carouselIndexes[produtoId] < 0) {
-        carouselIndexes[produtoId] = 0;
-      } else if (carouselIndexes[produtoId] > totalItems - 1) {
-        carouselIndexes[produtoId] = totalItems - 1;
-      }
+      carouselIndexes[produtoId] = (carouselIndexes[produtoId] + direction + totalItems) % totalItems;
       const offset = -carouselIndexes[produtoId] * 100;
       track.style.transform = `translateX(${offset}%)`;
     }
 
-    // Adiciona o ID do produto ao carrinho do usuário (armazenado no atributo "carrinhovetor")
     async function addToCart(productId) {
       const currentUser = Parse.User.current();
-      if (!currentUser) {
-        alert("Você precisa estar logado para adicionar produtos ao carrinho.");
-        return;
-      }
+      if (!currentUser) return alert("Faça login para adicionar ao carrinho!");
+
       try {
-        let carrinho = currentUser.get("carrinhovetor") || [];
+        const user = currentUser;
+        let carrinho = user.get("carrinhovetor") || [];
         carrinho.push(productId);
-        currentUser.set("carrinhovetor", carrinho);
-        await currentUser.save();
+        user.set("carrinhovetor", carrinho);
+        await user.save();
         alert("Produto adicionado ao carrinho!");
       } catch (error) {
-        console.error("Erro ao adicionar ao carrinho: ", error);
+        console.error("Erro ao adicionar ao carrinho:", error);
       }
     }
 
-    // Função de login
-    document.getElementById("loginBtn").addEventListener("click", async function() {
-      const username = document.getElementById("usernameInput").value;
-      const password = document.getElementById("passwordInput").value;
+    // Event Listeners
+    document.getElementById("loginBtn").addEventListener("click", async () => {
       try {
-        await Parse.User.logIn(username, password);
+        await Parse.User.logIn(
+          document.getElementById("usernameInput").value,
+          document.getElementById("passwordInput").value
+        );
         updateAuthUI();
-		 await toggleAdminButton();
-        alert("Login realizado com sucesso!");
+        await toggleAdminButton();
         loadProducts();
+        alert("Login realizado com sucesso!");
       } catch (error) {
         alert("Erro no login: " + error.message);
       }
     });
 
-    // Recuperação de senha
-    document.getElementById("forgotPasswordLink").addEventListener("click", async function(e) {
+    document.getElementById("forgotPasswordLink").addEventListener("click", async (e) => {
       e.preventDefault();
       const email = prompt("Digite seu email para recuperação de senha:");
       if (email) {
@@ -382,27 +374,21 @@
       }
     });
 
-    // Redireciona para a página de registro
-    document.getElementById("registerLink").addEventListener("click", function(e) {
-      e.preventDefault();
-      window.location.href = "registro.html";
-    });
-
-    // Função de logout
-    document.getElementById("logoutBtn").addEventListener("click", async function() {
+    document.getElementById("logoutBtn").addEventListener("click", async () => {
       try {
         await Parse.User.logOut();
         updateAuthUI();
-		await toggleAdminButton();
+        await toggleAdminButton();
+        loadProducts();
         alert("Você saiu da conta.");
       } catch (error) {
         alert("Erro ao sair: " + error.message);
       }
     });
 
-    // Inicializa a página
+    // Inicialização
     updateAuthUI();
-	toggleAdminButton().catch(error => console.error(error));
+    toggleAdminButton();
     loadProducts();
   </script>
 </body>
