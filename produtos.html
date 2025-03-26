@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Produtos - Loja</title>
+  <!-- Adicione o Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <style>
+    /* [Manter os mesmos estilos CSS anteriores] */
+  </style>
+  <!-- SDK do Parse -->
+  <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Produtos à Venda</h1>
+    <div id="productGrid" class="product-grid"></div>
+  </div>
+
+  <script>
+    // Configuração do Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDlUQbbTP29VqBVmzOGHhfc67R1DTRPwxg",
+      authDomain: "gitautenticatio.firebaseapp.com",
+      databaseURL: "https://gitautenticatio-default-rtdb.firebaseio.com",
+      projectId: "gitautenticatio",
+      storageBucket: "gitautenticatio.firebasestorage.app",
+      messagingSenderId: "21514234895",
+      appId: "1:21514234895:web:d34dc4c44baf586d2cc77a"
+    };
+    
+    // Inicializar Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const database = firebase.database();
+
+    // Configuração do Parse
+    Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
+    Parse.serverURL = "https://parseapi.back4app.com";
+
+    let currentUser = null;
+    const carouselIndexes = {};
+
+    // Monitorar estado de autenticação
+    auth.onAuthStateChanged(user => {
+      currentUser = user;
+    });
+
+    async function loadProducts() {
+      const Produto = Parse.Object.extend("Produto");
+      const query = new Parse.Query(Produto);
+
+      try {
+        const results = await query.find();
+        const grid = document.getElementById("productGrid");
+        grid.innerHTML = "";
+
+        results.forEach(produto => {
+          const produtoId = produto.id;
+          const imagens = produto.get("imagens") || [];
+          const nome = produto.get("nome");
+          const preco = parseFloat(produto.get("preco")).toFixed(2);
+
+          const card = document.createElement("div");
+          card.className = "product-card";
+
+          // [Manter o mesmo código do carrossel...]
+
+          card.innerHTML = `
+            ${carouselHTML}
+            <h3>${nome}</h3>
+            ${descricao ? `<p>${descricao}</p>` : ""}
+            <p>R$ ${preco}</p>
+            <button onclick="addToCart('${produtoId}')">Comprar</button>
+          `;
+
+          grid.appendChild(card);
+        });
+
+      } catch (error) {
+        console.error("Erro ao carregar produtos: ", error);
+      }
+    }
+
+    async function addToCart(productId) {
+      if (!currentUser) {
+        alert("Você precisa estar logado para adicionar produtos ao carrinho.");
+        return;
+      }
+
+      try {
+        const userRef = database.ref(`users/${currentUser.uid}/carrinho`);
+        const snapshot = await userRef.once('value');
+        const carrinho = snapshot.val() || {};
+        
+        // Adicionar ou incrementar quantidade
+        if (carrinho[productId]) {
+          carrinho[productId].quantidade += 1;
+        } else {
+          carrinho[productId] = {
+            produtoId,
+            quantidade: 1,
+            adicionadoEm: Date.now()
+          };
+        }
+
+        await userRef.set(carrinho);
+        alert("Produto adicionado ao carrinho!");
+      } catch (error) {
+        console.error("Erro ao atualizar carrinho:", error);
+        alert("Erro ao adicionar produto ao carrinho!");
+      }
+    }
+
+    // Função para carregar o carrinho do usuário
+    async function loadCart() {
+      if (!currentUser) return {};
+      
+      try {
+        const snapshot = await database.ref(`users/${currentUser.uid}/carrinho`).once('value');
+        return snapshot.val() || {};
+      } catch (error) {
+        console.error("Erro ao carregar carrinho:", error);
+        return {};
+      }
+    }
+
+    // Função para finalizar compra
+    async function finalizarCompra() {
+      if (!currentUser) {
+        alert("Faça login para finalizar a compra!");
+        return;
+      }
+
+      try {
+        const carrinho = await loadCart();
+        const produtosIds = Object.keys(carrinho);
+
+        // Registrar pedido no Parse
+        const Pedido = Parse.Object.extend("Pedido");
+        const pedido = new Pedido();
+        
+        pedido.set("clienteId", currentUser.uid);
+        pedido.set("produtos", produtosIds);
+        pedido.set("status", "pendente");
+        pedido.set("total", await calcularTotalCarrinho(carrinho));
+
+        await pedido.save();
+        
+        // Limpar carrinho
+        await database.ref(`users/${currentUser.uid}/carrinho`).remove();
+        alert("Compra finalizada com sucesso!");
+
+      } catch (error) {
+        console.error("Erro ao finalizar compra:", error);
+        alert("Erro ao processar pedido!");
+      }
+    }
+
+    // Função para calcular o total do carrinho
+    async function calcularTotalCarrinho(carrinho) {
+      const Produto = Parse.Object.extend("Produto");
+      const query = new Parse.Query(Produto);
+      query.containedIn("objectId", Object.keys(carrinho));
+      
+      const produtos = await query.find();
+      return produtos.reduce((total, produto) => {
+        const preco = produto.get("preco");
+        const quantidade = carrinho[produto.id].quantidade;
+        return total + (preco * quantidade);
+      }, 0);
+    }
+
+    // Carregar produtos ao iniciar
+    loadProducts();
+  </script>
+</body>
+</html>
