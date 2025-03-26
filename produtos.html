@@ -118,7 +118,7 @@
     <div id="productGrid" class="product-grid"></div>
   </div>
 
-  <!-- Carrinho Flutuante -->
+  <!-- Carrinho Flutuante Atualizado -->
   <div class="cart-info">
     <h3>Seu Carrinho 🛒</h3>
     <div id="cartItems"></div>
@@ -157,6 +157,7 @@
         loadCart();
       } else {
         document.getElementById('cartItems').innerHTML = 'Faça login para acessar o carrinho';
+        document.getElementById('cartTotal').textContent = '0.00';
       }
     });
 
@@ -174,7 +175,7 @@
           const produtoId = produto.id;
           const imagens = produto.get("imagens") || [];
           const nome = produto.get("nome");
-          const preco = parseFloat(produto.get("preco")).toFixed(2);
+          const preco = produto.get("preco");
           const descricao = produto.get("descricao");
 
           const card = document.createElement("div");
@@ -207,7 +208,7 @@
             ${carouselHTML}
             <h3>${nome}</h3>
             ${descricao ? `<p>${descricao}</p>` : ""}
-            <p>R$ ${preco}</p>
+            <p>R$ ${preco.toFixed(2)}</p>
             <button onclick="addToCart('${produtoId}')">Adicionar ao Carrinho</button>`;
 
           carouselIndexes[produtoId] = 0;
@@ -299,6 +300,9 @@
           return;
         }
 
+        // Calcular total corretamente
+        const total = await calcularTotalCarrinho(carrinho);
+
         // Registrar pedido no Parse
         const Pedido = Parse.Object.extend("Pedido");
         const pedido = new Pedido();
@@ -306,7 +310,7 @@
         pedido.set("clienteId", currentUser.uid);
         pedido.set("produtos", carrinho);
         pedido.set("status", "pendente");
-        pedido.set("total", document.getElementById('cartTotal').textContent);
+        pedido.set("total", total); // Número garantido
         
         await pedido.save();
         
@@ -316,8 +320,22 @@
         loadCart();
       } catch (error) {
         console.error("Erro ao finalizar compra:", error);
-        alert("Erro ao processar pedido!");
+        alert("Erro ao processar pedido! Verifique o console.");
       }
+    }
+
+    // Função de cálculo do total corrigida
+    async function calcularTotalCarrinho(carrinho) {
+      const Produto = Parse.Object.extend("Produto");
+      const query = new Parse.Query(Produto);
+      query.containedIn("objectId", Object.keys(carrinho));
+      
+      const produtos = await query.find();
+      return produtos.reduce((total, produto) => {
+        const preco = parseFloat(produto.get("preco"));
+        const quantidade = parseInt(carrinho[produto.id].quantidade);
+        return total + (preco * quantidade);
+      }, 0);
     }
 
     // Funções do Carrossel
