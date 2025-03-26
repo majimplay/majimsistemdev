@@ -174,10 +174,11 @@
     <a href="painelcompleto.html" class="admin-panel-btn" rel="noopener noreferrer">Painel de Controle 👑</a>
   </div>
 
-  <iframe src="produtosavenda.html"></iframe>
+  <!-- Iframe modificado com ID para controle dinâmico -->
+  <iframe id="mainContent" src="produtosoff.html"></iframe>
 
   <script>
-    // Suas credenciais do Firebase
+    // Configuração do Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyDlUQbbTP29VqBVmzOGHhfc67R1DTRPwxg",
       authDomain: "gitautenticatio.firebaseapp.com",
@@ -200,7 +201,14 @@
       if (user) {
         checkAdminStatus(user.uid);
       }
+      updateIframeContent(user); // Atualiza o iframe conforme o status
     });
+
+    // Função para atualizar o conteúdo do iframe
+    function updateIframeContent(user) {
+      const iframe = document.getElementById('mainContent');
+      iframe.src = user ? 'produtos.html' : 'produtosoff.html';
+    }
 
     // Login com Google
     document.getElementById('googleLoginBtn').addEventListener('click', async () => {
@@ -222,21 +230,17 @@
       }
     });
 
-    // Verificar se o usuário é administrador a partir do Realtime Database
+    // Verificar status de administrador
     async function checkAdminStatus(uid) {
       try {
         const snapshot = await database.ref('admins/' + uid).once('value');
-        if (snapshot.exists()) {
-          document.getElementById('adminPanel').style.display = 'flex';
-        } else {
-          document.getElementById('adminPanel').style.display = 'none';
-        }
+        document.getElementById('adminPanel').style.display = snapshot.exists() ? 'flex' : 'none';
       } catch (error) {
         console.error('Erro ao verificar status de administrador:', error);
       }
     }
 
-    // Atualizar interface do usuário
+    // Atualizar interface de autenticação
     function updateAuthUI(user) {
       const loginArea = document.getElementById('loginArea');
       const userArea = document.getElementById('userArea');
@@ -245,12 +249,8 @@
       if (user) {
         loginArea.style.display = 'none';
         userArea.style.display = 'flex';
-
-        // Define o nome de exibição (ou parte do e-mail, se displayName estiver ausente)
         const displayName = user.displayName || user.email.split('@')[0];
         welcomeUser.innerHTML = `Bem-vindo 😘, ${displayName}!`;
-
-        // Exibe a foto de perfil, se disponível
         if (user.photoURL) {
           welcomeUser.innerHTML += `<img src="${user.photoURL}" alt="Foto de Perfil">`;
         }
