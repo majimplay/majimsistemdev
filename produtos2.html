@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <title>Produtos - Loja</title>
   <style>
-    /* Estilos gerais */
     body {
       font-family: sans-serif;
       margin: 0;
@@ -20,15 +19,11 @@
       text-align: center;
       margin-bottom: 20px;
     }
-
-    /* Empilhar produtos (um abaixo do outro) */
     .product-grid {
       display: flex;
       flex-direction: column;
       gap: 20px;
     }
-
-    /* Card de cada produto */
     .product-card {
       background: white;
       padding: 15px;
@@ -54,44 +49,35 @@
     .product-card button:hover {
       background: #218838;
     }
-
-    /* Container do carrossel de imagens DENTRO de cada produto */
     .carousel-container {
       position: relative;
-      overflow: hidden; /* esconde partes que "passam" do container */
+      overflow: hidden;
       width: 100%;
-      height: 180px; /* altura fixa do carrossel (ajuste se precisar) */
+      height: 180px;
       margin-bottom: 10px;
     }
-
     .carousel-track {
       display: flex;
       transition: transform 0.3s ease-in-out;
       height: 100%;
     }
-
     .carousel-item {
-      flex: 0 0 100%; /* cada “slide” ocupa 100% da largura do container */
+      flex: 0 0 100%;
       display: flex;
       justify-content: center;
       align-items: center;
       box-sizing: border-box;
     }
-
-    /* Imagem de cada slide */
     .carousel-item img {
       width: 150px;
       height: 150px;
       object-fit: cover;
       border-radius: 5px;
-      transition: transform 0.3s ease; /* para o efeito de zoom */
+      transition: transform 0.3s ease;
     }
-    /* Ao passar o mouse, aplica zoom */
     .carousel-item img:hover {
-      transform: scale(1.5); /* aumenta 50% */
+      transform: scale(1.5);
     }
-
-    /* Botões de navegação do carrossel */
     .carousel-button {
       position: absolute;
       top: 50%;
@@ -110,27 +96,71 @@
     .carousel-button.next {
       right: 5px;
     }
-
+    .cart-info {
+      position: fixed;
+      top: 100px;
+      right: 20px;
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
   </style>
-  <!-- SDK do Parse -->
+  <!-- Firebase e Parse SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
   <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
 </head>
 <body>
   <div class="container">
     <h1>Produtos à Venda</h1>
-    <div id="productGrid" class="product-grid">
-      <!-- Produtos e seus carrosséis serão adicionados dinamicamente -->
-    </div>
+    <div id="productGrid" class="product-grid"></div>
+  </div>
+
+  <!-- Carrinho Flutuante -->
+  <div class="cart-info">
+    <h3>Seu Carrinho 🛒</h3>
+    <div id="cartItems"></div>
+    <p>Total: R$ <span id="cartTotal">0.00</span></p>
+    <button onclick="finalizarCompra()">Finalizar Compra</button>
   </div>
 
   <script>
-    // Inicializa o Parse
+    // Configuração do Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDlUQbbTP29VqBVmzOGHhfc67R1DTRPwxg",
+      authDomain: "gitautenticatio.firebaseapp.com",
+      databaseURL: "https://gitautenticatio-default-rtdb.firebaseio.com",
+      projectId: "gitautenticatio",
+      storageBucket: "gitautenticatio.firebasestorage.app",
+      messagingSenderId: "21514234895",
+      appId: "1:21514234895:web:d34dc4c44baf586d2cc77a"
+    };
+
+    // Inicializar Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const database = firebase.database();
+
+    // Configuração do Parse
     Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
     Parse.serverURL = "https://parseapi.back4app.com";
 
-    // Objeto para guardar o índice atual de cada carrossel
+    let currentUser = null;
     const carouselIndexes = {};
 
+    // Monitorar estado de autenticação
+    auth.onAuthStateChanged(user => {
+      currentUser = user;
+      if (user) {
+        loadCart();
+      } else {
+        document.getElementById('cartItems').innerHTML = 'Faça login para acessar o carrinho';
+      }
+    });
+
+    // Carregar produtos
     async function loadProducts() {
       const Produto = Parse.Object.extend("Produto");
       const query = new Parse.Query(Produto);
@@ -145,29 +175,25 @@
           const imagens = produto.get("imagens") || [];
           const nome = produto.get("nome");
           const preco = parseFloat(produto.get("preco")).toFixed(2);
+          const descricao = produto.get("descricao");
 
-          // Cria o container do card do produto
           const card = document.createElement("div");
           card.className = "product-card";
 
-          // Se não tiver imagens, cria ao menos uma "imagem" placeholder
-          let carouselItemsHTML = "";
+          // Carrossel
+          let carouselItemsHTML = '';
           if (imagens.length === 0) {
             carouselItemsHTML = `
               <div class="carousel-item">
                 <img src="https://via.placeholder.com/150?text=Sem+Imagem" alt="Sem Imagem">
-              </div>
-            `;
+              </div>`;
           } else {
-            // Para cada imagem, cria um .carousel-item
             carouselItemsHTML = imagens.map(url => `
               <div class="carousel-item">
                 <a href="${url}" target="_blank"> <img src="${url}" alt="${nome}"> </a>
-              </div>
-            `).join("");
+              </div>`).join("");
           }
 
-          // Carrossel interno para as imagens do produto
           const carouselHTML = `
             <div class="carousel-container">
               <button class="carousel-button prev" onclick="moveCarousel('${produtoId}', -1)">&#10094;</button>
@@ -175,23 +201,16 @@
                 ${carouselItemsHTML}
               </div>
               <button class="carousel-button next" onclick="moveCarousel('${produtoId}', 1)">&#10095;</button>
-            </div>
-          `;
+            </div>`;
 
-          // Conteúdo do card
-		  const descricao = produto.get("descricao") ;
           card.innerHTML = `
             ${carouselHTML}
             <h3>${nome}</h3>
-			  ${descricao ? `<p>${descricao}</p>` : ""}
+            ${descricao ? `<p>${descricao}</p>` : ""}
             <p>R$ ${preco}</p>
-            <button onclick="addToCart('${produtoId}')">Comprar</button>
-          `;
+            <button onclick="addToCart('${produtoId}')">Adicionar ao Carrinho</button>`;
 
-          // Define o índice inicial do carrossel para este produto
           carouselIndexes[produtoId] = 0;
-
-          // Adiciona o card ao grid
           grid.appendChild(card);
         });
 
@@ -200,46 +219,121 @@
       }
     }
 
-    // Função para mover o carrossel de um produto
+    // Funções do Carrinho
+    async function addToCart(productId) {
+      if (!currentUser) {
+        alert("Faça login para adicionar produtos ao carrinho!");
+        return;
+      }
+
+      try {
+        const userCartRef = database.ref(`users/${currentUser.uid}/carrinho`);
+        const snapshot = await userCartRef.once('value');
+        const carrinho = snapshot.val() || {};
+
+        if (carrinho[productId]) {
+          carrinho[productId].quantidade += 1;
+        } else {
+          carrinho[productId] = {
+            quantidade: 1,
+            adicionadoEm: Date.now()
+          };
+        }
+
+        await userCartRef.set(carrinho);
+        await loadCart();
+      } catch (error) {
+        console.error("Erro ao atualizar carrinho:", error);
+      }
+    }
+
+    async function loadCart() {
+      if (!currentUser) return;
+
+      try {
+        const snapshot = await database.ref(`users/${currentUser.uid}/carrinho`).once('value');
+        const carrinho = snapshot.val() || {};
+        const produtos = await getProdutosCarrinho(carrinho);
+        
+        let total = 0;
+        let cartHTML = '';
+        
+        produtos.forEach(produto => {
+          const quantidade = carrinho[produto.id].quantidade;
+          const preco = produto.get("preco");
+          total += preco * quantidade;
+          
+          cartHTML += `
+            <div class="cart-item">
+              <p>${produto.get("nome")} x${quantidade}</p>
+              <p>R$ ${(preco * quantidade).toFixed(2)}</p>
+            </div>`;
+        });
+
+        document.getElementById('cartItems').innerHTML = cartHTML;
+        document.getElementById('cartTotal').textContent = total.toFixed(2);
+      } catch (error) {
+        console.error("Erro ao carregar carrinho:", error);
+      }
+    }
+
+    async function getProdutosCarrinho(carrinho) {
+      const Produto = Parse.Object.extend("Produto");
+      const query = new Parse.Query(Produto);
+      query.containedIn("objectId", Object.keys(carrinho));
+      return await query.find();
+    }
+
+    async function finalizarCompra() {
+      if (!currentUser) {
+        alert("Faça login para finalizar a compra!");
+        return;
+      }
+
+      try {
+        const snapshot = await database.ref(`users/${currentUser.uid}/carrinho`).once('value');
+        const carrinho = snapshot.val() || {};
+        
+        if (Object.keys(carrinho).length === 0) {
+          alert("Seu carrinho está vazio!");
+          return;
+        }
+
+        // Registrar pedido no Parse
+        const Pedido = Parse.Object.extend("Pedido");
+        const pedido = new Pedido();
+        
+        pedido.set("clienteId", currentUser.uid);
+        pedido.set("produtos", carrinho);
+        pedido.set("status", "pendente");
+        pedido.set("total", document.getElementById('cartTotal').textContent);
+        
+        await pedido.save();
+        
+        // Limpar carrinho
+        await database.ref(`users/${currentUser.uid}/carrinho`).remove();
+        alert("Compra finalizada com sucesso!");
+        loadCart();
+      } catch (error) {
+        console.error("Erro ao finalizar compra:", error);
+        alert("Erro ao processar pedido!");
+      }
+    }
+
+    // Funções do Carrossel
     function moveCarousel(produtoId, direction) {
       const track = document.getElementById(`track-${produtoId}`);
       const items = track.querySelectorAll(".carousel-item");
       const totalItems = items.length;
 
       carouselIndexes[produtoId] += direction;
+      if (carouselIndexes[produtoId] < 0) carouselIndexes[produtoId] = 0;
+      if (carouselIndexes[produtoId] >= totalItems) carouselIndexes[produtoId] = totalItems - 1;
 
-      // Garante que o índice fique dentro dos limites
-      if (carouselIndexes[produtoId] < 0) {
-        carouselIndexes[produtoId] = 0;
-      } else if (carouselIndexes[produtoId] > totalItems - 1) {
-        carouselIndexes[produtoId] = totalItems - 1;
-      }
-
-      // Calcula o deslocamento em porcentagem
-      const offset = -carouselIndexes[produtoId] * 100;
-      track.style.transform = `translateX(${offset}%)`;
+      track.style.transform = `translateX(${-carouselIndexes[produtoId] * 100}%)`;
     }
 
-    // Adiciona o ID do produto ao carrinho do usuário
-    async function addToCart(productId) {
-      const currentUser = Parse.User.current();
-      if (!currentUser) {
-        alert("Você precisa estar logado para adicionar produtos ao carrinho.");
-        return;
-      }
-
-      try {
-        let carrinho = currentUser.get("carrinhovetor") || [];
-        carrinho.push(productId);
-        currentUser.set("carrinhovetor", carrinho);
-        await currentUser.save();
-        alert("Produto adicionado ao carrinho!");
-      } catch (error) {
-        console.error("Erro ao adicionar ao carrinho: ", error);
-      }
-    }
-
-    // Carrega os produtos ao abrir a página
+    // Inicialização
     loadProducts();
   </script>
 </body>
