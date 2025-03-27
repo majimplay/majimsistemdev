@@ -134,6 +134,13 @@
       margin: 15px 0;
       border: 1px solid #ffecb5;
     }
+    .pedido {
+      padding: 15px;
+      margin: 10px 0;
+      background: #f8f9fa;
+      border-radius: 4px;
+      border: 1px solid #eee;
+    }
   </style>
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -243,6 +250,7 @@
         await loadUserData();
         updateUI();
         carregarCarrinho();
+        carregarHistoricoPedidos();
       } else {
         window.location.href = 'index.html';
       }
@@ -302,7 +310,7 @@
       }
     });
 
-    // Máscaras de entrada
+    // Máscaras de entrada para CPF e telefone
     document.getElementById('cpf').addEventListener('input', function(e) {
       let value = e.target.value.replace(/\D/g, '');
       value = value.replace(/(\d{3})(\d)/, '$1.$2')
@@ -318,7 +326,7 @@
       e.target.value = value;
     });
 
-    // Carregar carrinho do Firebase e atualizar a área de "Meu Carrinho"
+    // Carregar carrinho do Firebase e atualizar a área "Meu Carrinho"
     async function carregarCarrinho() {
       try {
         const snapshot = await database.ref(`users/${currentUser.uid}/carrinho`).once('value');
@@ -405,6 +413,7 @@
         // Limpar carrinho
         await database.ref(`users/${currentUser.uid}/carrinho`).remove();
         carregarCarrinho();
+        carregarHistoricoPedidos();
         alert('Compra finalizada com sucesso!');
       } catch (error) {
         console.error('Erro na finalização:', error);
@@ -415,6 +424,35 @@
     async function getCarrinhoDetalhado() {
       const snapshot = await database.ref(`users/${currentUser.uid}/carrinho`).once('value');
       return snapshot.val() || {};
+    }
+
+    // Carregar histórico de pedidos do usuário usando Parse
+    async function carregarHistoricoPedidos() {
+      const Pedido = Parse.Object.extend("Pedido");
+      const query = new Parse.Query(Pedido);
+      query.equalTo("clienteId", currentUser.uid);
+      query.descending("createdAt");
+      try {
+        const pedidos = await query.find();
+        let html = '';
+        if (pedidos.length === 0) {
+          html = '<p>Nenhum pedido encontrado.</p>';
+        } else {
+          pedidos.forEach(pedido => {
+            html += `
+              <div class="pedido">
+                <p><strong>Pedido ID:</strong> ${pedido.id}</p>
+                <p><strong>Total:</strong> R$ ${pedido.get("total").toFixed(2)}</p>
+                <p><strong>Status:</strong> ${pedido.get("status")}</p>
+                <p><strong>Data:</strong> ${pedido.createdAt.toLocaleDateString("pt-BR")} ${pedido.createdAt.toLocaleTimeString("pt-BR")}</p>
+              </div>
+            `;
+          });
+        }
+        document.getElementById("historicoPedidos").innerHTML = html;
+      } catch (error) {
+        console.error("Erro ao carregar histórico de pedidos:", error);
+      }
     }
 
     // Logout
