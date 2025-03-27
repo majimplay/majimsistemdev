@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Calculadora de Frete com Parse Cloud Code</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; }
+    label { display: block; margin-bottom: 8px; }
+    input { padding: 8px; width: 200px; margin-bottom: 12px; }
+    button { padding: 8px 16px; }
+  </style>
+  <!-- Inclua o SDK do Parse -->
+  <script src="https://npmcdn.com/parse/dist/parse.min.js"></script>
+  <script>
+    // Inicialize o Parse com suas chaves (Application ID, JavaScript Key e servidor)
+    Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
+   Parse.serverURL = "https://parseapi.back4app.com";
+
+    async function calcularFrete() {
+      const cep = document.getElementById('cep').value.replace(/\D/g, '');
+      if (cep.length !== 8) {
+        alert('CEP inválido! Informe 8 dígitos.');
+        return;
+      }
+
+      try {
+        const result = await Parse.Cloud.run("calcFrete", { cepDestino: cep });
+        document.getElementById('resultado').innerText =
+          `Valor do frete: R$ ${result.valor} \nPrazo de entrega: ${result.prazo} dias`;
+      } catch (error) {
+        document.getElementById('resultado').innerText = 'Erro: ' + error;
+      }
+    }
+  </script>
+</head>
+<body>
+  <h1>Calculadora de Frete</h1>
+  <label for="cep">Digite o CEP:</label>
+  <input type="text" id="cep" placeholder="Ex.: 01001000">
+  <button onclick="calcularFrete()">Calcular Frete</button>
+  <pre id="resultado"></pre>
+</body>
+</html>
