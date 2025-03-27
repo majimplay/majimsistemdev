@@ -24,7 +24,8 @@
       }
 
       try {
-        const result = await Parse.Cloud.run("calcFrete", { cepDestino: cep });
+        Parse.Cloud.run("calcFrete", { cepDestino: cep }, { timeout: 10000 });
+        
         document.getElementById('resultado').innerText =
           `Valor do frete: R$ ${result.valor} \nPrazo de entrega: ${result.prazo} dias`;
       } catch (error) {
