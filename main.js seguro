@@ -1,52 +1,73 @@
-// Configurações de segurança
-Parse.Cloud.define('isAdmin', async (request) => {
-    // Verificação reforçada
-    if (!request.user) {
-        throw new Parse.Error(141, 'Sessão inválida');
+const { Buffer } = require('buffer');
+
+Parse.Cloud.define('handleGoogleAuth', async ({ params }) => {
+  const { code } = params;
+
+  const config = {
+    clientId: '21514234895-keiqos567ifvs4hjkg3l1q5mvun8lri0.apps.googleusercontent.com',
+    clientSecret: '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',
+    redirectUri: 'https://majimplay.github.io/',
+    tokenUrl: 'https://oauth2.googleapis.com/token'
+  };
+
+  try {
+    // 1. Trocar código por token
+    const tokenResponse = await fetch(config.tokenUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        code,
+        client_id: config.clientId,
+        client_secret: config.clientSecret,
+        redirect_uri: config.redirectUri,
+        grant_type: 'authorization_code'
+      })
+    });
+
+    if (!tokenResponse.ok) {
+      const errorData = await tokenResponse.json();
+      throw new Error(`Erro Google: ${errorData.error} - ${errorData.error_description}`);
     }
 
-    // Atualizar dados do usuário
-    await request.user.fetch({ useMasterKey: true });
-
-    // Query segura
-    const roleQuery = new Parse.Query(Parse.Role)
-        .equalTo('name', 'admin')
-        .equalTo('users', request.user);
-
-    const count = await roleQuery.count({ useMasterKey: true });
+    const tokens = await tokenResponse.json();
     
-    // Auditoria
-    Parse.Cloud.logger.info(`Verificação admin - User: ${request.user.id} | IP: ${request.ip} | Admin: ${count > 0}`);
+    // 2. Decodificar token
+    const payload = JSON.parse(
+      Buffer.from(tokens.id_token.split('.')[1], 'base64').toString()
+    );
+
+    // 3. Gerenciar usuário
+    const userQuery = new Parse.Query(Parse.User);
+    userQuery.equalTo('email', payload.email);
     
-    return count > 0;
-});
- // emeio
-Parse.Cloud.define("getUserByEmail", async (request) => {
-  const email = request.params.email;
-  const query = new Parse.Query(Parse.User);
-  query.equalTo("email", email);
-  const user = await query.first({ useMasterKey: true });
-  if (user) {
-    return { exists: true, userId: user.id };
-  } else {
-    return { exists: false };
+    let user = await userQuery.first({ useMasterKey: true });
+
+    if (!user) {
+      user = new Parse.User();
+      user.setUsername(payload.email);
+      user.setEmail(payload.email);
+      user.setPassword(Math.random().toString(36).slice(-8));
+    }
+
+    // Atualizar dados
+    user.set('googleId', payload.sub);
+    user.set('nome', payload.name || 'Usuário Google');
+    user.set('picture', payload.picture || '');
+    user.set('authMethod', 'google');
+
+    // Salvar alterações
+    user = await user.save(null, { useMasterKey: true });
+
+    return {
+      user: user.toJSON(),
+      sessionToken: user.getSessionToken()
+    };
+
+  } catch (error) {
+    console.error('Erro detalhado:', error);
+    throw new Parse.Error(
+      Parse.Error.SCRIPT_FAILED,
+      `Falha na autenticação: ${error.message}`
+    );
   }
-});
-
-// Middleware de segurança global
-Parse.Cloud.beforeFind((request) => {
-    if (request.className === '_User' && !request.master) {
-        throw new Parse.Error(119, 'Operação proibida');
-    }
-});
-
-// Função com proteção adicional
-Parse.Cloud.define("getUserCount", async (request) => {
-    if (!request.master) {
-        const isAdmin = await Parse.Cloud.run('isAdmin', {}, { sessionToken: request.user.getSessionToken() });
-        if (!isAdmin) throw new Parse.Error(119, 'Acesso negado');
-    }
-    
-    const query = new Parse.Query("_User");
-    return query.count({ useMasterKey: true });
 });
