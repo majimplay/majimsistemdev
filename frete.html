@@ -2,42 +2,59 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Calculadora de Frete com Parse Cloud Code</title>
+  <title>Calculadora de Frete</title>
   <style>
     body { font-family: Arial, sans-serif; margin: 40px; }
     label { display: block; margin-bottom: 8px; }
     input { padding: 8px; width: 200px; margin-bottom: 12px; }
-    button { padding: 8px 16px; }
+    button { padding: 8px 16px; cursor: pointer; }
+    pre { background: #f5f5f5; padding: 15px; border-radius: 5px; }
   </style>
-  <!-- Inclua o SDK do Parse -->
   <script src="https://npmcdn.com/parse/dist/parse.min.js"></script>
   <script>
-    // Inicialize o Parse com suas chaves (Application ID, JavaScript Key e servidor)
-    Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
+       Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
    Parse.serverURL = "https://parseapi.back4app.com";
 
     async function calcularFrete() {
-      const cep = document.getElementById('cep').value.replace(/\D/g, '');
-      if (cep.length !== 8) {
-        alert('CEP inválido! Informe 8 dígitos.');
-        return;
-      }
-
+      const cepInput = document.getElementById('cep');
+      const resultado = document.getElementById('resultado');
+      
       try {
-        Parse.Cloud.run("calcFrete", { cepDestino: cep }, { timeout: 10000 });
+        const cep = cepInput.value.replace(/\D/g, '');
         
-        document.getElementById('resultado').innerText =
-          `Valor do frete: R$ ${result.valor} \nPrazo de entrega: ${result.prazo} dias`;
+        // Validação básica no cliente
+        if (!/^\d{8}$/.test(cep)) {
+          throw new Error('CEP inválido! Digite 8 números.');
+        }
+
+        resultado.innerText = "Calculando...";
+        
+        // Chamada ao Cloud Code com timeout
+        const result = await Parse.Cloud.run(
+          "calcFrete", 
+          { cepDestino: cep },
+          { timeout: 15000 }
+        );
+
+        resultado.innerHTML = `
+          <strong>Resultado:</strong>\n
+          Valor: R$ ${parseFloat(result.valor).toFixed(2)}\n
+          Prazo: ${result.prazo} dias úteis
+        `;
+
       } catch (error) {
-        document.getElementById('resultado').innerText = 'Erro: ' + error;
+        console.error('Erro completo:', error);
+        resultado.innerText = error.message.includes("CEP") 
+          ? error.message 
+          : `Erro no servidor: ${error.message}`;
       }
     }
   </script>
 </head>
 <body>
-  <h1>Calculadora de Frete</h1>
-  <label for="cep">Digite o CEP:</label>
-  <input type="text" id="cep" placeholder="Ex.: 01001000">
+  <h1>Calculadora de Frete Correios</h1>
+  <label for="cep">CEP Destino:</label>
+  <input type="text" id="cep" placeholder="Ex: 01001000" maxlength="8">
   <button onclick="calcularFrete()">Calcular Frete</button>
   <pre id="resultado"></pre>
 </body>
