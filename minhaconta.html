@@ -188,9 +188,12 @@
     <div class="carrinho">
       <h2>Meu Carrinho</h2>
       <div id="carrinhoItens"></div>
-      <div id="carrinhoTotal" class="total"></div>
+      <!-- Mostra o total com o texto "Total: R$" -->
+      <div class="total">Total: R$ <span id="carrinhoTotal">0.00</span></div>
+      <!-- Botão Comprar -->
+      <button onclick="finalizarCompra()" class="btn btn-primary" style="margin-top: 15px;">Comprar</button>
       
-      <!-- Seção de Checkout -->
+      <!-- Seção de Checkout (opcional para PayPal, se for implementar) -->
       <div class="checkout-section">
         <div class="simulacao-alerta">
           ATENÇÃO: Esta é uma simulação de compra para testes. Nenhum pagamento real será processado.
@@ -314,22 +317,6 @@
                    .replace(/(\d)(\d{4})$/, '$1-$2');
       e.target.value = value;
     });
-
-    // Validação de CPF
-    function validarCPF(cpf) {
-      cpf = cpf.replace(/\D/g, '');
-      if (cpf.length !== 11) return false;
-      
-      const digitos = cpf.split('').map(Number);
-      const calcDV = (slice) => {
-        let soma = slice.reduce((acc, cur, idx) => acc + cur * (slice.length + 1 - idx), 0);
-        const resto = soma % 11;
-        return resto < 2 ? 0 : 11 - resto;
-      };
-      
-      return digitos[9] === calcDV(digitos.slice(0,9)) && 
-             digitos[10] === calcDV(digitos.slice(0,10));
-    }
 
     // Carregar carrinho do Firebase e atualizar a área de "Meu Carrinho"
     async function carregarCarrinho() {
