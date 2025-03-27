@@ -201,7 +201,34 @@
       </form>
     </div>
 
-    <!-- Seção do Carrinho (mantida da versão anterior) -->
+
+    
+   <!-- Seção do Carrinho -->
+    <div class="carrinho">
+      <h2>Meu Carrinho</h2>
+      <div id="carrinhoItens"></div>
+      <div id="carrinhoTotal" class="total"></div>
+      
+      <!-- Seção de Checkout -->
+      <div class="checkout-section">
+        <div class="simulacao-alerta">
+          ATENÇÃO: Esta é uma simulação de compra para testes. Nenhum pagamento real será processado.
+        </div>
+        
+        <!-- Container para o botão do PayPal -->
+        <div id="paypal-button-container"></div>
+      </div>
+    </div>
+
+    <!-- Histórico de Pedidos -->
+    <div class="historico-pedidos">
+      <h2>Histórico de Pedidos</h2>
+      <div id="historicoPedidos"></div>
+    </div>
+
+    <button class="btn btn-secondary" onclick="voltarParaIndex()">
+      Voltar para Página Inicial
+    </button>
   </div>
 
   <script>
