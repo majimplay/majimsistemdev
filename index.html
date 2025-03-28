@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calculadora de Frete</title>
     <style>
+        /* Mantenha o mesmo CSS anterior */
         body {
             font-family: Arial, sans-serif;
             max-width: 600px;
@@ -67,75 +68,83 @@
     </div>
 
     <script>
-        function validarCEP() {
-            const cep = document.getElementById('cep').value;
+        // Configurações do Back4App (substitua com suas credenciais)
+        const BACK4APP_CONFIG = {
+            APP_ID: 'TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY',
+            JS_KEY: 'n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I',
+            ENDPOINT: 'https://parseapi.back4app.com/functions/calcularFrete'
+        };
+
+        async function validarCEP() {
+            const cepInput = document.getElementById('cep');
+            const cep = cepInput.value.replace(/\D/g, '');
             const cepError = document.getElementById('cepError');
             const loader = document.getElementById('loader');
             const resultDiv = document.getElementById('result');
 
-            // Regex para validar CEP (8 dígitos)
-            if (!/^\d{8}$/.test(cep)) {
+            // Validação básica do CEP
+            if (cep.length !== 8) {
                 cepError.style.display = 'block';
                 resultDiv.innerHTML = '';
                 return;
             }
-
+            
             cepError.style.display = 'none';
             loader.style.display = 'block';
             resultDiv.innerHTML = '';
 
-            // Dados fictícios para teste (sandbox)
-            const payload = {
-                from: { postal_code: '60733610' },  // CEP de origem fixo (ex: São Paulo)
-                to: { postal_code: cep },
-                package: {
-                    height: 10,
-                    width: 10,
-                    length: 10,
-                    weight: 1
-                },
-                options: {
-                    insurance_value: 0,
-                    receipt: false,
-                    own_hand: false
-                }
-            };
-
-            fetch('https://sandbox.melhorenvio.com.br/api/v2/me/shipment/calculate', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiI5NTYiLCJqdGkiOiI4ODAxNjA5ZTNiN2FkZmIxMWFhYTBjMzhiNGQ3ZTU0ZmY2NjNiNTMxZGE0MzcyODRiNDRiNGUzZjllMDU0ZWVlMTJiNDZiMWYxM2NlYjQxMyIsImlhdCI6MTc0MzEzMTYxMi43NzgyMzgsIm5iZiI6MTc0MzEzMTYxMi43NzgyNCwiZXhwIjoxNzc0NjY3NjEyLjc2OTYwOSwic3ViIjoiOWU4OTZhMDktMjE5Ni00Y2IxLWIwOWQtODhlZjY2ZmQ0MjkyIiwic2NvcGVzIjpbImNhcnQtcmVhZCIsImNhcnQtd3JpdGUiLCJjb21wYW5pZXMtcmVhZCIsImNvbXBhbmllcy13cml0ZSIsImNvdXBvbnMtcmVhZCIsImNvdXBvbnMtd3JpdGUiLCJub3RpZmljYXRpb25zLXJlYWQiLCJvcmRlcnMtcmVhZCIsInByb2R1Y3RzLXJlYWQiLCJwcm9kdWN0cy1kZXN0cm95IiwicHJvZHVjdHMtd3JpdGUiLCJwdXJjaGFzZXMtcmVhZCIsInNoaXBwaW5nLWNhbGN1bGF0ZSIsInNoaXBwaW5nLWNhbmNlbCIsInNoaXBwaW5nLWNoZWNrb3V0Iiwic2hpcHBpbmctY29tcGFuaWVzIiwic2hpcHBpbmctZ2VuZXJhdGUiLCJzaGlwcGluZy1wcmV2aWV3Iiwic2hpcHBpbmctcHJpbnQiLCJzaGlwcGluZy1zaGFyZSIsInNoaXBwaW5nLXRyYWNraW5nIiwiZWNvbW1lcmNlLXNoaXBwaW5nIiwidHJhbnNhY3Rpb25zLXJlYWQiLCJ1c2Vycy1yZWFkIiwidXNlcnMtd3JpdGUiLCJ3ZWJob29rcy1yZWFkIiwid2ViaG9va3Mtd3JpdGUiLCJ3ZWJob29rcy1kZWxldGUiLCJ0ZGVhbGVyLXdlYmhvb2siXX0.QW9k4bWTVYOrs7wtsgtTAPWpu5xQNOfglpnUWUR7v91h5l4nfUqo6GRUTXOVndyr_9qgNyuJAC6Wj54rf-b3WKlgTmIWLsiSiy3rot3LM8HoEHMAaBkgjI2XP7OtopdC7RFyC9L7V8zw9YtBQeupmwW4STGAc3qxJOfYVN0LgDAKaipTURqzECmy44n7Ejlf7D_oqqmkK6lRPtnfh_rmJuXcs8Vz8o5D0XfZDFw6v6IGhEfzdCfu0iMVEhNhCGzLUxDQAxcR-1BF3wbZaL4truMWmI_LEPqRsb2--zOX8b12xtI-Of6AXuG1kcX-q8pJ4TceVoTBdMA_DzMyiIyxjINsxTGKUc-uqSnNN821UxvLu-Xraq0CF42uBDdckMk0At4bIvB0qVQAWHKsLXpe-VIbZA7GfkYGzUX_OiPQGL1QyHDMTZ9X5zUqanOunWZmLP96_r405315-DhpH29cF3fRpnx-glOYeZ0kqxik2X5HCXS-wiv2M5V_RtM_ZqwPteCeikdOuKbH-5EXFTtfVB6QisQF3yw-lO8gHnrKFMf5qy-mZS-E3lPHzVZor0LBVVN7ezGEAsDk2hfEUMYarhmISN_2M-MDCpYBDQjNn8n0iQM2OWyoIeDtDn8FQfJQbysmL0vcf87i0-tnvbNkAuVKfOplfwMRBJ9bxrSAkPI', // Substitua pelo seu token
-                    'User-Agent': 'Aplicacao (email para contato)'
-                },
-                body: JSON.stringify(payload)
-            })
-            .then(response => response.json())
-            .then(data => {
-                loader.style.display = 'none';
-                if (data.error) {
-                    resultDiv.innerHTML = `Erro: ${data.message}`;
-                    return;
-                }
-
-                let html = '<h3>Opções de Frete:</h3>';
-                data.forEach(service => {
-                    html += `
-                        <div>
-                            <strong>${service.company.name}</strong><br>
-                            Prazo: ${service.delivery_time} dias<br>
-                            Preço: R$ ${service.price}
-                        </div>
-                        <hr>
-                    `;
+            try {
+                const response = await fetch(BACK4APP_CONFIG.ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'X-Parse-Application-Id': BACK4APP_CONFIG.APP_ID,
+                        'X-Parse-JavaScript-Key': BACK4APP_CONFIG.JS_KEY,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ cepDestino: cep })
                 });
-                resultDiv.innerHTML = html;
-            })
-            .catch(error => {
-                loader.style.display = 'none';
-                resultDiv.innerHTML = 'Erro ao consultar o frete. Tente novamente.';
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                exibirResultados(data.result);
+
+            } catch (error) {
                 console.error('Erro:', error);
+                resultDiv.innerHTML = `Erro: ${error.message}`;
+            } finally {
+                loader.style.display = 'none';
+            }
+        }
+
+        function exibirResultados(servicos) {
+            const resultDiv = document.getElementById('result');
+            
+            if (!servicos || servicos.length === 0) {
+                resultDiv.innerHTML = 'Nenhuma opção de frete disponível';
+                return;
+            }
+
+            let html = '<h3>Opções de Frete:</h3>';
+            servicos.forEach(servico => {
+                html += `
+                    <div class="servico">
+                        <strong>${servico.company.name}</strong><br>
+                        <span>Prazo: ${servico.delivery_time} dias úteis</span><br>
+                        <span>Preço: R$ ${servico.price.toFixed(2).replace('.', ',')}</span>
+                    </div>
+                    <hr>
+                `;
             });
+
+            resultDiv.innerHTML = html;
         }
     </script>
 </body>
