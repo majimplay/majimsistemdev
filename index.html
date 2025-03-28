@@ -1,95 +1,142 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Calculadora de Frete</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 2rem;
-      background: #f7f7f7;
-    }
-    form {
-      background: #fff;
-      padding: 1rem;
-      border-radius: 5px;
-      max-width: 400px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-    input, button {
-      width: 100%;
-      padding: 0.8rem;
-      margin-top: 0.5rem;
-      font-size: 1rem;
-    }
-    button {
-      cursor: pointer;
-      background: #007BFF;
-      border: none;
-      color: #fff;
-      border-radius: 3px;
-    }
-    #resultado {
-      margin-top: 1rem;
-      font-size: 1.2rem;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Frete</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            background-color: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        input, button {
+            padding: 10px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .error {
+            color: red;
+            display: none;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 4px;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            display: none;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body>
-  <h1>Calculadora de Frete</h1>
-  <form id="freteForm">
-    <label for="cep">Digite o CEP:</label>
-    <input type="text" id="cep" name="cep" required placeholder="Ex: 12345-678">
-    <button type="submit">Calcular Frete</button>
-  </form>
-  <div id="resultado"></div>
+    <div class="container">
+        <h1>Calculadora de Frete</h1>
+        <input type="text" id="cep" placeholder="Digite o CEP (somente números)" maxlength="8">
+        <button onclick="validarCEP()">Calcular Frete</button>
+        <div id="cepError" class="error">CEP inválido! Digite 8 números.</div>
+        <div class="loader" id="loader"></div>
+        <div id="result" class="result"></div>
+    </div>
 
-  <script>
-    document.getElementById('freteForm').addEventListener('submit', function(e) {
-      e.preventDefault();
+    <script>
+        function validarCEP() {
+            const cep = document.getElementById('cep').value;
+            const cepError = document.getElementById('cepError');
+            const loader = document.getElementById('loader');
+            const resultDiv = document.getElementById('result');
 
-      // Obtém e trata o CEP informado
-      var cepInput = document.getElementById('cep').value;
-      var cep = cepInput.replace(/\D/g, ''); // Remove qualquer caractere não numérico
+            // Regex para validar CEP (8 dígitos)
+            if (!/^\d{8}$/.test(cep)) {
+                cepError.style.display = 'block';
+                resultDiv.innerHTML = '';
+                return;
+            }
 
-      if (cep.length !== 8) {
-        document.getElementById('resultado').innerText = 'CEP inválido! Por favor, informe um CEP com 8 dígitos.';
-        return;
-      }
+            cepError.style.display = 'none';
+            loader.style.display = 'block';
+            resultDiv.innerHTML = '';
 
-      // Token e endpoint da API
-      var token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NDMxMjc3MzksInN1YiI6IjM2Yllaa1BTTGFiZDU2SWZqd1V2RDExM1BJVjIifQ.q88HeOr-US-nEmGMcz9PqYi9fTuzs_CN7g1wC4ECayE';
-      
-      // Exemplo de URL: ajuste conforme a documentação da API do SuperFrete
-      var url = 'https://api.superfrete.com/calculate?cep=' + cep;
+            // Dados fictícios para teste (sandbox)
+            const payload = {
+                from: { postal_code: '01001000' },  // CEP de origem fixo (ex: São Paulo)
+                to: { postal_code: cep },
+                package: {
+                    height: 10,
+                    width: 10,
+                    length: 10,
+                    weight: 1
+                },
+                options: {
+                    insurance_value: 0,
+                    receipt: false,
+                    own_hand: false
+                }
+            };
 
-      // Realiza a chamada à API
-      fetch(url, {
-        method: 'GET', // ou 'POST' se for o caso, conforme a API
-        headers: {
-          'Authorization': 'Bearer ' + token,
-          'Content-Type': 'application/json'
+            fetch('https://sandbox.melhorenvio.com.br/api/v2/me/shipment/calculate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer SEU_TOKEN_AQUI', // Substitua pelo seu token
+                    'User-Agent': 'Aplicacao (email para contato)'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => {
+                loader.style.display = 'none';
+                if (data.error) {
+                    resultDiv.innerHTML = `Erro: ${data.message}`;
+                    return;
+                }
+
+                let html = '<h3>Opções de Frete:</h3>';
+                data.forEach(service => {
+                    html += `
+                        <div>
+                            <strong>${service.company.name}</strong><br>
+                            Prazo: ${service.delivery_time} dias<br>
+                            Preço: R$ ${service.price}
+                        </div>
+                        <hr>
+                    `;
+                });
+                resultDiv.innerHTML = html;
+            })
+            .catch(error => {
+                loader.style.display = 'none';
+                resultDiv.innerHTML = 'Erro ao consultar o frete. Tente novamente.';
+                console.error('Erro:', error);
+            });
         }
-      })
-      .then(function(response) {
-        if (!response.ok) {
-          throw new Error('Erro na requisição: ' + response.status);
-        }
-        return response.json();
-      })
-      .then(function(data) {
-        // Supondo que a resposta contenha um campo "frete" com o valor do frete
-        if (data && data.frete) {
-          document.getElementById('resultado').innerText = 'Valor do frete: R$ ' + data.frete;
-        } else {
-          document.getElementById('resultado').innerText = 'Não foi possível calcular o frete. Verifique os dados informados.';
-        }
-      })
-      .catch(function(error) {
-        document.getElementById('resultado').innerText = 'Erro: ' + error.message;
-      });
-    });
-  </script>
+    </script>
 </body>
 </html>
