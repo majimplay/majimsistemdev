@@ -34,36 +34,43 @@
             ENDPOINT: 'https://parseapi.back4app.com/functions/calcularFrete'
         };
 
-        async function calcularFrete() {
-            const cep = document.getElementById('cep').value.replace(/\D/g, '');
-            const errorDiv = document.getElementById('cepError');
-            const loader = document.getElementById('loader');
-            const resultDiv = document.getElementById('result');
+    async function calcularFrete() {
+    const cep = document.getElementById('cep').value.replace(/\D/g, '');
+    const errorDiv = document.getElementById('cepError');
+    const loader = document.getElementById('loader');
+    const resultDiv = document.getElementById('result');
 
-            // Resetar exibição
-            errorDiv.style.display = 'none';
-            resultDiv.innerHTML = '';
-            loader.style.display = 'block';
+    errorDiv.style.display = 'none';
+    loader.style.display = 'block';
+    resultDiv.innerHTML = '';
 
- try {
-        // Forçar CEP de teste
-        const cepTeste = '01001000'; // Substitua pelo CEP do input
+    try {
+        // 🔥 CORREÇÃO PRINCIPAL AQUI
         const response = await fetch(CONFIG.ENDPOINT, {
-            body: JSON.stringify({ cepDestino: cepTeste }) // Teste fixo
+            method: 'POST', // Método obrigatório
+            headers: {
+                'X-Parse-Application-Id': CONFIG.APP_ID,
+                'X-Parse-JavaScript-Key': CONFIG.JS_KEY,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                cepDestino: cep // Garantir que está enviando string
+            })
         });
 
-        const result = await response.json();
-        console.log('Resposta completa:', result); // Adicione isso
-
-        if (result.debug) { // Apenas para modo de desenvolvimento
-            document.getElementById('result').innerHTML = 
-                `<pre>${JSON.stringify(result.debug, null, 2)}</pre>`;
-            return;
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Erro desconhecido');
         }
 
+        const result = await response.json();
         exibirResultados(result.data);
+
     } catch (error) {
-        console.error('Erro completo:', error); 
+        errorDiv.textContent = error.message;
+        errorDiv.style.display = 'block';
+    } finally {
+        loader.style.display = 'none';
     }
 }
         function exibirResultados(servicos) {
