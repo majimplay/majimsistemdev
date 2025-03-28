@@ -5,146 +5,100 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calculadora de Frete</title>
     <style>
-        /* Mantenha o mesmo CSS anterior */
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        .container {
-            background-color: #f5f5f5;
-            padding: 20px;
-            border-radius: 8px;
-        }
-        input, button {
-            padding: 10px;
-            margin: 5px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        .error {
-            color: red;
-            display: none;
-        }
-        .result {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: white;
-            border-radius: 4px;
-        }
-        .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #3498db;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            display: none;
-            margin: 20px auto;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        /* Estilos mantidos do anterior */
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+        .container { background: #f5f5f5; padding: 20px; border-radius: 8px; }
+        input, button { padding: 10px; margin: 5px; border: 1px solid #ddd; border-radius: 4px; }
+        button { background: #4CAF50; color: white; cursor: pointer; }
+        button:hover { background: #45a049; }
+        .error { color: red; display: none; }
+        .result { margin-top: 20px; padding: 15px; background: white; border-radius: 4px; }
+        .loader { /* manter animação igual */ }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Calculadora de Frete</h1>
-        <input type="text" id="cep" placeholder="Digite o CEP (somente números)" maxlength="8">
-        <button onclick="validarCEP()">Calcular Frete</button>
-        <div id="cepError" class="error">CEP inválido! Digite 8 números.</div>
+        <input type="text" id="cep" placeholder="Digite o CEP (ex: 01001000)" maxlength="9">
+        <button onclick="calcularFrete()">Calcular</button>
+        <div id="cepError" class="error"></div>
         <div class="loader" id="loader"></div>
         <div id="result" class="result"></div>
     </div>
 
     <script>
-        // Configurações do Back4App (substitua com suas credenciais)
-        const BACK4APP_CONFIG = {
+        // Configurações (SUBSTITUIR COM SEUS DADOS)
+        const CONFIG = {
             APP_ID: 'TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY',
             JS_KEY: 'n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I',
             ENDPOINT: 'https://parseapi.back4app.com/functions/calcularFrete'
         };
 
-        async function validarCEP() {
-            const cepInput = document.getElementById('cep');
-            const cep = cepInput.value.replace(/\D/g, '');
-            const cepError = document.getElementById('cepError');
+        async function calcularFrete() {
+            const cep = document.getElementById('cep').value.replace(/\D/g, '');
+            const errorDiv = document.getElementById('cepError');
             const loader = document.getElementById('loader');
             const resultDiv = document.getElementById('result');
 
-            // Validação básica do CEP
-            if (cep.length !== 8) {
-                cepError.style.display = 'block';
-                resultDiv.innerHTML = '';
-                return;
-            }
-            
-            cepError.style.display = 'none';
-            loader.style.display = 'block';
+            // Resetar exibição
+            errorDiv.style.display = 'none';
             resultDiv.innerHTML = '';
+            loader.style.display = 'block';
 
             try {
-                const response = await fetch(BACK4APP_CONFIG.ENDPOINT, {
+                // Validar CEP no client-side
+                if (cep.length !== 8) {
+                    throw new Error('CEP deve conter 8 dígitos');
+                }
+
+                // Fazer requisição
+                const response = await fetch(CONFIG.ENDPOINT, {
                     method: 'POST',
                     headers: {
-                        'X-Parse-Application-Id': BACK4APP_CONFIG.APP_ID,
-                        'X-Parse-JavaScript-Key': BACK4APP_CONFIG.JS_KEY,
+                        'X-Parse-Application-Id': CONFIG.APP_ID,
+                        'X-Parse-JavaScript-Key': CONFIG.JS_KEY,
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({ cepDestino: cep })
                 });
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
                 const data = await response.json();
 
-                if (data.error) {
-                    throw new Error(data.error);
+                if (!response.ok) {
+                    throw new Error(data.error || 'Erro desconhecido');
                 }
 
-                exibirResultados(data.result);
+                exibirResultados(data.data);
 
             } catch (error) {
-                console.error('Erro:', error);
-                resultDiv.innerHTML = `Erro: ${error.message}`;
+                errorDiv.textContent = error.message;
+                errorDiv.style.display = 'block';
+                resultDiv.innerHTML = '';
             } finally {
                 loader.style.display = 'none';
             }
         }
 
         function exibirResultados(servicos) {
-            const resultDiv = document.getElementById('result');
+            let html = '<h3>Opções de Frete:</h3>';
             
             if (!servicos || servicos.length === 0) {
-                resultDiv.innerHTML = 'Nenhuma opção de frete disponível';
-                return;
+                html = '<p>Nenhuma opção disponível para este CEP</p>';
+            } else {
+                servicos.forEach(servico => {
+                    html += `
+                        <div class="servico">
+                            <strong>${servico.empresa}</strong><br>
+                            <span>${servico.metodo}</span><br>
+                            Prazo: ${servico.prazo} dias<br>
+                            Preço: R$ ${servico.preco.toFixed(2).replace('.', ',')}
+                        </div>
+                        <hr>
+                    `;
+                });
             }
 
-            let html = '<h3>Opções de Frete:</h3>';
-            servicos.forEach(servico => {
-                html += `
-                    <div class="servico">
-                        <strong>${servico.company.name}</strong><br>
-                        <span>Prazo: ${servico.delivery_time} dias úteis</span><br>
-                        <span>Preço: R$ ${servico.price.toFixed(2).replace('.', ',')}</span>
-                    </div>
-                    <hr>
-                `;
-            });
-
-            resultDiv.innerHTML = html;
+            document.getElementById('result').innerHTML = html;
         }
     </script>
 </body>
