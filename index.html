@@ -45,40 +45,27 @@
             resultDiv.innerHTML = '';
             loader.style.display = 'block';
 
-            try {
-                // Validar CEP no client-side
-                if (cep.length !== 8) {
-                    throw new Error('CEP deve conter 8 dígitos');
-                }
+ try {
+        // Forçar CEP de teste
+        const cepTeste = '01001000'; // Substitua pelo CEP do input
+        const response = await fetch(CONFIG.ENDPOINT, {
+            body: JSON.stringify({ cepDestino: cepTeste }) // Teste fixo
+        });
 
-                // Fazer requisição
-                const response = await fetch(CONFIG.ENDPOINT, {
-                    method: 'POST',
-                    headers: {
-                        'X-Parse-Application-Id': CONFIG.APP_ID,
-                        'X-Parse-JavaScript-Key': CONFIG.JS_KEY,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ cepDestino: cep })
-                });
+        const result = await response.json();
+        console.log('Resposta completa:', result); // Adicione isso
 
-                const data = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(data.error || 'Erro desconhecido');
-                }
-
-                exibirResultados(data.data);
-
-            } catch (error) {
-                errorDiv.textContent = error.message;
-                errorDiv.style.display = 'block';
-                resultDiv.innerHTML = '';
-            } finally {
-                loader.style.display = 'none';
-            }
+        if (result.debug) { // Apenas para modo de desenvolvimento
+            document.getElementById('result').innerHTML = 
+                `<pre>${JSON.stringify(result.debug, null, 2)}</pre>`;
+            return;
         }
 
+        exibirResultados(result.data);
+    } catch (error) {
+        console.error('Erro completo:', error); 
+    }
+}
         function exibirResultados(servicos) {
             let html = '<h3>Opções de Frete:</h3>';
             
