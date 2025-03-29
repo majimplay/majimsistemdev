@@ -1,61 +1,176 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Calculadora de Frete</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 40px; }
-    label { display: block; margin-bottom: 8px; }
-    input { padding: 8px; width: 200px; margin-bottom: 12px; }
-    button { padding: 8px 16px; cursor: pointer; }
-    pre { background: #f5f5f5; padding: 15px; border-radius: 5px; }
-  </style>
-  <script src="https://npmcdn.com/parse/dist/parse.min.js"></script>
-  <script>
-       Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
-   Parse.serverURL = "https://parseapi.back4app.com";
-
-    async function calcularFrete() {
-      const cepInput = document.getElementById('cep');
-      const resultado = document.getElementById('resultado');
-      
-      try {
-        const cep = cepInput.value.replace(/\D/g, '');
-        
-        // Validação básica no cliente
-        if (!/^\d{8}$/.test(cep)) {
-          throw new Error('CEP inválido! Digite 8 números.');
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Frete</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f8f9fa;
         }
 
-        resultado.innerText = "Calculando...";
-        
-        // Chamada ao Cloud Code com timeout
-        const result = await Parse.Cloud.run(
-          "calcFrete", 
-          { cepDestino: cep },
-          { timeout: 15000 }
-        );
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
 
-        resultado.innerHTML = `
-          <strong>Resultado:</strong>\n
-          Valor: R$ ${parseFloat(result.valor).toFixed(2)}\n
-          Prazo: ${result.prazo} dias úteis
-        `;
+        .input-group {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
 
-      } catch (error) {
-        console.error('Erro completo:', error);
-        resultado.innerText = error.message.includes("CEP") 
-          ? error.message 
-          : `Erro no servidor: ${error.message}`;
-      }
-    }
-  </script>
+        input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 12px 25px;
+            background: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #27ae60;
+        }
+
+        .error {
+            color: #e74c3c;
+            margin: 10px 0;
+            display: none;
+        }
+
+        .result-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #2ecc71;
+        }
+
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            display: none;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body>
-  <h1>Calculadora de Frete Correios</h1>
-  <label for="cep">CEP Destino:</label>
-  <input type="text" id="cep" placeholder="Ex: 01001000" maxlength="8">
-  <button onclick="calcularFrete()">Calcular Frete</button>
-  <pre id="resultado"></pre>
+    <div class="container">
+        <h1>📦 Calculadora de Frete</h1>
+        <div class="input-group">
+            <input 
+                type="text" 
+                id="cep" 
+                placeholder="Digite o CEP (ex: 01001000)"
+                maxlength="9"
+                oninput="this.value = this.value.replace(/\D/g, '')"
+            >
+            <button onclick="calcularFrete()">Calcular</button>
+        </div>
+        <div id="cepError" class="error"></div>
+        <div class="loader" id="loader"></div>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        // Configurações do Back4App (SUBSTITUIR)
+        const CONFIG = {
+            APP_ID: 'TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY',
+            JS_KEY: 'n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I',
+            ENDPOINT: 'https://parseapi.back4app.com/functions/calcularFrete'
+        };
+
+        async function calcularFrete() {
+            const cep = document.getElementById('cep').value.replace(/\D/g, '');
+            const errorDiv = document.getElementById('cepError');
+            const loader = document.getElementById('loader');
+            const resultDiv = document.getElementById('result');
+
+            // Resetar estado
+            errorDiv.style.display = 'none';
+            resultDiv.innerHTML = '';
+            loader.style.display = 'block';
+
+            try {
+                // Validação local
+                if (cep.length !== 8) throw new Error('CEP deve ter 8 dígitos');
+
+                // Chamada ao backend
+                const response = await fetch(CONFIG.ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'X-Parse-Application-Id': CONFIG.APP_ID,
+                        'X-Parse-JavaScript-Key': CONFIG.JS_KEY,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ cepDestino: cep })
+                });
+
+                const { result } = await response.json();
+                
+                if (!response.ok || !result?.success) {
+                    throw new Error(result?.error || 'Erro ao calcular fretes');
+                }
+
+                exibirResultados(result.data);
+
+            } catch (error) {
+                errorDiv.textContent = error.message;
+                errorDiv.style.display = 'block';
+            } finally {
+                loader.style.display = 'none';
+            }
+        }
+
+        function exibirResultados(servicos) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '';
+
+            if (!servicos?.length) {
+                resultDiv.innerHTML = '<p>Nenhuma opção disponível para este CEP</p>';
+                return;
+            }
+
+            let html = '<h3>🚚 Opções de Frete:</h3>';
+            
+            servicos.forEach(servico => {
+                html += `
+                    <div class="result-card">
+                        <strong>${servico.empresa}</strong>
+                        <p>📦 Método: ${servico.metodo}</p>
+                        <p>📅 Prazo: ${servico.prazo}</p>
+                        <p style="color: #2ecc71; font-weight: bold;">💵 Preço: R$ ${servico.preco.replace('.', ',')}</p>
+                    </div>
+                `;
+            });
+
+            resultDiv.innerHTML = html;
+        }
+    </script>
 </body>
 </html>
