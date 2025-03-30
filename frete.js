@@ -1,23 +1,24 @@
-// cloud/main.js
+const Parse = require('parse/node');
 const fetch = require('node-fetch');
 
 Parse.Cloud.define('calcularFrete', async (request) => {
     try {
-        // Validação do CEP
-        const cepDestino = request.params.cepDestino?.replace(/\D/g, '');
-        if (!cepDestino || cepDestino.length !== 8) {
-            throw new Parse.Error(101, 'CEP inválido');
+        // Validação dos dados
+        const { cepOrigem, cepDestino, package } = request.params;
+        
+        if (!cepOrigem || !cepDestino || cepOrigem.length !== 8 || cepDestino.length !== 8) {
+            throw new Parse.Error(101, 'CEPs inválidos');
         }
 
-        // Configuração do payload
+        // Configurar payload para API Melhor Envio
         const payload = {
-            from: { postal_code: '01001000' },
+            from: { postal_code: cepOrigem },
             to: { postal_code: cepDestino },
             package: {
-                height: 20,
-                width: 30,
-                length: 40,
-                weight: 2
+                height: package.height,
+                width: package.width,
+                length: package.length,
+                weight: package.weight
             },
             options: {
                 insurance_value: 0,
@@ -26,7 +27,7 @@ Parse.Cloud.define('calcularFrete', async (request) => {
             }
         };
 
-        // Chamada à API Melhor Envio
+        // Chamar API Melhor Envio
         const response = await fetch('https://sandbox.melhorenvio.com.br/api/v2/me/shipment/calculate', {
             method: 'POST',
             headers: {
@@ -37,15 +38,14 @@ Parse.Cloud.define('calcularFrete', async (request) => {
             body: JSON.stringify(payload)
         });
 
-        // Tratamento de erros da API
         if (!response.ok) {
             const errorData = await response.json();
-            throw new Parse.Error(500, errorData.message || 'Erro na API');
+            throw new Parse.Error(500, errorData.message || 'Erro na API de fretes');
         }
 
         const data = await response.json();
 
-        // Processamento dos resultados
+        // Processar resultados
         const resultados = data
             .filter(item => item.price && item.delivery_time)
             .map(item => ({
@@ -56,13 +56,8 @@ Parse.Cloud.define('calcularFrete', async (request) => {
             }));
 
         return { success: true, data: resultados };
-
     } catch (error) {
-        console.error('Erro detalhado:', {
-            code: error.code,
-            message: error.message,
-            params: request.params
-        });
+        console.error('Erro no cálculo de frete:', error);
         throw new Parse.Error(error.code || 500, error.message);
     }
 });
