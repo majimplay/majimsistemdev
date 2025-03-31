@@ -406,6 +406,79 @@
       return isValid;
     }
 
+   // Cálculo do frete
+    async function calcularFrete() {
+      const resultadosDiv = document.getElementById('resultadosFrete');
+      resultadosDiv.innerHTML = '<p>Calculando fretes...</p>';
+
+      try {
+        const dados = {
+          cepOrigem: document.getElementById('cep_loja').value.replace(/\D/g, ''),
+          cepDestino: document.getElementById('cep').value.replace(/\D/g, ''),
+          package: {
+            height: parseFloat(document.getElementById('altura').value),
+            width: parseFloat(document.getElementById('largura').value),
+            length: parseFloat(document.getElementById('comprimento').value),
+            weight: parseFloat(document.getElementById('peso').value)
+          }
+        };
+
+        const response = await fetch(CONFIG.BACK4APP.ENDPOINT, {
+          method: 'POST',
+          headers: {
+            'X-Parse-Application-Id': CONFIG.BACK4APP.APP_ID,
+            'X-Parse-JavaScript-Key': CONFIG.BACK4APP.JS_KEY,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(dados)
+        });
+
+        const { result } = await response.json();
+        if (!response.ok || !result?.success) {
+          throw new Error(result?.error || 'Erro ao calcular fretes');
+        }
+
+        exibirFretes(result.data);
+      } catch (error) {
+        resultadosDiv.innerHTML = `<p class="error">${error.message}</p>`;
+      }
+    }
+
+    function exibirFretes(servicos) {
+      const resultadosDiv = document.getElementById('resultadosFrete');
+      resultadosDiv.innerHTML = '';
+
+      servicos.forEach(servico => {
+        const card = document.createElement('div');
+        card.className = 'frete-card';
+        card.innerHTML = `
+          <h4>${servico.empresa} - ${servico.metodo}</h4>
+          <p>Prazo: ${servico.prazo} dias</p>
+          <p>Preço: R$ ${servico.preco.replace('.', ',')}</p>
+          <button class="btn btn-primary" 
+                  onclick="selecionarFrete(${JSON.stringify(servico)})">
+            Selecionar
+          </button>
+        `;
+        resultadosDiv.appendChild(card);
+      });
+    }
+
+    function selecionarFrete(servico) {
+      freteSelecionado = servico;
+      document.getElementById('totalFrete').textContent = parseFloat(servico.preco).toFixed(2);
+      atualizarTotalGeral();
+      fecharModal();
+    }
+
+    function atualizarTotalGeral() {
+      const totalProdutos = parseFloat(document.getElementById('totalProdutos').textContent);
+      const totalFrete = parseFloat(document.getElementById('totalFrete').textContent);
+      document.getElementById('totalGeral').textContent = (totalProdutos + totalFrete).toFixed(2);
+    }
+
+
+    
 
 
 
