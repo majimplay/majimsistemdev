@@ -347,7 +347,7 @@
     }
 
     function validarDadosCliente() {
-      const requiredFields = ['nome', 'email', 'cpf', 'telefone', 'cep', 'numero'];
+      const requiredFields = ['nome', 'email', 'cpf', 'cep', 'numero'];
       let isValid = true;
 
       requiredFields.forEach(id => {
@@ -424,6 +424,7 @@
         cpf: document.getElementById('cpf').value,
         address: document.getElementById('address').value,
         phone: document.getElementById('phone').value,
+        cepuser: document.getElementById('cepuser').value,
         lastUpdated: Date.now()
       };
 
