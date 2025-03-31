@@ -408,7 +408,7 @@
       document.getElementById('cpf').value = userData.cpf || '';
 
       document.getElementById('phone').value = userData.phone || '';
-        document.getElementById('phone').value = userData.phone || '';
+        document.getElementById('numero').value = userData.numero || '';
      
     }
 
@@ -425,7 +425,7 @@
       e.preventDefault();
       const updatedData = {
         cpf: document.getElementById('cpf').value,
-
+        numero: document.getElementById('numero').value,
         phone: document.getElementById('phone').value,
         cepuser: document.getElementById('cepuser').value,
         lastUpdated: Date.now()
