@@ -1,0 +1,74 @@
+ const { Buffer } = require('buffer');
+const Parse = require('parse/node');
+const fetch = require('node-fetch');
+Parse.Cloud.define('handleGoogleAuth', async ({ params }) => {
+  const { code } = params;
+
+  const config = {
+    clientId: '21514234895-keiqos567ifvs4hjkg3l1q5mvun8lri0.apps.googleusercontent.com ',
+    clientSecret: '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',
+    redirectUri: 'https://majimplay.github.io/',
+    tokenUrl: 'https://oauth2.googleapis.com/token'
+  };
+
+  try {
+    // 1. Trocar código por token
+    const tokenResponse = await fetch(config.tokenUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        code,
+        client_id: config.clientId,
+        client_secret: config.clientSecret,
+        redirect_uri: config.redirectUri,
+        grant_type: 'authorization_code'
+      })
+    });
+
+    if (!tokenResponse.ok) {
+      const errorData = await tokenResponse.json();
+      throw new Error(`Erro Google: ${errorData.error} - ${errorData.error_description}`);
+    }
+
+    const tokens = await tokenResponse.json();
+    
+    // 2. Decodificar token
+    const payload = JSON.parse(
+      Buffer.from(tokens.id_token.split('.')[1], 'base64').toString()
+    );
+
+    // 3. Gerenciar usuário
+    const userQuery = new Parse.Query(Parse.User);
+    userQuery.equalTo('email', payload.email);
+    
+    let user = await userQuery.first({ useMasterKey: true });
+
+    if (!user) {
+      user = new Parse.User();
+      user.setUsername(payload.email);
+      user.setEmail(payload.email);
+      user.setPassword(Math.random().toString(36).slice(-8));
+    }
+
+    // Atualizar dados
+    user.set('googleId', payload.sub);
+    user.set('nome', payload.name || 'Usuário Google');
+    user.set('picture', payload.picture || '');
+    user.set('authMethod', 'google');
+
+    // Salvar alterações
+    user = await user.save(null, { useMasterKey: true });
+
+    return {
+      user: user.toJSON(),
+      sessionToken: user.getSessionToken()
+    };
+
+  } catch (error) {
+    console.error('Erro detalhado:', error);
+    throw new Parse.Error(
+      Parse.Error.SCRIPT_FAILED,
+      `Falha na autenticação: ${error.message}`
+    );
+  }
+});
