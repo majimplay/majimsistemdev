@@ -294,6 +294,81 @@
     Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
     Parse.serverURL = "https://parseapi.back4app.com";
 
+    // Configurações da API
+    const CONFIG = {
+      BACK4APP: {
+        APP_ID: 'TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY',
+        JS_KEY: 'n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I',
+        ENDPOINT: 'https://parseapi.back4app.com/functions/calcularFrete'
+      },
+      VIACEP: 'https://viacep.com.br/ws/'
+    };
+
+    let freteSelecionado = null;
+
+    // Funções de formatação
+    function formatarCEP(input) {
+      let cep = input.value.replace(/\D/g, '');
+      if (cep.length > 5) cep = cep.replace(/^(\d{5})(\d)/, '$1-$2');
+      input.value = cep;
+    }
+
+    // Buscar endereço via API
+    async function buscarEndereco(cep) {
+      cep = cep.replace(/\D/g, '');
+      if(cep.length !== 8) return;
+
+      try {
+        const response = await fetch(`${CONFIG.VIACEP}${cep}/json/`);
+        const data = await response.json();
+        
+        if(data.erro) {
+          alert('CEP não encontrado!');
+          return;
+        }
+
+        document.getElementById('rua').value = data.logradouro || '';
+        document.getElementById('bairro').value = data.bairro || '';
+        document.getElementById('cidade').value = data.localidade || '';
+        document.getElementById('uf').value = data.uf || '';
+      } catch(error) {
+        console.error('Erro ao buscar CEP:', error);
+        alert('Erro ao buscar endereço!');
+      }
+    }
+
+    // Modal de fretes
+    function abrirCalculadoraFrete() {
+      if(!validarDadosCliente()) return;
+      document.getElementById('modalFrete').style.display = 'block';
+      calcularFrete();
+    }
+
+    function fecharModal() {
+      document.getElementById('modalFrete').style.display = 'none';
+    }
+
+    function validarDadosCliente() {
+      const requiredFields = ['nome', 'email', 'cpf', 'telefone', 'cep', 'numero'];
+      let isValid = true;
+
+      requiredFields.forEach(id => {
+        const field = document.getElementById(id);
+        if(!field.value.trim()) {
+          field.style.borderColor = 'red';
+          isValid = false;
+        } else {
+          field.style.borderColor = '#ddd';
+        }
+      });
+
+      return isValid;
+    }
+
+
+
+
+    
     let currentUser = null;
     let userData = {};
 
