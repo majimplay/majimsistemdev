@@ -112,6 +112,28 @@
             display: none;
             margin: 20px auto;
         }
+        .selected-shipping {
+            background: #e3f2fd;
+            border-left: 4px solid #2196F3;
+        }
+        .btn-select {
+            background: #4CAF50;
+            color: white;
+            padding: 8px 16px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .final-price {
+            font-size: 1.4em;
+            color: #2ecc71;
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            text-align: right;
+        }
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -121,18 +143,19 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <!-- Parse SDK -->
+    <script src="https://unpkg.com/parse@3.5.0/dist/parse.min.js"></script>
 </head>
 <body>
     <div class="container">
         <!-- Cabeçalho do Perfil -->
         <div class="profile-header">
-            <img id="profilePhoto" class="profile-photo" src="https://via.placeholder.com/120" alt="Foto do Perfil">
+            <img id="profilePhoto" class="profile-photo" src="imagens/avatar-padrao.jpg" alt="Foto do Perfil">
             <div class="profile-info">
                 <h1 id="userName">Carregando...</h1>
                 <p id="userEmail"></p>
                 <p id="loginMethod"></p>
             </div>
-            <button onclick="window.location.href='carrinhodecompra.html'" class="btn btn-primary">Carrinho</button>
             <button id="logoutBtn" class="btn btn-secondary">Logout</button>
         </div>
 
@@ -140,7 +163,7 @@
         <div class="carrinho">
             <h2>Meu Carrinho</h2>
             <div id="carrinhoItens"></div>
-            <div class="total">Total: R$ <span id="carrinhoTotal">0.00</span></div>
+            <div class="total">Subtotal: R$ <span id="carrinhoTotal">0.00</span></div>
         </div>
 
         <!-- Formulário de CEP e Frete -->
@@ -181,19 +204,19 @@
             <div class="form-row">
                 <div>
                     <label>Altura (cm)</label>
-                    <input type="number" id="altura" value="20">
+                    <input type="number" id="altura" value="20" min="1">
                 </div>
                 <div>
                     <label>Largura (cm)</label>
-                    <input type="number" id="largura" value="30">
+                    <input type="number" id="largura" value="30" min="1">
                 </div>
                 <div>
                     <label>Comprimento (cm)</label>
-                    <input type="number" id="comprimento" value="40">
+                    <input type="number" id="comprimento" value="40" min="1">
                 </div>
                 <div>
                     <label>Peso (kg)</label>
-                    <input type="number" id="peso" step="0.1" value="2">
+                    <input type="number" id="peso" step="0.1" value="2" min="0.1">
                 </div>
             </div>
 
@@ -202,11 +225,16 @@
             <div id="result"></div>
         </div>
 
+        <!-- Preço Final -->
+        <div class="final-price" id="finalPriceContainer" style="display: none;">
+            Preço Final: R$ <span id="precoFinal">0.00</span>
+        </div>
+
         <button class="btn btn-secondary" onclick="voltarParaIndex()">Voltar para Página Inicial</button>
     </div>
 
     <script>
-        // Configuração do Firebase
+        // Configurações
         const firebaseConfig = {
             apiKey: "AIzaSyDlUQbbTP29VqBVmzOGHhfc67R1DTRPwxg",
             authDomain: "gitautenticatio.firebaseapp.com",
@@ -217,25 +245,34 @@
             appId: "1:21514234895:web:d34dc4c44baf586d2cc77a"
         };
 
+        // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const database = firebase.database();
 
+        // Inicializar Parse
+        Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
+        Parse.serverURL = "https://parseapi.back4app.com/";
+
+        // Variáveis globais
         let currentUser = null;
+        let totalCarrinho = 0;
+        let freteSelecionado = 0;
 
         // Monitorar estado de autenticação
         auth.onAuthStateChanged(user => {
             if (user) {
                 currentUser = user;
-                updateProfileHeader();
+                atualizarCabecalho();
                 carregarCarrinho();
             } else {
                 window.location.href = 'index.html';
             }
         });
 
-        function updateProfileHeader() {
-            document.getElementById('profilePhoto').src = currentUser.photoURL || 'https://via.placeholder.com/120';
+        // Atualizar cabeçalho do perfil
+        function atualizarCabecalho() {
+            document.getElementById('profilePhoto').src = currentUser.photoURL || 'imagens/avatar-padrao.jpg';
             document.getElementById('userName').textContent = currentUser.displayName || 'Usuário';
             document.getElementById('userEmail').textContent = currentUser.email;
         }
@@ -250,32 +287,45 @@
                 if (Object.keys(carrinho).length === 0) {
                     container.innerHTML = '<p>Seu carrinho está vazio</p>';
                     document.getElementById('carrinhoTotal').textContent = '0.00';
+                    totalCarrinho = 0;
+                    atualizarPrecoFinal();
                     return;
                 }
 
+                const Produto = Parse.Object.extend("Produto");
+                const query = new Parse.Query(Produto);
+                query.containedIn("objectId", Object.keys(carrinho));
+                const produtos = await query.find();
+
                 let html = '';
-                let total = 0;
-                
-                for (const [produtoId, item] of Object.entries(carrinho)) {
-                    total += item.preco * item.quantidade;
+                totalCarrinho = 0;
+
+                produtos.forEach(produto => {
+                    const item = carrinho[produto.id];
+                    const preco = produto.get('preco');
+                    const subtotal = preco * item.quantidade;
+                    totalCarrinho += subtotal;
+
                     html += `
                         <div class="produto">
                             <div>
-                                <h4>${item.nome}</h4>
+                                <h4>${produto.get('nome')}</h4>
                                 <p>Quantidade: ${item.quantidade}</p>
-                                <p>Preço unitário: R$ ${item.preco.toFixed(2)}</p>
+                                <p>Preço unitário: R$ ${preco.toFixed(2)}</p>
                             </div>
-                            <button onclick="removerDoCarrinho('${produtoId}')" class="btn btn-danger">
+                            <button onclick="removerDoCarrinho('${produto.id}')" class="btn btn-danger">
                                 Remover
                             </button>
                         </div>
                     `;
-                }
+                });
 
                 container.innerHTML = html;
-                document.getElementById('carrinhoTotal').textContent = total.toFixed(2);
+                document.getElementById('carrinhoTotal').textContent = totalCarrinho.toFixed(2);
+                atualizarPrecoFinal();
             } catch (error) {
                 console.error('Erro ao carregar carrinho:', error);
+                alert('Erro ao carregar o carrinho!');
             }
         }
 
@@ -309,6 +359,7 @@
             }
         }
 
+        // Calcular frete
         async function calcularFrete() {
             const loader = document.getElementById('mainLoader');
             loader.style.display = 'block';
@@ -343,18 +394,40 @@
             }
         }
 
+        // Exibir opções de frete
         function exibirFrete(servicos) {
             const resultDiv = document.getElementById('result');
             resultDiv.innerHTML = servicos.map(servico => `
-                <div class="result-card">
+                <div class="result-card" id="frete-${servico.empresa}-${servico.metodo}">
                     <p><strong>${servico.empresa} - ${servico.metodo}</strong></p>
                     <p>Prazo: ${servico.prazo} dias</p>
-                    <p>Preço: R$ ${servico.preco}</p>
+                    <p>Preço: R$ ${parseFloat(servico.preco).toFixed(2)}</p>
+                    <button class="btn-select" 
+                            onclick="selecionarFrete(${parseFloat(servico.preco)}, this)">
+                        Selecionar Frete
+                    </button>
                 </div>
             `).join('');
         }
 
-        // Funções compartilhadas
+        // Selecionar frete
+        function selecionarFrete(preco, element) {
+            document.querySelectorAll('.result-card').forEach(card => {
+                card.classList.remove('selected-shipping');
+            });
+            element.parentElement.classList.add('selected-shipping');
+            freteSelecionado = preco;
+            document.getElementById('finalPriceContainer').style.display = 'block';
+            atualizarPrecoFinal();
+        }
+
+        // Atualizar preço final
+        function atualizarPrecoFinal() {
+            const precoFinal = totalCarrinho + freteSelecionado;
+            document.getElementById('precoFinal').textContent = precoFinal.toFixed(2);
+        }
+
+        // Remover item do carrinho
         window.removerDoCarrinho = async (produtoId) => {
             try {
                 await database.ref(`users/${currentUser.uid}/carrinho/${produtoId}`).remove();
@@ -365,6 +438,7 @@
             }
         };
 
+        // Logout
         document.getElementById('logoutBtn').addEventListener('click', async () => {
             try {
                 await auth.signOut();
@@ -374,6 +448,7 @@
             }
         });
 
+        // Voltar para página inicial
         function voltarParaIndex() {
             window.location.href = 'index.html';
         }
