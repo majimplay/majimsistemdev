@@ -1,4 +1,4 @@
-const Parse = require('parse/node');
+ const Parse = require('parse/node');
 const fetch = require('node-fetch');
 
 Parse.Cloud.define('calcularFrete', async (request) => {
