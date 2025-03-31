@@ -127,6 +127,11 @@
   </div>
 
   <script>
+ // Configuração do Parse
+    Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
+    Parse.serverURL = "https://parseapi.back4app.com";
+
+    
     // Configuração do Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyDlUQbbTP29VqBVmzOGHhfc67R1DTRPwxg",
@@ -143,9 +148,7 @@
     const auth = firebase.auth();
     const database = firebase.database();
 
-    // Configuração do Parse
-    Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
-    Parse.serverURL = "https://parseapi.back4app.com";
+
 
     let currentUser = null;
     const carouselIndexes = {};
