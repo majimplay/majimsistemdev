@@ -449,22 +449,21 @@ async function carregarCarrinho() {
         }
 
         // Selecionar frete
-        function selecionarFrete(preco, element) {
-            document.querySelectorAll('.result-card').forEach(card => {
-                card.classList.remove('selected-shipping');
-            });
-            element.parentElement.classList.add('selected-shipping');
-            freteSelecionado = preco;
-            document.getElementById('finalPriceContainer').style.display = 'block';
-            document.getElementById('checkoutBtn').style.display = 'block';
-            atualizarPrecoFinal();
-        }
-
-        // Atualizar preço final
-        function atualizarPrecoFinal() {
-            const precoFinal = totalCarrinho + freteSelecionado;
-            document.getElementById('precoFinal').textContent = precoFinal.toFixed(2);
-        }
+    function selecionarFrete(preco, element) {
+        document.querySelectorAll('.result-card').forEach(card => {
+            card.classList.remove('selected-shipping');
+        });
+        element.parentElement.classList.add('selected-shipping');
+        freteSelecionado = preco;
+        
+        // Salvar preço total com frete no Firebase
+        const precoFinal = totalCarrinho + freteSelecionado;
+        database.ref(`users/${currentUser.uid}/carrinho/precototal`).set(precoFinal);
+        
+        document.getElementById('finalPriceContainer').style.display = 'block';
+        document.getElementById('checkoutBtn').style.display = 'block';
+        atualizarPrecoFinal();
+    }
 
         // Remover item do carrinho
         window.removerDoCarrinho = async (produtoId) => {
@@ -490,7 +489,7 @@ async function carregarCarrinho() {
         // Prosseguir para checkout
         function prosseguirCheckout() {
             alert('🚀 Redirecionando para o checkout...');
-            // Adicione aqui a lógica de redirecionamento
+            window.location.href = 'checkout.html';
         }
 
         // Voltar para página inicial
