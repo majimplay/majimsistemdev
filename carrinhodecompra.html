@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Carrinho de Compras</title>
+    <title>🛒 Carrinho de Compras</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -20,6 +20,7 @@
         }
         .profile-header {
             display: flex;
+            justify-content: space-between;
             align-items: center;
             margin-bottom: 2rem;
             padding-bottom: 2rem;
@@ -75,6 +76,7 @@
         .btn-secondary {
             background: #6c757d;
             color: white;
+            margin-left: auto;
         }
         .form-section {
             margin: 25px 0;
@@ -134,6 +136,16 @@
             border-radius: 8px;
             text-align: right;
         }
+        .checkout-btn {
+            background: #2ecc71;
+            margin-top: 20px;
+            display: none;
+            width: 100%;
+            font-size: 1.1em;
+        }
+        .emoji {
+            margin-right: 8px;
+        }
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -150,33 +162,35 @@
     <div class="container">
         <!-- Cabeçalho do Perfil -->
         <div class="profile-header">
-            <img id="profilePhoto" class="profile-photo" src="imagens/avatar-padrao.jpg" alt="Foto do Perfil">
-            <div class="profile-info">
-                <h1 id="userName">Carregando...</h1>
-                <p id="userEmail"></p>
-                <p id="loginMethod"></p>
+            <div style="display: flex; align-items: center;">
+                <img id="profilePhoto" class="profile-photo" src="imagens/avatar-padrao.jpg" alt="Foto do Perfil">
+                <div class="profile-info">
+                    <h1 id="userName">📱 Carregando...</h1>
+                    <p id="userEmail"></p>
+                    <p id="loginMethod"></p>
+                </div>
             </div>
-            <button id="logoutBtn" class="btn btn-secondary">Logout</button>
+            <button id="logoutBtn" class="btn btn-secondary">🚪 Sair</button>
         </div>
 
         <!-- Carrinho de Compras -->
         <div class="carrinho">
-            <h2>Meu Carrinho</h2>
+            <h2>🛒 Meu Carrinho</h2>
             <div id="carrinhoItens"></div>
-            <div class="total">Subtotal: R$ <span id="carrinhoTotal">0.00</span></div>
+            <div class="total">📦 Subtotal: R$ <span id="carrinhoTotal">0.00</span></div>
         </div>
 
         <!-- Formulário de CEP e Frete -->
         <div class="form-section">
-            <h3>Calcular Frete</h3>
+            <h3>🚚 Calcular Frete</h3>
             <div class="form-row">
                 <div>
-                    <label>CEP da Loja</label>
+                    <label>📍 CEP da Loja</label>
                     <input type="text" id="cep_loja" placeholder="01001000" 
                            oninput="formatarCEP(this)" value="01001000">
                 </div>
                 <div>
-                    <label>CEP do Cliente</label>
+                    <label>📮 CEP do Cliente</label>
                     <input type="text" id="cep_destino" placeholder="Digite seu CEP"
                            oninput="formatarCEP(this)" onblur="buscarEndereco(this.value)">
                 </div>
@@ -184,53 +198,58 @@
 
             <div class="form-row">
                 <div>
-                    <label>Logradouro</label>
+                    <label>🏠 Logradouro</label>
                     <input type="text" id="logradouro" readonly>
                 </div>
                 <div>
-                    <label>Bairro</label>
+                    <label>🏘️ Bairro</label>
                     <input type="text" id="bairro" readonly>
                 </div>
                 <div>
-                    <label>Cidade</label>
+                    <label>🌆 Cidade</label>
                     <input type="text" id="cidade" readonly>
                 </div>
                 <div>
-                    <label>Estado</label>
+                    <label>🏳️ Estado</label>
                     <input type="text" id="uf" readonly>
                 </div>
             </div>
 
             <div class="form-row">
                 <div>
-                    <label>Altura (cm)</label>
+                    <label>📏 Altura (cm)</label>
                     <input type="number" id="altura" value="20" min="1">
                 </div>
                 <div>
-                    <label>Largura (cm)</label>
+                    <label>📏 Largura (cm)</label>
                     <input type="number" id="largura" value="30" min="1">
                 </div>
                 <div>
-                    <label>Comprimento (cm)</label>
+                    <label>📐 Comprimento (cm)</label>
                     <input type="number" id="comprimento" value="40" min="1">
                 </div>
                 <div>
-                    <label>Peso (kg)</label>
+                    <label>⚖️ Peso (kg)</label>
                     <input type="number" id="peso" step="0.1" value="2" min="0.1">
                 </div>
             </div>
 
-            <button class="btn btn-primary" onclick="calcularFrete()">Calcular Frete</button>
+            <button class="btn btn-primary" onclick="calcularFrete()">📦 Calcular Frete</button>
             <div class="loader" id="mainLoader"></div>
             <div id="result"></div>
         </div>
 
         <!-- Preço Final -->
         <div class="final-price" id="finalPriceContainer" style="display: none;">
-            Preço Final: R$ <span id="precoFinal">0.00</span>
+            💰 Preço Final: R$ <span id="precoFinal">0.00</span>
         </div>
 
-        <button class="btn btn-secondary" onclick="voltarParaIndex()">Voltar para Página Inicial</button>
+        <!-- Botão de Checkout -->
+        <button id="checkoutBtn" class="btn checkout-btn" onclick="prosseguirCheckout()">
+            ✅ Prosseguir para Checkout
+        </button>
+
+        <button class="btn btn-secondary" onclick="voltarParaIndex()">🏠 Voltar para Página Inicial</button>
     </div>
 
     <script>
@@ -273,8 +292,8 @@
         // Atualizar cabeçalho do perfil
         function atualizarCabecalho() {
             document.getElementById('profilePhoto').src = currentUser.photoURL || 'imagens/avatar-padrao.jpg';
-            document.getElementById('userName').textContent = currentUser.displayName || 'Usuário';
-            document.getElementById('userEmail').textContent = currentUser.email;
+            document.getElementById('userName').textContent = '👤 ' + (currentUser.displayName || 'Usuário');
+            document.getElementById('userEmail').textContent = '📧 ' + currentUser.email;
         }
 
         // Carregar carrinho
@@ -285,10 +304,12 @@
                 const container = document.getElementById('carrinhoItens');
                 
                 if (Object.keys(carrinho).length === 0) {
-                    container.innerHTML = '<p>Seu carrinho está vazio</p>';
+                    container.innerHTML = '<p>🛍️ Seu carrinho está vazio</p>';
                     document.getElementById('carrinhoTotal').textContent = '0.00';
                     totalCarrinho = 0;
                     atualizarPrecoFinal();
+                    // Salvar total no Firebase
+                    await database.ref(`users/${currentUser.uid}/carrinho/precototal`).set(totalCarrinho);
                     return;
                 }
 
@@ -309,12 +330,12 @@
                     html += `
                         <div class="produto">
                             <div>
-                                <h4>${produto.get('nome')}</h4>
-                                <p>Quantidade: ${item.quantidade}</p>
-                                <p>Preço unitário: R$ ${preco.toFixed(2)}</p>
+                                <h4>📦 ${produto.get('nome')}</h4>
+                                <p>🔢 Quantidade: ${item.quantidade}</p>
+                                <p>💲 Preço unitário: R$ ${preco.toFixed(2)}</p>
                             </div>
                             <button onclick="removerDoCarrinho('${produto.id}')" class="btn btn-danger">
-                                Remover
+                                ❌ Remover
                             </button>
                         </div>
                     `;
@@ -322,10 +343,12 @@
 
                 container.innerHTML = html;
                 document.getElementById('carrinhoTotal').textContent = totalCarrinho.toFixed(2);
+                // Salvar total no Firebase
+                await database.ref(`users/${currentUser.uid}/carrinho/precototal`).set(totalCarrinho);
                 atualizarPrecoFinal();
             } catch (error) {
                 console.error('Erro ao carregar carrinho:', error);
-                alert('Erro ao carregar o carrinho!');
+                alert('❌ Erro ao carregar o carrinho!');
             }
         }
 
@@ -345,7 +368,7 @@
                 const data = await response.json();
                 
                 if(data.erro) {
-                    alert('CEP não encontrado!');
+                    alert('❌ CEP não encontrado!');
                     return;
                 }
 
@@ -353,9 +376,12 @@
                 document.getElementById('bairro').value = data.bairro || '';
                 document.getElementById('cidade').value = data.localidade || '';
                 document.getElementById('uf').value = data.uf || '';
+
+                // Salvar CEP no Firebase
+                await database.ref(`users/${currentUser.uid}/cepuser`).set(cep);
             } catch(error) {
                 console.error('Erro ao buscar CEP:', error);
-                alert('Erro ao buscar endereço!');
+                alert('❌ Erro ao buscar endereço!');
             }
         }
 
@@ -388,7 +414,7 @@
                 exibirFrete(result.data);
             } catch (error) {
                 console.error('Erro:', error);
-                alert('Erro ao calcular frete!');
+                alert('❌ Erro ao calcular frete!');
             } finally {
                 loader.style.display = 'none';
             }
@@ -399,12 +425,12 @@
             const resultDiv = document.getElementById('result');
             resultDiv.innerHTML = servicos.map(servico => `
                 <div class="result-card" id="frete-${servico.empresa}-${servico.metodo}">
-                    <p><strong>${servico.empresa} - ${servico.metodo}</strong></p>
-                    <p>Prazo: ${servico.prazo} dias</p>
-                    <p>Preço: R$ ${parseFloat(servico.preco).toFixed(2)}</p>
+                    <p><strong>🚚 ${servico.empresa} - ${servico.metodo}</strong></p>
+                    <p>📅 Prazo: ${servico.prazo} dias</p>
+                    <p>💲 Preço: R$ ${parseFloat(servico.preco).toFixed(2)}</p>
                     <button class="btn-select" 
                             onclick="selecionarFrete(${parseFloat(servico.preco)}, this)">
-                        Selecionar Frete
+                        ✅ Selecionar Frete
                     </button>
                 </div>
             `).join('');
@@ -418,6 +444,7 @@
             element.parentElement.classList.add('selected-shipping');
             freteSelecionado = preco;
             document.getElementById('finalPriceContainer').style.display = 'block';
+            document.getElementById('checkoutBtn').style.display = 'block';
             atualizarPrecoFinal();
         }
 
@@ -432,9 +459,9 @@
             try {
                 await database.ref(`users/${currentUser.uid}/carrinho/${produtoId}`).remove();
                 carregarCarrinho();
-                alert('Item removido do carrinho!');
+                alert('🗑️ Item removido do carrinho!');
             } catch (error) {
-                alert('Erro ao remover item: ' + error.message);
+                alert('❌ Erro ao remover item: ' + error.message);
             }
         };
 
@@ -444,9 +471,15 @@
                 await auth.signOut();
                 window.location.href = 'index.html';
             } catch (error) {
-                alert('Erro ao fazer logout: ' + error.message);
+                alert('❌ Erro ao fazer logout: ' + error.message);
             }
         });
+
+        // Prosseguir para checkout
+        function prosseguirCheckout() {
+            alert('🚀 Redirecionando para o checkout...');
+            // Adicione aqui a lógica de redirecionamento
+        }
 
         // Voltar para página inicial
         function voltarParaIndex() {
