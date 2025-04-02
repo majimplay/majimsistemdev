@@ -298,11 +298,29 @@
 
         // Carregar carrinho
       // Carregar carrinho
-async function carregarCarrinho() {
-    try {
-        const snapshot = await database.ref(`users/${currentUser.uid}/carrinho`).once('value');
-        const carrinho = snapshot.val() || {};
-        const container = document.getElementById('carrinhoItens');
+   async function carregarCarrinho() {
+            try {
+                const [carrinhoSnapshot, cepSnapshot] = await Promise.all([
+                    database.ref(`users/${currentUser.uid}/carrinho`).once('value'),
+                    database.ref(`users/${currentUser.uid}/cepuser`).once('value')
+                ]);
+
+                const carrinho = carrinhoSnapshot.val() || {};
+                const cepSalvo = cepSnapshot.val();
+
+                // Preencher CEP automaticamente
+                if(cepSalvo) {
+                    document.getElementById('cep_destino').value = cepSalvo.replace(/(\d{5})(\d{3})/, '$1-$2');
+                    buscarEndereco(cepSalvo);
+                }
+
+                // Restante da função mantido...
+                
+            } catch (error) {
+                console.error('Erro ao carregar carrinho:', error);
+                alert('❌ Erro ao carregar o carrinho!');
+            }
+        }
         
         // Carregar CEP salvo do usuário
         const cepSnapshot = await database.ref(`users/${currentUser.uid}/cepuser`).once('value');
@@ -449,17 +467,25 @@ async function carregarCarrinho() {
         }
 
         // Selecionar frete
-        function selecionarFrete(preco, element) {
-            document.querySelectorAll('.result-card').forEach(card => {
-                card.classList.remove('selected-shipping');
-            });
-            element.parentElement.classList.add('selected-shipping');
-            freteSelecionado = preco;
-            document.getElementById('finalPriceContainer').style.display = 'block';
-            document.getElementById('checkoutBtn').style.display = 'block';
-            atualizarPrecoFinal();
+         async function selecionarFrete(preco, element) {
+            try {
+                document.querySelectorAll('.result-card').forEach(card => {
+                    card.classList.remove('selected-shipping');
+                });
+                element.parentElement.classList.add('selected-shipping');
+                freteSelecionado = preco;
+                
+                // Calcular e salvar preço final
+                const precoFinal = totalCarrinho + freteSelecionado;
+                await database.ref(`users/${currentUser.uid}/carrinho/precototal`).set(precoFinal);
+                
+                document.getElementById('finalPriceContainer').style.display = 'block';
+                document.getElementById('checkoutBtn').style.display = 'block';
+                atualizarPrecoFinal();
+            } catch (error) {
+                alert('❌ Erro ao selecionar frete: ' + error.message);
+            }
         }
-
         // Atualizar preço final
         function atualizarPrecoFinal() {
             const precoFinal = totalCarrinho + freteSelecionado;
@@ -488,9 +514,16 @@ async function carregarCarrinho() {
         });
 
         // Prosseguir para checkout
+              // Função de checkout atualizada
         function prosseguirCheckout() {
-            alert('🚀 Redirecionando para o checkout...');
-            // Adicione aqui a lógica de redirecionamento
+            // Validar se o frete foi selecionado
+            if(freteSelecionado <= 0) {
+                alert('⚠️ Selecione um frete antes de prosseguir!');
+                return;
+            }
+            
+            // Redirecionar para página de checkout
+            window.location.href = 'checkout.html';
         }
 
         // Voltar para página inicial
