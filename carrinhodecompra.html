@@ -297,61 +297,73 @@
         }
 
         // Carregar carrinho
-        async function carregarCarrinho() {
-            try {
-                const snapshot = await database.ref(`users/${currentUser.uid}/carrinho`).once('value');
-                const carrinho = snapshot.val() || {};
-                const container = document.getElementById('carrinhoItens');
-                
-                if (Object.keys(carrinho).length === 0) {
-                    container.innerHTML = '<p>🛍️ Seu carrinho está vazio</p>';
-                    document.getElementById('carrinhoTotal').textContent = '0.00';
-                    totalCarrinho = 0;
-                    atualizarPrecoFinal();
-                    // Salvar total no Firebase
-                    await database.ref(`users/${currentUser.uid}/carrinho/precototal`).set(totalCarrinho);
-                    return;
-                }
-
-                const Produto = Parse.Object.extend("Produto");
-                const query = new Parse.Query(Produto);
-                query.containedIn("objectId", Object.keys(carrinho));
-                const produtos = await query.find();
-
-                let html = '';
-                totalCarrinho = 0;
-
-                produtos.forEach(produto => {
-                    const item = carrinho[produto.id];
-                    const preco = produto.get('preco');
-                    const subtotal = preco * item.quantidade;
-                    totalCarrinho += subtotal;
-
-                    html += `
-                        <div class="produto">
-                            <div>
-                                <h4>📦 ${produto.get('nome')}</h4>
-                                <p>🔢 Quantidade: ${item.quantidade}</p>
-                                <p>💲 Preço unitário: R$ ${preco.toFixed(2)}</p>
-                            </div>
-                            <button onclick="removerDoCarrinho('${produto.id}')" class="btn btn-danger">
-                                ❌ Remover
-                            </button>
-                        </div>
-                    `;
-                });
-
-                container.innerHTML = html;
-                document.getElementById('carrinhoTotal').textContent = totalCarrinho.toFixed(2);
-                // Salvar total no Firebase
-                await database.ref(`users/${currentUser.uid}/carrinho/precototal`).set(totalCarrinho);
-                atualizarPrecoFinal();
-            } catch (error) {
-                console.error('Erro ao carregar carrinho:', error);
-                alert('❌ Erro ao carregar o carrinho!');
-            }
+      // Carregar carrinho
+async function carregarCarrinho() {
+    try {
+        const snapshot = await database.ref(`users/${currentUser.uid}/carrinho`).once('value');
+        const carrinho = snapshot.val() || {};
+        const container = document.getElementById('carrinhoItens');
+        
+        // Carregar CEP salvo do usuário
+        const cepSnapshot = await database.ref(`users/${currentUser.uid}/cepuser`).once('value');
+        const cepSalvo = cepSnapshot.val();
+        
+        // Preencher CEP automaticamente se existir
+        if(cepSalvo) {
+            document.getElementById('cep_destino').value = cepSalvo.replace(/(\d{5})(\d{3})/, '$1-$2');
+            buscarEndereco(cepSalvo); // Buscar endereço automaticamente
         }
 
+        if (Object.keys(carrinho).length === 0) {
+            container.innerHTML = '<p>🛍️ Seu carrinho está vazio</p>';
+            document.getElementById('carrinhoTotal').textContent = '0.00';
+            totalCarrinho = 0;
+            atualizarPrecoFinal();
+            // Atualizar total no Firebase
+            await database.ref(`users/${currentUser.uid}/carrinho/precototal`).set(totalCarrinho);
+            return;
+        }
+
+        const Produto = Parse.Object.extend("Produto");
+        const query = new Parse.Query(Produto);
+        query.containedIn("objectId", Object.keys(carrinho));
+        const produtos = await query.find();
+
+        let html = '';
+        totalCarrinho = 0;
+
+        produtos.forEach(produto => {
+            const item = carrinho[produto.id];
+            const preco = produto.get('preco');
+            const subtotal = preco * item.quantidade;
+            totalCarrinho += subtotal;
+
+            html += `
+                <div class="produto">
+                    <div>
+                        <h4>📦 ${produto.get('nome')}</h4>
+                        <p>🔢 Quantidade: ${item.quantidade}</p>
+                        <p>💲 Preço unitário: R$ ${preco.toFixed(2)}</p>
+                    </div>
+                    <button onclick="removerDoCarrinho('${produto.id}')" class="btn btn-danger">
+                        ❌ Remover
+                    </button>
+                </div>
+            `;
+        });
+
+        container.innerHTML = html;
+        document.getElementById('carrinhoTotal').textContent = totalCarrinho.toFixed(2);
+        
+        // Salvar total atualizado no Firebase
+        await database.ref(`users/${currentUser.uid}/carrinho/precototal`).set(totalCarrinho);
+        atualizarPrecoFinal();
+        
+    } catch (error) {
+        console.error('Erro ao carregar carrinho:', error);
+        alert('❌ Erro ao carregar o carrinho!');
+    }
+}
         // Funções de CEP e Frete
         function formatarCEP(input) {
             let cep = input.value.replace(/\D/g, '');
