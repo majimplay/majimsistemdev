@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Minha Conta</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 800px;
+      margin: 50px auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    h1 {
+      text-align: center;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+    label {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    input {
+      padding: 8px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .btn {
+      margin-top: 20px;
+      padding: 10px;
+      border: none;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background: #28a745;
+    }
+    .btn-primary:hover {
+      background: #218838;
+    }
+    .btn-secondary {
+      background: #6c757d;
+    }
+    .btn-danger {
+      background: #dc3545;
+    }
+    .obs {
+      font-size: 0.9em;
+      color: #555;
+    }
+    .carrinho, .historico-pedidos {
+      margin-top: 40px;
+      border-top: 2px solid #eee;
+      padding-top: 20px;
+    }
+    .produto {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+    }
+    .remove-btn {
+      padding: 5px 10px;
+      border-radius: 4px;
+    }
+    .total {
+      margin-top: 20px;
+      font-size: 1.2em;
+      font-weight: bold;
+      text-align: right;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 4px;
+    }
+    .checkout-section {
+      margin-top: 30px;
+    }
+    .simulacao-alerta {
+      color: #dc3545;
+      background: #fff3cd;
+      padding: 15px;
+      border-radius: 4px;
+      margin: 15px 0;
+      border: 1px solid #ffecb5;
+    }
+    .payment-methods {
+      margin: 15px 0;
+    }
+    .payment-methods label {
+      display: block;
+      margin: 10px 0;
+    }
+    .pedido {
+      padding: 15px;
+      margin: 10px 0;
+      background: #f8f9fa;
+      border-radius: 4px;
+      border: 1px solid #eee;
+    }
+  </style>
+  <!-- Script do Parse -->
+  <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
+  <!-- Script do PayPal (modo sandbox ou teste) -->
+  <script src="https://www.paypal.com/sdk/js?client-id=Af7i4HgLoBa3MKob6w_aIklV2bSaeZZlN1jstVM9ZyNvGDLwv2w8DVK2eOo5e4YNLXClbVmQ4oL8l_ei&currency=BRL"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Minha Conta</h1>
+    
+    <!-- Formulário de Atualização -->
+    <form id="updateForm">
+      <label for="username">Nome de Usuário *</label>
+      <input type="text" id="username" required>
+      
+      <label for="email">Email *</label>
+      <input type="email" id="email" required>
+      
+      <label for="newPassword">Nova Senha <span class="obs">(Deixe em branco para manter a atual)</span></label>
+      <input type="password" id="newPassword">
+      
+      <label for="confirmNewPassword">Confirmar Nova Senha</label>
+      <input type="password" id="confirmNewPassword">
+      
+      <label for="cpf">CPF</label>
+      <input type="text" id="cpf">
+      
+      <label for="endereco">Endereço</label>
+      <input type="text" id="endereco">
+      
+      <label for="telefone">Telefone</label>
+      <input type="text" id="telefone">
+      
+      <button type="submit" class="btn btn-primary">Atualizar Dados</button>
+    </form>
+
+    <!-- Seção do Carrinho -->
+    <div class="carrinho">
+      <h2>Meu Carrinho</h2>
+      <div id="carrinhoItens"></div>
+      <div id="carrinhoTotal" class="total"></div>
+      
+      <!-- Seção de Checkout -->
+      <div class="checkout-section">
+        <div class="simulacao-alerta">
+          ATENÇÃO: Esta é uma simulação de compra para testes. Nenhum pagamento real será processado.
+        </div>
+        
+        <!-- Container para o botão do PayPal -->
+        <div id="paypal-button-container"></div>
+      </div>
+    </div>
+
+    <!-- Histórico de Pedidos -->
+    <div class="historico-pedidos">
+      <h2>Histórico de Pedidos</h2>
+      <div id="historicoPedidos"></div>
+    </div>
+
+    <button class="btn btn-secondary" onclick="voltarParaIndex()">
+      Voltar para Página Inicial
+    </button>
+  </div>
+
+  <script>
+    // Configuração do Parse
+    Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
+    Parse.serverURL = "https://parseapi.back4app.com";
+    
+    let currentUser = Parse.User.current();
+    // Variável global para armazenar o total do carrinho
+    let totalCarrinho = "0.00";
+    
+ 
+    
+    // Atualiza os dados do usuário ao carregar a página
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        // Busca os dados atualizados do servidor
+        currentUser = await currentUser.fetch();
+        // Atualiza as seções que dependem dos dados do usuário
+        carregarHistoricoPedidos();
+        carregarCarrinho();
+
+        // Preenche o formulário com os dados atualizados
+        document.getElementById('username').value = currentUser.get('username');
+        document.getElementById('email').value = currentUser.get('email');
+        document.getElementById('cpf').value = currentUser.get('cpf') || '';
+        document.getElementById('endereco').value = currentUser.get('endereco') || '';
+        document.getElementById('telefone').value = currentUser.get('telefone') || '';
+      } catch (error) {
+        console.error('Erro ao atualizar dados do usuário:', error);
+      }
+    });
+    
+    // Atualizar dados do usuário via formulário
+    document.getElementById('updateForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const newPassword = document.getElementById('newPassword').value;
+      const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+      
+      if (newPassword && newPassword !== confirmNewPassword) {
+        alert('As novas senhas não conferem!');
+        return;
+      }
+      
+      currentUser.set('username', document.getElementById('username').value);
+      currentUser.set('email', document.getElementById('email').value);
+      currentUser.set('cpf', document.getElementById('cpf').value);
+      currentUser.set('endereco', document.getElementById('endereco').value);
+      currentUser.set('telefone', document.getElementById('telefone').value);
+      
+      if (newPassword) currentUser.set('password', newPassword);
+      
+      try {
+        await currentUser.save();
+        alert('Dados atualizados com sucesso!');
+      } catch (error) {
+        alert('Erro ao atualizar: ' + error.message);
+      }
+    });
+    
+    // Carrega o carrinho e atualiza o total global
+    async function carregarCarrinho() {
+      const carrinho = currentUser.get('carrinhovetor') || [];
+      const carrinhoItens = document.getElementById('carrinhoItens');
+      const carrinhoTotal = document.getElementById('carrinhoTotal');
+      
+      carrinhoItens.innerHTML = 'Carregando...';
+      carrinhoTotal.innerHTML = '';
+
+      try {
+        const Produto = Parse.Object.extend('Produto');
+        const query = new Parse.Query(Produto);
+        query.containedIn('objectId', carrinho);
+        const produtos = await query.find();
+
+        let total = 0;
+        let html = produtos.length === 0 
+          ? '<p>Carrinho vazio</p>' 
+          : produtos.map(produto => {
+              const preco = produto.get('preco') || 0;
+              total += preco;
+              return `
+                <div class="produto">
+                  <span>${produto.get('nome')} - R$ ${preco.toFixed(2)}</span>
+                  <button class="remove-btn btn-danger" onclick="removerDoCarrinho('${produto.id}')">
+                    Remover
+                  </button>
+                </div>
+              `;
+            }).join('');
+
+        carrinhoItens.innerHTML = html;
+        carrinhoTotal.innerHTML = `Total: R$ ${total.toFixed(2)}`;
+        // Atualiza variável global para uso no PayPal
+        totalCarrinho = total.toFixed(2);
+      } catch (error) {
+        carrinhoItens.innerHTML = '<p>Erro ao carregar carrinho</p>';
+      }
+    }
+    
+    // Remove item do carrinho
+    window.removerDoCarrinho = async (produtoId) => {
+      const novoCarrinho = currentUser.get('carrinhovetor').filter(id => id !== produtoId);
+      currentUser.set('carrinhovetor', novoCarrinho);
+      
+      try {
+        await currentUser.save();
+        carregarCarrinho();
+      } catch (error) {
+        alert('Erro ao remover item: ' + error.message);
+      }
+    }
+    
+    // Finalização de compra simulada (chamada após aprovação do PayPal)
+    window.finalizarCompraSimulada = async () => {
+      const carrinho = currentUser.get('carrinhovetor') || [];
+      if (carrinho.length === 0) {
+        alert('Carrinho vazio! Adicione itens antes de comprar.');
+        return;
+      }
+
+      const paymentMethod = "paypal"; // Método definido como PayPal para a simulação
+
+      try {
+        const Produto = Parse.Object.extend('Produto');
+        const query = new Parse.Query(Produto);
+        query.containedIn('objectId', carrinho);
+        const produtos = await query.find();
+        const total = produtos.reduce((sum, produto) => sum + (produto.get('preco') || 0), 0);
+
+        // Cria novo pedido
+        const novoPedido = {
+          id: `PED-${Date.now()}`,
+          data: new Date().toISOString(),
+          produtos: [...carrinho],
+          total: total,
+          metodoPagamento: paymentMethod,
+          status: "SIMULAÇÃO - Concluído"
+        };
+
+        // Atualiza histórico e limpa o carrinho
+        const historico = [...(currentUser.get('pedidos') || []), novoPedido];
+        currentUser.set('pedidos', historico);
+        currentUser.set('carrinhovetor', []);
+        await currentUser.save();
+
+        // Atualiza a interface
+        carregarCarrinho();
+        carregarHistoricoPedidos();
+        alert('Compra simulada finalizada com sucesso!');
+      } catch (error) {
+        alert('Erro na simulação: ' + error.message);
+      }
+    }
+    
+    // Carrega histórico de pedidos
+    async function carregarHistoricoPedidos() {
+      const container = document.getElementById('historicoPedidos');
+      const pedidos = currentUser.get('pedidos') || [];
+      
+      container.innerHTML = pedidos.length === 0 
+        ? '<p>Nenhum pedido encontrado</p>' 
+        : pedidos.reverse().map(pedido => `
+            <div class="pedido">
+              <p><strong>ID:</strong> ${pedido.id}</p>
+              <p><strong>Data:</strong> ${new Date(pedido.data).toLocaleString()}</p>
+              <p><strong>Total:</strong> R$ ${pedido.total.toFixed(2)}</p>
+              <p><strong>Método:</strong> ${pedido.metodoPagamento}</p>
+              <p><strong>Status:</strong> ${pedido.status}</p>
+            </div>
+          `).join('');
+    }
+    
+    // Função para voltar para a página inicial
+    window.voltarParaIndex = () => {
+      window.location.href = 'index.html';
+    }
+    
+    // Renderiza o botão do PayPal após o carregamento da página
+    document.addEventListener('DOMContentLoaded', () => {
+      paypal.Buttons({
+        createOrder: function(data, actions) {
+          // Cria a transação com o valor total do carrinho
+          return actions.order.create({
+            purchase_units: [{
+              amount: {
+                value: totalCarrinho || "0.00"
+              }
+            }]
+          });
+        },
+        onApprove: function(data, actions) {
+          return actions.order.capture().then(function(details) {
+            alert('Pagamento de teste aprovado para ' + details.payer.name.given_name);
+            // Finaliza a compra simulada no Parse
+            finalizarCompraSimulada();
+          });
+        },
+        onError: function (err) {
+          console.error('Erro no pagamento: ', err);
+          alert('Erro durante o pagamento. Tente novamente.');
+        }
+      }).render('#paypal-button-container');
+    });
+  </script>
+</body>
+</html>
