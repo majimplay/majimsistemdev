@@ -457,15 +457,18 @@ async function carregarCarrinho() {
             freteSelecionado = preco;
             document.getElementById('finalPriceContainer').style.display = 'block';
             document.getElementById('checkoutBtn').style.display = 'block';
+            database.ref(`users/${currentUser.uid}/carrinho/frete`).set(preco); // Nova linha
             atualizarPrecoFinal();
         }
 
         // Atualizar preço final
-        function atualizarPrecoFinal() {
-            const precoFinal = totalCarrinho + freteSelecionado;
-            document.getElementById('precoFinal').textContent = precoFinal.toFixed(2);
-        }
-
+     function atualizarPrecoFinal() {
+    const precoFinal = totalCarrinho + freteSelecionado;
+    document.getElementById('precoFinal').textContent = precoFinal.toFixed(2);
+    
+    // Salvar o preço total no Firebase
+    database.ref(`users/${currentUser.uid}/carrinho/precototal`).set(precoFinal);
+}
         // Remover item do carrinho
         window.removerDoCarrinho = async (produtoId) => {
             try {
@@ -489,7 +492,7 @@ async function carregarCarrinho() {
 
         // Prosseguir para checkout
         function prosseguirCheckout() {
-            alert('🚀 Redirecionando para o checkout...');
+        window.location.href = 'checkout.html';
             // Adicione aqui a lógica de redirecionamento
         }
 
