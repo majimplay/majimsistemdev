@@ -233,16 +233,17 @@
                 label: 'paypal'
             },
 
-createOrder: function(data, actions) {
-  return actions.order.create({
-    purchase_units: [{
-      amount: { value: total, currency_code: 'BRL' },
-      payment_instruction: {
-        disbursement_mode: 'DELAYED' // Captura atrasada
-      }
-    }]
-  });
-},
+            createOrder: function(data, actions) {
+                const total = document.getElementById('totalPagar').value;
+                return actions.order.create({
+                    purchase_units: [{
+                        amount: {
+                            value: total,
+                            currency_code: 'BRL'
+                        }
+                    }]
+                });
+            },
 
 onApprove: function(data, actions) {
     return actions.order.capture().then(async function(details) {
