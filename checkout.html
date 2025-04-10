@@ -249,27 +249,27 @@ onApprove: function(data, actions) {
     return actions.order.capture().then(async function(details) {
         alert(`Pagamento simulado com sucesso!\nValor: R$ ${document.getElementById('totalPagar').value}`);
         
-        // Registrar o pedido no Parse
+         // Registrar pedido no Parse
         const Pedido = Parse.Object.extend("Pedido");
-        const novoPedido = new Pedido();
+        const pedido = new Pedido();
         
-        try {
-            await novoPedido.save({
-                clienteId: currentUser.uid,
-                total: parseFloat(document.getElementById('totalPagar').value),
-                status: "Processando",
-              
-            });
-            
-            alert('Pedido registrado com sucesso!');
-            window.location.href = 'minhaconta.html';
-            
-        } catch (error) {
-            console.error('Erro ao salvar pedido:', error);
-            alert('Erro ao registrar pedido!');
-        }
-    });
-},
+        pedido.set("clienteId", currentUser.uid);
+        pedido.set("produtos", carrinho);
+        pedido.set("status", "pendente");
+        pedido.set("total", total); // Número garantido
+        
+        await pedido.save();
+        
+        // Limpar carrinho
+        await database.ref(`users/${currentUser.uid}/carrinho`).remove();
+        alert("Compra finalizada com sucesso!");
+        loadCart();
+      } catch (error) {
+        console.error("Erro ao finalizar compra:", error);
+        alert("Erro ao processar pedido! Verifique o console.");
+      }
+    }
+
             onError: function(err) {
                 console.error('Erro no pagamento:', err);
                 alert('Erro durante o processo de pagamento');
