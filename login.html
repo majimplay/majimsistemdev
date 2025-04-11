@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Login Header</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f5f5f5;
+        }
+        .profile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid #eee;
+        }
+        .profile-photo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #007BFF;
+            margin-right: 2rem;
+        }
+        .profile-info h1 {
+            margin: 0;
+            color: #333;
+        }
+        .profile-info p {
+            color: #666;
+            margin: 0.5rem 0;
+        }
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+    </style>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+</head>
+<body>
+    <div class="profile-header">
+        <div style="display: flex; align-items: center;">
+            <img id="profilePhoto" class="profile-photo" src="avatar-padrao.jpeg" alt="Foto do Perfil">
+            <div class="profile-info">
+                <h1 id="userName">📱 Carregando...</h1>
+                <p id="userEmail"></p>
+                <p id="loginMethod"></p>
+            </div>
+        </div>
+        <button id="logoutBtn" class="btn btn-secondary">🚪 Sair</button>
+    </div>
+
+    <!-- Resto da página em branco -->
+
+    <script>
+        // Configurações Firebase (mesmas da sua app)
+        const firebaseConfig = {
+            apiKey: "AIzaSyDlUQbbTP29VqBVmzOGHhfc67R1DTRPwxg",
+            authDomain: "gitautenticatio.firebaseapp.com",
+            // ... demais campos
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        // Verifica estado de autenticação
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                // Usuário logado: atualiza cabeçalho
+                document.getElementById('profilePhoto').src = user.photoURL || 'avatar-padrao.jpeg';
+                document.getElementById('userName').textContent = '👤 ' + (user.displayName || 'Usuário');
+                document.getElementById('userEmail').textContent = '📧 ' + user.email;
+                document.getElementById('loginMethod').textContent = '🔑 ' + (user.providerData[0]?.providerId || '');
+            
+        });
+
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            auth.signOut().then(() => {
+                window.location.href = 'index.html';
+            }).catch(err => {
+                alert('Erro ao fazer logout: ' + err.message);
+            });
+        });
+    </script>
+</body>
+</html>
