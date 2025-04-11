@@ -112,15 +112,14 @@
 
         // Função para registrar os dados
         async function registrarDados() {
-              const teste = Parse.Object.extend("Teste");
             const campo1 = document.getElementById('campo1').value;
             const userId = document.getElementById('userId').textContent;
-           
+            const Teste = Parse.Object.extend("teste");
             const teste = new Teste();
-            Teste.set("userId", userId);
-            Teste.set("campo1", campo1);
+            teste.set("userId", userId);
+            teste.set("campo1", campo1);
             try {
-                const result = await Teste.save();
+                const result = await teste.save();
                 alert('Dados registrados com sucesso!');
                 console.log('Registro criado: ', result);
             } catch (error) {
