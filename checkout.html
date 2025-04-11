@@ -144,6 +144,15 @@
         const auth = firebase.auth();
         const database = firebase.database();
 
+         // Inicializar Parse
+        try {
+            Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I"); // Substituir pelas suas chaves
+            Parse.serverURL = 'https://parseapi.back4app.com/';
+        } catch (error) {
+            console.error("Erro na inicialização do Parse:", error);
+        }
+
+
         // Monitorar estado de autenticação
         auth.onAuthStateChanged(user => {
             if (user) {
@@ -190,45 +199,43 @@
                 });
             },
 
-              onApprove: async function(data, actions) {
-      // Captura o pagamento
-      const details = await actions.order.capture();
+             onApprove: function(data, actions) {
+                return actions.order.capture().then(async function(details) {
+                    alert(`Pagamento simulado com sucesso!\nValor: R$ ${document.getElementById('totalPagar').value}`);
+                    
+                    try {
+                        const user = auth.currentUser;
+                        const userId = user.uid;
+                        
+                        const [enderecoSnap, produtosSnap] = await Promise.all([
+                            database.ref(`users/${userId}/endereco`).once('value'),
+                            database.ref(`users/${userId}/carrinho/itens`).once('value')
+                        ]);
+                        
+                        const Pedido = Parse.Object.extend("Pedido");
+                        const novoPedido = new Pedido();
+                        
+                        novoPedido.set({
+                            clienteId: userId,
+                            total: parseFloat(document.getElementById('totalPagar').value),
+                            endereco: enderecoSnap.val() || "Endereço não informado",
+                            status: "Processando",
+                            produtos: produtosSnap.val() || []
+                        });
 
-      // Exibe confirmação ao usuário
-      alert(`Pagamento simulado com sucesso!\nValor: R$ ${document.getElementById('totalPagar').value}`);
+                        await novoPedido.save();
+                        alert("Pedido registrado com sucesso!");
+                        
+                        // Limpar carrinho após sucesso
+                        await database.ref(`users/${userId}/carrinho`).remove();
+                        
+                    } catch (error) {
+                        console.error("Erro ao salvar pedido:", error);
+                        alert("Erro ao registrar pedido: " + error.message);
+                    }
+                });
+            },
 
-      try {
-        // Monta os dados do pedido
-        const Pedido = Parse.Object.extend("Pedido");
-        const pedido = new Pedido();
-
-        // Supondo que você tenha esses valores em variáveis ou no banco Firebase:
-        const clienteId = currentUser.uid;  // do Firebase Auth
-        const total = parseFloat(document.getElementById('totalPagar').value);
-        const endereco = await database.ref(`users/${currentUser.uid}/endereco`).once('value').then(snap => snap.val()) || "";
-        const status = "PAGO";
-        const produtosSnapshot = await database.ref(`users/${currentUser.uid}/carrinho/produtos`).once('value');
-        const produtos = produtosSnapshot.val() || [];
-
-        // Define os campos no objeto Parse
-        pedido.set("clienteId", clienteId);
-        pedido.set("total", total);
-        pedido.set("endereco", endereco);
-        pedido.set("status", status);
-        pedido.set("produtos", produtos);
-        // O objectId será gerado automaticamente pelo Parse
-
-        // Salva no Parse
-        const resultado = await pedido.save();
-        console.log("Pedido salvo com objectId:", resultado.id);
-        // Opcional: limpar carrinho no Firebase
-        await database.ref(`users/${currentUser.uid}/carrinho`).remove();
-
-      } catch (err) {
-        console.error("Erro ao salvar pedido no Parse:", err);
-        alert("Houve um problema ao registrar seu pedido. Tente novamente.");
-      }
-    },
 
     onError: function(err) {
       console.error('Erro no pagamento:', err);
