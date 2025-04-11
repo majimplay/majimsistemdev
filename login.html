@@ -48,8 +48,9 @@
         }
     </style>
     <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 </head>
 <body>
     <div class="profile-header">
@@ -67,25 +68,40 @@
     <!-- Resto da página em branco -->
 
     <script>
-        // Configurações Firebase (mesmas da sua app)
+ // Configurações Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyDlUQbbTP29VqBVmzOGHhfc67R1DTRPwxg",
             authDomain: "gitautenticatio.firebaseapp.com",
-            // ... demais campos
+            databaseURL: "https://gitautenticatio-default-rtdb.firebaseio.com",
+            projectId: "gitautenticatio",
+            storageBucket: "gitautenticatio.appspot.com",
+            messagingSenderId: "21514234895",
+            appId: "1:21514234895:web:d34dc4c44baf586d2cc77a"
         };
+
+        // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
+        const database = firebase.database();
 
-        // Verifica estado de autenticação
+
+             // Monitorar estado de autenticação
         auth.onAuthStateChanged(user => {
             if (user) {
-                // Usuário logado: atualiza cabeçalho
-                document.getElementById('profilePhoto').src = user.photoURL || 'avatar-padrao.jpeg';
-                document.getElementById('userName').textContent = '👤 ' + (user.displayName || 'Usuário');
-                document.getElementById('userEmail').textContent = '📧 ' + user.email;
-                document.getElementById('loginMethod').textContent = '🔑 ' + (user.providerData[0]?.providerId || '');
-            
+                currentUser = user;
+                atualizarCabecalho();
+                carregarTotal();
+            } else {
+                window.location.href = 'index.html';
+            }
         });
+
+          // Atualizar cabeçalho
+        function atualizarCabecalho() {
+            document.getElementById('profilePhoto').src = currentUser.photoURL || 'imagens/avatar-padrao.jpg';
+            document.getElementById('userName').textContent = '👤 ' + (currentUser.displayName || 'Usuário');
+            document.getElementById('userEmail').textContent = '📧 ' + currentUser.email;
+        }
 
         // Logout
         document.getElementById('logoutBtn').addEventListener('click', () => {
