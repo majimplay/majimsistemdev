@@ -118,7 +118,7 @@
             Teste.set("userId", userId);
             Teste.set("campo1", campo1);
             try {
-                const result = await teste.save();
+                const result = await Teste.save();
                 alert('Dados registrados com sucesso!');
                 console.log('Registro criado: ', result);
             } catch (error) {
