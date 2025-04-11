@@ -132,7 +132,7 @@
     try {
         const result = await myNewObject.save();
         alert('Dados registrados com sucesso!');
-        console.log('ID do registro:', result.id); // Funciona se o salvamento for bem-sucedido
+        console.log('ID do registro:', myNewObject.id); // Funciona se o salvamento for bem-sucedido
     } catch (error) {
         alert('Erro: ' + error.message);
         console.error('Detalhes do erro:', error);
