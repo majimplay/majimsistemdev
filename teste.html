@@ -111,16 +111,16 @@
         Parse.serverURL = 'https://parseapi.back4app.com';
 
         // Função para registrar os dados
-       async function registrarDados() {
+     async function registrarDados() {
     const campo1 = document.getElementById('campo1').value;
-    const userId = auth.currentUser?.uid; // Obtém o ID diretamente do Firebase Auth
+    const userId = firebase.auth().currentUser?.uid; // Corrigido: acesso ao auth via firebase
 
-    if (!userId || !campo1) {
+    if (!userId || !campo1.trim()) {
         alert("Preencha todos os campos!");
         return;
     }
 
-    const Teste = Parse.Object.extend("Teste"); // Nome da classe com letra maiúscula
+    const Teste = Parse.Object.extend("Teste");
     const teste = new Teste();
     
     teste.set("userId", userId);
@@ -129,10 +129,10 @@
     try {
         const result = await teste.save();
         alert('Dados registrados com sucesso!');
-        console.log('Registro criado:', result.id); // Agora exibirá o ID do objeto
+        console.log('Registro criado. ID:', result.id); // Acessando .id diretamente
     } catch (error) {
         alert('Erro ao registrar: ' + error.message);
-        console.error('Erro detalhado:', error);
+        console.error('Erro completo:', error);
     }
 }
     </script>
