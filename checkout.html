@@ -190,18 +190,52 @@
                 });
             },
 
-            onApprove: function(data, actions) {
-                return actions.order.capture().then(function(details) {
-                    alert(`Pagamento simulado com sucesso!\nValor: R$ ${document.getElementById('totalPagar').value}`);
-                    // Aqui você pode adicionar lógica para salvar o pedido
-                });
-            },
+              onApprove: async function(data, actions) {
+      // Captura o pagamento
+      const details = await actions.order.capture();
 
-            onError: function(err) {
-                console.error('Erro no pagamento:', err);
-                alert('Erro durante o processo de pagamento');
-            }
+      // Exibe confirmação ao usuário
+      alert(`Pagamento simulado com sucesso!\nValor: R$ ${document.getElementById('totalPagar').value}`);
 
+      try {
+        // Monta os dados do pedido
+        const Pedido = Parse.Object.extend("Pedido");
+        const pedido = new Pedido();
+
+        // Supondo que você tenha esses valores em variáveis ou no banco Firebase:
+        const clienteId = currentUser.uid;  // do Firebase Auth
+        const total = parseFloat(document.getElementById('totalPagar').value);
+        const endereco = await database.ref(`users/${currentUser.uid}/endereco`).once('value').then(snap => snap.val()) || "";
+        const status = "PAGO";
+        const produtosSnapshot = await database.ref(`users/${currentUser.uid}/carrinho/produtos`).once('value');
+        const produtos = produtosSnapshot.val() || [];
+
+        // Define os campos no objeto Parse
+        pedido.set("clienteId", clienteId);
+        pedido.set("total", total);
+        pedido.set("endereco", endereco);
+        pedido.set("status", status);
+        pedido.set("produtos", produtos);
+        // O objectId será gerado automaticamente pelo Parse
+
+        // Salva no Parse
+        const resultado = await pedido.save();
+        console.log("Pedido salvo com objectId:", resultado.id);
+        // Opcional: limpar carrinho no Firebase
+        await database.ref(`users/${currentUser.uid}/carrinho`).remove();
+
+      } catch (err) {
+        console.error("Erro ao salvar pedido no Parse:", err);
+        alert("Houve um problema ao registrar seu pedido. Tente novamente.");
+      }
+    },
+
+    onError: function(err) {
+      console.error('Erro no pagamento:', err);
+      alert('Erro durante o processo de pagamento');
+    }
+
+            
         }).render('#paypal-button-container');
 
         // Logout
