@@ -11,7 +11,6 @@
       max-width: 1200px;
       margin: 0 auto;
     }
-    .hidden { display: none; }
     .admin-panel {
       background: white;
       padding: 2rem;
@@ -46,13 +45,6 @@
     .btn-edit { background: #4CAF50; color: white; }
     .btn-delete { background: #f44336; color: white; }
     .btn:hover { opacity: 0.9; }
-    .welcome-banner {
-      background: #2196F3;
-      color: white;
-      padding: 1rem;
-      border-radius: 8px;
-      margin-bottom: 2rem;
-    }
     img.product-image {
       height: 50px;
       border-radius: 4px;
@@ -144,10 +136,7 @@
   </style>
 </head>
 <body>
-  <div id="message">Carregando...</div>
-  <div class="welcome-banner hidden" id="userWelcome"></div>
-  
-  <div class="admin-panel hidden" id="adminContent">
+  <div class="admin-panel" id="adminContent">
     <h2>Gerenciamento de Produtos</h2>
     
     <form id="productForm">
@@ -193,13 +182,11 @@
 
   <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
   <script>
-    let readOnly = false;
     Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
     Parse.serverURL = "https://parseapi.back4app.com";
 
     const Produto = Parse.Object.extend("Produto");
 
-    // Função Debounce para edição em tempo real
     function debounce(func, timeout = 300) {
       let timer;
       return (...args) => {
@@ -209,33 +196,8 @@
     }
 
     async function initPage() {
-      const user = Parse.User.current();
-      if (user) {
-        const isAdminLocal = await checkIfUserIsAdmin(user);
-        if (isAdminLocal) {
-          readOnly = false;
-          document.getElementById('userWelcome').innerHTML = `Bem-vindo, <strong>${user.get("username")}</strong>!`;
-        } else {
-          readOnly = true;
-          document.getElementById('userWelcome').innerHTML = `Olá, <strong>${user.get("username")}</strong>! Visualização somente.`;
-          document.getElementById('productForm').style.display = 'none';
-        }
-      } else {
-        readOnly = true;
-        document.getElementById('productForm').style.display = 'none';
-        document.getElementById('userWelcome').innerHTML = `Visualização somente.`;
-      }
-      document.getElementById('adminContent').classList.remove('hidden');
-      document.getElementById('userWelcome').classList.remove('hidden');
-      document.getElementById('message').classList.add('hidden');
       loadProducts();
-    }
-
-    async function checkIfUserIsAdmin(user) {
-      const roleQuery = new Parse.Query(Parse.Role);
-      roleQuery.equalTo("name", "admin");
-      roleQuery.equalTo("users", user);
-      return await roleQuery.count() > 0;
+      setupEditableFields();
     }
 
     async function loadProducts() {
@@ -257,7 +219,7 @@
         const imagemHtml = imagens.map((url, index) => `
           <div class="image-container">
             <img src="${url}" class="product-image">
-            ${!readOnly ? `<div class="delete-image" onclick="removeImage('${produto.id}', ${index})">×</div>` : ''}
+            <div class="delete-image" onclick="removeImage('${produto.id}', ${index})">×</div>
           </div>
         `).join("");
 
@@ -271,34 +233,30 @@
           </td>
           <td>
             <div class="image-gallery">${imagemHtml}</div>
-            ${!readOnly ? `<button class="btn btn-edit" onclick="addImage('${produto.id}')">Adicionar Imagem</button>` : ''}
+            <button class="btn btn-edit" onclick="addImage('${produto.id}')">Adicionar Imagem</button>
           </td>
           <td>
-            <div class="editable-field" ${!readOnly ? 'contenteditable="true"' : ''} data-id="${produto.id}" data-field="nome">${produto.get("nome")}</div>
+            <div class="editable-field" contenteditable="true" data-id="${produto.id}" data-field="nome">${produto.get("nome")}</div>
           </td>
           <td>
-            <div class="editable-field" ${!readOnly ? 'contenteditable="true"' : ''} data-id="${produto.id}" data-field="preco">${parseFloat(produto.get("preco")).toFixed(2)}</div>
+            <div class="editable-field" contenteditable="true" data-id="${produto.id}" data-field="preco">${parseFloat(produto.get("preco")).toFixed(2)}</div>
           </td>
           <td>
-            ${!readOnly ? `
               <button class="btn btn-edit" onclick="editProduct('${produto.id}')">Editar</button><br><br>
               <button class="btn btn-delete" onclick="deleteProduct('${produto.id}')">Excluir</button>
-            ` : ''}
           </td>
         `;
         tbody.appendChild(tr);
       });
 
-      if (!readOnly) {
-        document.querySelectorAll('.editable-field').forEach(field => {
-          field.addEventListener('input', debounce(() => {
-            const id = field.getAttribute('data-id');
-            const fieldName = field.getAttribute('data-field');
-            const value = fieldName === "preco" ? parseFloat(field.textContent) : field.textContent;
-            updateProductField(id, fieldName, value);
-          }, 500));
-        });
-      }
+      document.querySelectorAll('.editable-field').forEach(field => {
+        field.addEventListener('input', debounce(() => {
+          const id = field.getAttribute('data-id');
+          const fieldName = field.getAttribute('data-field');
+          const value = fieldName === "preco" ? parseFloat(field.textContent) : field.textContent;
+          updateProductField(id, fieldName, value);
+        }, 500));
+      });
     }
 
     async function updateProductField(id, fieldName, value) {
