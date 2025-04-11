@@ -250,7 +250,7 @@ onApprove: function(data, actions) {
         alert(`Pagamento simulado com sucesso!\nValor: R$ ${document.getElementById('totalPagar').value}`);
         
          // Registrar pedido no Parse
-        const Pedido = Parse.Object.extend("Pedido");
+       const Pedido = Parse.Object.extend("Pedido");
         const pedido = new Pedido();
         
         pedido.set("clienteId", currentUser.uid);
@@ -260,15 +260,7 @@ onApprove: function(data, actions) {
         
         await pedido.save();
         
-        // Limpar carrinho
-        await database.ref(`users/${currentUser.uid}/carrinho`).remove();
-        alert("Compra finalizada com sucesso!");
-        loadCart();
-      } catch (error) {
-        console.error("Erro ao finalizar compra:", error);
-        alert("Erro ao processar pedido! Verifique o console.");
-      }
-    }
+     
 
             onError: function(err) {
                 console.error('Erro no pagamento:', err);
