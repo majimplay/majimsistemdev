@@ -81,8 +81,9 @@
 
     <script>
       // Configuração do Parse para registrar os dados na classe "teste"
-        Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
         Parse.serverURL = 'https://parseapi.back4app.com';
+        Parse.initialize('TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY', 'n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I', 'SS3NreF2Z8KSmHNnCMGUMUKJt3pTJeJdVoOMyU5l');
+       
         // Configurações Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyDlUQbbTP29VqBVmzOGHhfc67R1DTRPwxg",
@@ -113,14 +114,11 @@
 
 
         // Função para registrar os dados
-  async function registrarDados()  {
-    const campo1 = document.getElementById('campo1').value.trim();
-    const user = firebase.auth().currentUser; // Obtém o usuário atual do Firebase
-
-
+//  async function registrarDados()  {
+  (async function registrarDados () => {
   const myNewObject = new Parse.Object('Teste');
-  myNewObject.set('userId', 'dgghhyh');
-  myNewObject.set('campo1', 'kugykkktgg');
+  myNewObject.set('userId', 'fwuws');
+  myNewObject.set('campo1', 'tjyuyk');
   try {
     const result = await myNewObject.save();
     // Access the Parse Object attributes using the .GET method
@@ -128,7 +126,8 @@
   } catch (error) {
     console.error('Error while creating Teste: ', error);
   }
-};
+})();
+;
 
       
     </script>
