@@ -114,21 +114,6 @@
       margin: 5px;
     }
 
-    .delete-image {
-      position: absolute;
-      top: -5px;
-      right: -5px;
-      background: red;
-      color: white;
-      border-radius: 50%;
-      width: 20px;
-      height: 20px;
-      text-align: center;
-      line-height: 18px;
-      cursor: pointer;
-      font-size: 14px;
-    }
-
     .order-controls .btn {
       margin: 2px;
       padding: 4px 8px;
@@ -298,7 +283,7 @@
               ${imagens.map((url, index) => `
                 <div class="image-container">
                   <img src="${url}" class="product-image">
-                  <div class="delete-image" onclick="removeImage('${produto.id}', ${index})">×</div>
+                 
                 </div>
               `).join('')}
             </div>
@@ -464,22 +449,6 @@
       };
       input.click();
     }
-
-    async function removeImage(produtoId, index) {
-      if (!confirm("Deseja remover esta imagem?")) return;
-      try {
-        const query = new Parse.Query(Produto);
-        const produto = await query.get(produtoId);
-        let imagens = produto.get("imagens") || [];
-        imagens.splice(index, 1);
-        produto.set("imagens", imagens);
-        await produto.save();
-        loadProducts();
-      } catch (error) {
-        alert("Erro ao remover imagem: " + error.message);
-      }
-    }
-
     // Inicialização
     if (auth.currentUser) {
       syncAuth(auth.currentUser);
