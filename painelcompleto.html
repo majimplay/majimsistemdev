@@ -2,39 +2,79 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Painel Administrativo - Gerenciar Produtos</title>
+  <title>Painel Administrativo Integrado</title>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
       background: #f0f2f5;
+      margin: 0;
       padding: 20px;
-      max-width: 1200px;
-      margin: 0 auto;
     }
+    
+    .profile-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin-bottom: 2rem;
+    }
+    
+    .profile-photo {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #007BFF;
+      margin-right: 1rem;
+    }
+    
+    .profile-info h1 {
+      margin: 0;
+      font-size: 1.2rem;
+      color: #333;
+    }
+    
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
     .admin-panel {
       background: white;
       padding: 2rem;
       border-radius: 12px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
+
     table {
       width: 100%;
       border-collapse: collapse;
       margin: 2rem 0;
     }
+
     th, td {
       padding: 1rem;
       text-align: left;
       border-bottom: 1px solid #ddd;
     }
+
     th { background: #f8f9fa; }
     tr:hover { background: #f9f9f9; }
+
     input[type="text"], input[type="number"] {
       padding: 8px;
       border: 1px solid #ddd;
       border-radius: 4px;
       width: 150px;
     }
+
     .btn {
       padding: 8px 16px;
       border: none;
@@ -42,18 +82,11 @@
       cursor: pointer;
       transition: 0.3s;
     }
+
     .btn-edit { background: #4CAF50; color: white; }
     .btn-delete { background: #f44336; color: white; }
     .btn:hover { opacity: 0.9; }
-    img.product-image {
-      height: 50px;
-      border-radius: 4px;
-      object-fit: cover;
-    }
-    .image-upload {
-      position: relative;
-      display: inline-block;
-    }
+
     .image-upload input[type="file"] { display: none; }
     .upload-label {
       background: #2196F3;
@@ -61,16 +94,20 @@
       padding: 6px 12px;
       border-radius: 4px;
       cursor: pointer;
-      transition: 0.3s;
     }
-    .upload-label:hover { opacity: 0.9; }
+
     .image-gallery {
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
-      margin-bottom: 8px;
     }
-    .image-container { position: relative; }
+
+    .product-image {
+      height: 50px;
+      border-radius: 4px;
+      object-fit: cover;
+    }
+
     .delete-image {
       position: absolute;
       top: -8px;
@@ -80,71 +117,28 @@
       border-radius: 50%;
       width: 20px;
       height: 20px;
-      display: none;
-      cursor: pointer;
-    }
-    .image-container:hover .delete-image { display: block; }
-    .editable-field {
-      border-bottom: 1px dashed #666;
-      cursor: text;
-      padding: 4px;
-    }
-    .editable-field:focus {
-      outline: none;
-      background: #f0f8ff;
-      border-radius: 4px;
-    }
-    .order-controls {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      margin-right: 10px;
-    }
-    .order-btn {
-      padding: 4px;
-      background: #2196F3;
-      color: white;
-      border: none;
-      border-radius: 3px;
-      cursor: pointer;
-    }
-    .address-form {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: white;
-      padding: 15px;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      z-index: 1000;
-      display: none;
-    }
-    .address-form.show {
-      display: block;
-    }
-    .toggle-address {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      padding: 8px 16px;
-      background: #666;
-      color: white;
-      border: none;
-      border-radius: 20px;
       cursor: pointer;
     }
   </style>
+
+  <!-- SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
 </head>
 <body>
-  <div id="loginOverlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:flex; justify-content:center; align-items:center; z-index:9999;">
-  <div style="background:white; padding:2rem; border-radius:8px;">
-    <h3>Acesso Necessário</h3>
-    <input type="text" id="loginUsername" placeholder="Usuário" style="margin:5px;"><br>
-    <input type="password" id="loginPassword" placeholder="Senha" style="margin:5px;"><br>
-    <button onclick="basicLogin()" class="btn btn-edit" style="margin-top:10px;">Acessar</button>
+  <div class="profile-header">
+    <div style="display: flex; align-items: center;">
+      <img id="profilePhoto" class="profile-photo" src="avatar-padrao.jpeg">
+      <div class="profile-info">
+        <h1 id="userName">Carregando...</h1>
+        <p id="userEmail"></p>
+      </div>
+    </div>
+    <button id="logoutBtn" class="btn btn-secondary">🚪 Sair</button>
   </div>
-</div>
-  <div class="admin-panel" id="adminContent">
+
+  <div class="admin-panel">
     <h2>Gerenciamento de Produtos</h2>
     
     <form id="productForm">
@@ -152,9 +146,9 @@
         <input type="text" id="productName" placeholder="Nome do Produto" required>
         <input type="number" id="productPrice" step="0.01" placeholder="Preço" required>
         <div class="image-upload">
-          <img id="imagePreview" src="" alt="Miniatura" style="display:none; max-height:100px; margin-bottom:10px;">
+          <img id="imagePreview" src="" alt="Miniatura" style="display:none; max-height:100px;">
           <label class="upload-label">
-            Escolher Imagem
+            📷 Escolher Imagem
             <input type="file" id="productImage" accept="image/*" required>
           </label>
         </div>
@@ -176,67 +170,70 @@
     </table>
   </div>
 
-  <button class="toggle-address" onclick="toggleAddressForm()">Alterar CEP/Endereço</button>
-  <div class="address-form" id="addressForm">
-    <h3>Configurações de Endereço</h3>
-    <form id="addressFormContent">
-      <input type="text" id="cep" placeholder="CEP" required>
-      <input type="text" id="endereco" placeholder="Endereço" required>
-      <input type="text" id="numero" placeholder="Número">
-      <input type="text" id="cidade" placeholder="Cidade" required>
-      <button type="submit" class="btn btn-edit">Salvar</button>
-    </form>
-  </div>
-
-  <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
   <script>
-// Substitua estas credenciais básicas
-const BASIC_AUTH = {
-  username: "a",
-  password: "a"
-};
+    // Configurações
+    const firebaseConfig = {
+      apiKey: "AIzaSyDlUQbbTP29VqBVmzOGHhfc67R1DTRPwxg",
+      authDomain: "gitautenticatio.firebaseapp.com",
+      projectId: "gitautenticatio",
+      storageBucket: "gitautenticatio.appspot.com",
+      messagingSenderId: "21514234895",
+      appId: "1:21514234895:web:d34dc4c44baf586d2cc77a"
+    };
 
-    
     Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
-    Parse.serverURL = "https://parseapi.back4app.com";
-
+    Parse.serverURL = "https://parseapi.back4app.com/";
     const Produto = Parse.Object.extend("Produto");
 
-    function debounce(func, timeout = 300) {
-      let timer;
-      return (...args) => {
-        clearTimeout(timer);
-        timer = setTimeout(() => { func.apply(this, args); }, timeout);
-      };
+    // Inicializar Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    // Sincronizar autenticação
+    const syncAuth = async (user) => {
+      if (user) {
+        const token = await user.getIdToken();
+        try {
+          await Parse.User.logInWith('firebase', { authData: { token } });
+        } catch {
+          const parseUser = new Parse.User();
+          parseUser.set('username', user.uid);
+          parseUser.set('authData', { token });
+          await parseUser.save();
+        }
+      }
+    };
+
+    // Monitorar autenticação
+    auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        await syncAuth(user);
+        updateHeader(user);
+        loadProducts();
+      } else {
+        window.location.href = 'index.html';
+      }
+    });
+
+    // Atualizar cabeçalho
+    function updateHeader(user) {
+      document.getElementById('profilePhoto').src = user.photoURL || 'avatar-padrao.jpeg';
+      document.getElementById('userName').textContent = user.displayName || 'Usuário';
+      document.getElementById('userEmail').textContent = user.email;
     }
 
-   async function initPage() {
-  const user = Parse.User.current();
-  if (!user) {
-    document.getElementById('loginOverlay').style.display = 'flex';
-    return;
-  }
-  loadProducts();
-}
-// Adicione esta função de login
-async function basicLogin() {
-  const username = document.getElementById('loginUsername').value;
-  const password = document.getElementById('loginPassword').value;
-  
-  if (username === BASIC_AUTH.username && password === BASIC_AUTH.password) {
-    try {
-      const user = await Parse.User.logIn(username, password);
-      document.getElementById('loginOverlay').style.display = 'none';
-      loadProducts();
-    } catch (error) {
-      alert("Erro de login: " + error.message);
-    }
-  } else {
-    alert("Credenciais inválidas!");
-  }
-}
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      try {
+        await auth.signOut();
+        await Parse.User.logOut();
+        window.location.href = 'index.html';
+      } catch (error) {
+        alert('Erro no logout: ' + error.message);
+      }
+    });
 
-    
+    // CRUD de Produtos
     async function loadProducts() {
       const query = new Parse.Query(Produto);
       query.ascending("order");
@@ -251,130 +248,102 @@ async function basicLogin() {
     function updateTable(produtos) {
       const tbody = document.querySelector('#productsTable tbody');
       tbody.innerHTML = "";
+      
       produtos.forEach(produto => {
         const imagens = produto.get("imagens") || [];
-        const imagemHtml = imagens.map((url, index) => `
-          <div class="image-container">
-            <img src="${url}" class="product-image">
-            <div class="delete-image" onclick="removeImage('${produto.id}', ${index})">×</div>
-          </div>
-        `).join("");
-
         const tr = document.createElement('tr');
+        
         tr.innerHTML = `
           <td>
             <div class="order-controls">
-              <button class="order-btn" onclick="moveProductUp('${produto.id}')">↑</button>
-              <button class="order-btn" onclick="moveProductDown('${produto.id}')">↓</button>
+              <button class="btn" onclick="moveProductUp('${produto.id}')">↑</button>
+              <button class="btn" onclick="moveProductDown('${produto.id}')">↓</button>
             </div>
           </td>
           <td>
-            <div class="image-gallery">${imagemHtml}</div>
+            <div class="image-gallery">
+              ${imagens.map(url => `
+                <div class="image-container">
+                  <img src="${url}" class="product-image">
+                  <div class="delete-image" onclick="removeImage('${produto.id}', ${imagens.indexOf(url)})">×</div>
+                </div>
+              `).join('')}
+            </div>
             <button class="btn btn-edit" onclick="addImage('${produto.id}')">Adicionar Imagem</button>
           </td>
           <td>
-            <div class="editable-field" contenteditable="true" data-id="${produto.id}" data-field="nome">${produto.get("nome")}</div>
+            <div class="editable-field" contenteditable="true" data-id="${produto.id}" data-field="nome">
+              ${produto.get("nome")}
+            </div>
           </td>
           <td>
-            <div class="editable-field" contenteditable="true" data-id="${produto.id}" data-field="preco">${parseFloat(produto.get("preco")).toFixed(2)}</div>
+            <div class="editable-field" contenteditable="true" data-id="${produto.id}" data-field="preco">
+              R$ ${parseFloat(produto.get("preco")).toFixed(2)}
+            </div>
           </td>
           <td>
-              <button class="btn btn-edit" onclick="editProduct('${produto.id}')">Editar</button><br><br>
-              <button class="btn btn-delete" onclick="deleteProduct('${produto.id}')">Excluir</button>
+            <button class="btn btn-delete" onclick="deleteProduct('${produto.id}')">Excluir</button>
           </td>
         `;
+        
         tbody.appendChild(tr);
       });
 
+      // Atualização em tempo real
       document.querySelectorAll('.editable-field').forEach(field => {
         field.addEventListener('input', debounce(() => {
-          const id = field.getAttribute('data-id');
-          const fieldName = field.getAttribute('data-field');
-          const value = fieldName === "preco" ? parseFloat(field.textContent) : field.textContent;
+          const id = field.dataset.id;
+          const fieldName = field.dataset.field;
+          const value = fieldName === "preco" 
+            ? parseFloat(field.textContent.replace('R$ ', '')) 
+            : field.textContent;
+          
           updateProductField(id, fieldName, value);
         }, 500));
       });
     }
 
-    async function updateProductField(id, fieldName, value) {
+    // Funções auxiliares
+    function debounce(func, timeout = 300) {
+      let timer;
+      return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => func.apply(this, args), timeout);
+      };
+    }
+
+    async function updateProductField(id, field, value) {
       const query = new Parse.Query(Produto);
       try {
         const produto = await query.get(id);
-        produto.set(fieldName, value);
+        produto.set(field, value);
         await produto.save();
       } catch (error) {
-        alert("Erro ao atualizar: " + error.message);
-      }
-    }
-
-    async function moveProductUp(id) {
-      const query = new Parse.Query(Produto);
-      const currentProduct = await query.get(id);
-      const currentOrder = currentProduct.get("order");
-
-      const prevQuery = new Parse.Query(Produto);
-      prevQuery.lessThan("order", currentOrder);
-      prevQuery.descending("order");
-      const prevProduct = await prevQuery.first();
-
-      if(prevProduct) {
-        const prevOrder = prevProduct.get("order");
-        currentProduct.set("order", prevOrder);
-        prevProduct.set("order", currentOrder);
-        await currentProduct.save();
-        await prevProduct.save();
-        loadProducts();
-      }
-    }
-
-    async function moveProductDown(id) {
-      const query = new Parse.Query(Produto);
-      const currentProduct = await query.get(id);
-      const currentOrder = currentProduct.get("order");
-
-      const nextQuery = new Parse.Query(Produto);
-      nextQuery.greaterThan("order", currentOrder);
-      nextQuery.ascending("order");
-      const nextProduct = await nextQuery.first();
-
-      if(nextProduct) {
-        const nextOrder = nextProduct.get("order");
-        currentProduct.set("order", nextOrder);
-        nextProduct.set("order", currentOrder);
-        await currentProduct.save();
-        await nextProduct.save();
-        loadProducts();
+        alert("Erro na atualização: " + error.message);
       }
     }
 
     document.getElementById('productForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const nome = document.getElementById('productName').value;
-      const preco = parseFloat(document.getElementById('productPrice').value);
-      const fileInput = document.getElementById('productImage');
-      const file = fileInput.files[0];
       
-      if (!file) {
-        alert("Selecione uma imagem.");
-        return;
-      }
+      const productData = {
+        nome: document.getElementById('productName').value,
+        preco: parseFloat(document.getElementById('productPrice').value),
+        imagem: document.getElementById('productImage').files[0]
+      };
 
       try {
-        const parseFile = new Parse.File(file.name, file);
+        const parseFile = new Parse.File(productData.imagem.name, productData.imagem);
         await parseFile.save();
-        
-        const countQuery = new Parse.Query(Produto);
-        const count = await countQuery.count();
-        
+
         const produto = new Produto();
-        produto.set("nome", nome);
-        produto.set("preco", preco);
+        produto.set("nome", productData.nome);
+        produto.set("preco", productData.preco);
         produto.set("imagens", [parseFile.url()]);
-        produto.set("order", count + 1);
+        produto.set("order", (await new Parse.Query(Produto).count()) + 1);
         
         await produto.save();
         document.getElementById('productForm').reset();
-        document.getElementById('imagePreview').style.display = 'none';
         loadProducts();
       } catch (error) {
         alert("Erro ao adicionar produto: " + error.message);
@@ -382,81 +351,23 @@ async function basicLogin() {
     });
 
     async function deleteProduct(id) {
-      if (!confirm("Deseja realmente excluir este produto?")) return;
+      if (!confirm("Confirmar exclusão?")) return;
       const query = new Parse.Query(Produto);
       try {
         const produto = await query.get(id);
         await produto.destroy();
         loadProducts();
       } catch (error) {
-        alert("Erro ao excluir produto: " + error.message);
+        alert("Erro na exclusão: " + error.message);
       }
     }
 
-    function editProduct(id) {
-      window.location.href = `editar.html?id=${id}`;
+    // Inicialização
+    if (auth.currentUser) {
+      syncAuth(auth.currentUser);
+      updateHeader(auth.currentUser);
+      loadProducts();
     }
-
-    async function addImage(produtoId) {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = 'image/*';
-      input.onchange = async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        try {
-          const parseFile = new Parse.File(file.name, file);
-          await parseFile.save();
-          const query = new Parse.Query(Produto);
-          const produto = await query.get(produtoId);
-          const imagens = produto.get("imagens") || [];
-          imagens.push(parseFile.url());
-          produto.set("imagens", imagens);
-          await produto.save();
-          loadProducts();
-        } catch (error) {
-          alert("Erro ao adicionar imagem: " + error.message);
-        }
-      };
-      input.click();
-    }
-
-    async function removeImage(produtoId, index) {
-      if (!confirm("Deseja realmente remover esta imagem?")) return;
-      try {
-        const query = new Parse.Query(Produto);
-        const produto = await query.get(produtoId);
-        let imagens = produto.get("imagens") || [];
-        imagens.splice(index, 1);
-        produto.set("imagens", imagens);
-        await produto.save();
-        loadProducts();
-      } catch (error) {
-        alert("Erro ao remover imagem: " + error.message);
-      }
-    }
-
-    document.getElementById('productImage').addEventListener('change', function(event) {
-      const file = event.target.files[0];
-      const preview = document.getElementById('imagePreview');
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          preview.src = e.target.result;
-          preview.style.display = 'block';
-        };
-        reader.readAsDataURL(file);
-      } else {
-        preview.src = '';
-        preview.style.display = 'none';
-      }
-    });
-
-    function toggleAddressForm() {
-      document.getElementById('addressForm').classList.toggle('show');
-    }
-
-    initPage();
   </script>
 </body>
 </html>
