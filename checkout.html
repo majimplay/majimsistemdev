@@ -216,12 +216,12 @@
                     const novoPedido = new Pedido();
 
                     // 3. Definir permissões (ACL)
-                    const acl = new Parse.ACL();
-                    acl.setPublicRead(false);
-                    acl.setPublicWrite(false);
-                    acl.setReadAccess(userId, true);
-                    acl.setWriteAccess(userId, true);
-                    novoPedido.setACL(acl);
+                  const acl = new Parse.ACL();
+                  acl.setPublicReadAccess(false);  // Método correto
+                  acl.setPublicWriteAccess(false); // Método correto
+                  acl.setReadAccess(userId, true);
+                  acl.setWriteAccess(userId, true);
+                  novoPedido.setACL(acl);
 
                     // 4. Preencher dados
                     novoPedido.set({
