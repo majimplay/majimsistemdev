@@ -99,7 +99,7 @@
                 document.getElementById('userId').textContent = user.uid;
                 document.getElementById('userName').textContent = '👤 ' + (user.displayName || 'Usuário');
                 document.getElementById('userEmail').textContent = '📧 ' + user.email;
-                document.getElementById('profilePhoto').src = user.photoURL || 'imagens/avatar-padrao.jpg';
+                document.getElementById('profilePhoto').src = user.photoURL || 'avatar-padrao.jpeg';
             } else {
                 window.location.href = 'index.html';
             }
