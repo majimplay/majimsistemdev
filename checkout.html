@@ -230,7 +230,7 @@
                         endereco: enderecoSnap.val() || "Não informado",
                         status: "Processando",
                         produtos: produtosSnap.val() || [],
-                        sessionToken: user.stsTokenManager.accessToken // Para autenticação
+                  sessionToken: user?.stsTokenManager?.accessToken || 'sem-token'
                     });
 
                     // 5. Salvar pedido
