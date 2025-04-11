@@ -199,43 +199,55 @@
                 });
             },
 
-             onApprove: function(data, actions) {
-                return actions.order.capture().then(async function(details) {
-                    alert(`Pagamento simulado com sucesso!\nValor: R$ ${document.getElementById('totalPagar').value}`);
-                    
-                    try {
-                        const user = auth.currentUser;
-                        const userId = user.uid;
-                        
-                        const [enderecoSnap, produtosSnap] = await Promise.all([
-                            database.ref(`users/${userId}/endereco`).once('value'),
-                            database.ref(`users/${userId}/carrinho/itens`).once('value')
-                        ]);
-                        
-                        const Pedido = Parse.Object.extend("Pedido");
-                        const novoPedido = new Pedido();
-                        
-                        novoPedido.set({
-                            clienteId: userId,
-                            total: parseFloat(document.getElementById('totalPagar').value),
-                            endereco: enderecoSnap.val() || "Endereço não informado",
-                            status: "Processando",
-                            produtos: produtosSnap.val() || []
-                        });
+            onApprove: function(data, actions) {
+            return actions.order.capture().then(async function(details) {
+                try {
+                    const user = auth.currentUser;
+                    const userId = user.uid;
 
-                        await novoPedido.save();
-                        alert("Pedido registrado com sucesso!");
-                        
-                        // Limpar carrinho após sucesso
-                        await database.ref(`users/${userId}/carrinho`).remove();
-                        
-                    } catch (error) {
-                        console.error("Erro ao salvar pedido:", error);
-                        alert("Erro ao registrar pedido: " + error.message);
-                    }
-                });
-            },
+                    // 1. Buscar dados necessários
+                    const [enderecoSnap, produtosSnap] = await Promise.all([
+                        database.ref(`users/${userId}/endereco`).once('value'),
+                        database.ref(`users/${userId}/carrinho/itens`).once('value')
+                    ]);
 
+                    // 2. Criar objeto Parse
+                    const Pedido = Parse.Object.extend("Pedido");
+                    const novoPedido = new Pedido();
+
+                    // 3. Definir permissões (ACL)
+                    const acl = new Parse.ACL();
+                    acl.setPublicRead(false);
+                    acl.setPublicWrite(false);
+                    acl.setReadAccess(userId, true);
+                    acl.setWriteAccess(userId, true);
+                    novoPedido.setACL(acl);
+
+                    // 4. Preencher dados
+                    novoPedido.set({
+                        clienteId: userId,
+                        total: parseFloat(document.getElementById('totalPagar').value),
+                        endereco: enderecoSnap.val() || "Não informado",
+                        status: "Processando",
+                        produtos: produtosSnap.val() || [],
+                        sessionToken: user.stsTokenManager.accessToken // Para autenticação
+                    });
+
+                    // 5. Salvar pedido
+                    const resultado = await novoPedido.save();
+                    console.log("Pedido salvo:", resultado);
+
+                    // 6. Só limpa carrinho após sucesso
+                    await database.ref(`users/${userId}/carrinho`).remove();
+                    alert("Pedido registrado e carrinho limpo!");
+
+                } catch (error) {
+                    console.error("Erro completo:", error);
+                    alert(`Falha no registro: ${error.code} - ${error.message}`);
+                    throw error; // Impede limpeza do carrinho
+                }
+            });
+        },
 
     onError: function(err) {
       console.error('Erro no pagamento:', err);
