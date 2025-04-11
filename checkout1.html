@@ -97,7 +97,7 @@
         <!-- Cabeçalho do Perfil -->
         <div class="profile-header">
             <div style="display: flex; align-items: center;">
-                <img id="profilePhoto" class="profile-photo" src="imagens/avatar-padrao.jpg" alt="Foto do Perfil">
+                <img id="profilePhoto" class="profile-photo" src="avatar-padrao.jpeg" alt="Foto do Perfil">
                 <div class="profile-info">
                     <h1 id="userName">📱 Carregando...</h1>
                     <p id="userEmail"></p>
@@ -143,6 +143,15 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const database = firebase.database();
+
+         // Inicializar Parse
+        try {
+            Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I"); // Substituir pelas suas chaves
+            Parse.serverURL = 'https://parseapi.back4app.com/';
+        } catch (error) {
+            console.error("Erro na inicialização do Parse:", error);
+        }
+
 
         // Monitorar estado de autenticação
         auth.onAuthStateChanged(user => {
@@ -190,18 +199,50 @@
                 });
             },
 
-            onApprove: function(data, actions) {
-                return actions.order.capture().then(function(details) {
+             onApprove: function(data, actions) {
+                return actions.order.capture().then(async function(details) {
                     alert(`Pagamento simulado com sucesso!\nValor: R$ ${document.getElementById('totalPagar').value}`);
-                    // Aqui você pode adicionar lógica para salvar o pedido
+                    
+                    try {
+                        const user = auth.currentUser;
+                        const userId = user.uid;
+                        
+                        const [enderecoSnap, produtosSnap] = await Promise.all([
+                            database.ref(`users/${userId}/endereco`).once('value'),
+                            database.ref(`users/${userId}/carrinho/itens`).once('value')
+                        ]);
+                        
+                        const Pedido = Parse.Object.extend("Pedido");
+                        const novoPedido = new Pedido();
+                        
+                        novoPedido.set({
+                            clienteId: userId,
+                            total: parseFloat(document.getElementById('totalPagar').value),
+                            endereco: enderecoSnap.val() || "Endereço não informado",
+                            status: "Processando",
+                            produtos: produtosSnap.val() || []
+                        });
+
+                        await novoPedido.save();
+                        alert("Pedido registrado com sucesso!");
+                        
+                        // Limpar carrinho após sucesso
+                        await database.ref(`users/${userId}/carrinho`).remove();
+                        
+                    } catch (error) {
+                        console.error("Erro ao salvar pedido:", error);
+                        alert("Erro ao registrar pedido: " + error.message);
+                    }
                 });
             },
 
-            onError: function(err) {
-                console.error('Erro no pagamento:', err);
-                alert('Erro durante o processo de pagamento');
-            }
 
+    onError: function(err) {
+      console.error('Erro no pagamento:', err);
+      alert('Erro durante o processo de pagamento');
+    }
+
+            
         }).render('#paypal-button-container');
 
         // Logout
