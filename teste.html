@@ -113,10 +113,10 @@
         async function registrarDados() {
             const campo1 = document.getElementById('campo1').value;
             const userId = document.getElementById('userId').textContent;
-            const Teste = Parse.Object.extend("teste");
+            const Teste = Parse.Object.extend("Teste");
             const teste = new Teste();
-            teste.set("userId", userId);
-            teste.set("campo1", campo1);
+            Teste.set("userId", userId);
+            Teste.set("campo1", campo1);
             try {
                 const result = await teste.save();
                 alert('Dados registrados com sucesso!');
