@@ -436,6 +436,10 @@
         alert("Erro na exclusão: " + error.message);
       }
     }
+	
+	async function editProduct(id) {
+		window.location.href = `editar.html?id=${id}`;
+	}
 
     async function addImage(produtoId) {
       const input = document.createElement('input');
