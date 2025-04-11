@@ -73,12 +73,16 @@
         }
     </style>
     <!-- Firebase SDK -->
+    <script src="https://unpkg.com/parse@3.5.0/dist/parse.min.js"></script>
    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <!-- Parse SDK -->
-    <script src="https://unpkg.com/parse@3.5.0/dist/parse.min.js"></script>
+
     <script>
+      // Configuração do Parse para registrar os dados na classe "teste"
+        Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
+        Parse.serverURL = 'https://parseapi.back4app.com';
         // Configurações Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyDlUQbbTP29VqBVmzOGHhfc67R1DTRPwxg",
@@ -106,9 +110,7 @@
             }
         });
 
-        // Configuração do Parse para registrar os dados na classe "teste"
-        Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
-        Parse.serverURL = 'https://parseapi.back4app.com';
+
 
         // Função para registrar os dados
   async function registrarDados() {
@@ -121,13 +123,14 @@
     }
 
     const Teste = Parse.Object.extend("Teste"); // Nome da classe *exatamente* como está no Parse
-    const teste = new Teste();
-
-    teste.set("userId", user.uid); // Usa o UID do Firebase diretamente
-    teste.set("campo1", campo1);
-
+    
+    const myNewObject = new Parse.Object('Teste');
+      myNewObject.set('userId', 'user.uid');
+    
+    
+     myNewObject.set('campo1', 'campo1');
     try {
-        const result = await teste.save();
+        const result = await myNewObject.save();
         alert('Dados registrados com sucesso!');
         console.log('ID do registro:', result.id); // Funciona se o salvamento for bem-sucedido
     } catch (error) {
