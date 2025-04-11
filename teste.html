@@ -113,7 +113,7 @@
 
 
         // Função para registrar os dados
-  (async function registrarDados() => {
+  async function registrarDados()  {
     const campo1 = document.getElementById('campo1').value.trim();
     const user = firebase.auth().currentUser; // Obtém o usuário atual do Firebase
 
@@ -128,7 +128,7 @@
   } catch (error) {
     console.error('Error while creating Teste: ', error);
   }
-})();
+}();
 
       
     </script>
