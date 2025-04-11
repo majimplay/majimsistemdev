@@ -136,6 +136,14 @@
   </style>
 </head>
 <body>
+  <div id="loginOverlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:flex; justify-content:center; align-items:center; z-index:9999;">
+  <div style="background:white; padding:2rem; border-radius:8px;">
+    <h3>Acesso Necessário</h3>
+    <input type="text" id="loginUsername" placeholder="Usuário" style="margin:5px;"><br>
+    <input type="password" id="loginPassword" placeholder="Senha" style="margin:5px;"><br>
+    <button onclick="basicLogin()" class="btn btn-edit" style="margin-top:10px;">Acessar</button>
+  </div>
+</div>
   <div class="admin-panel" id="adminContent">
     <h2>Gerenciamento de Produtos</h2>
     
@@ -182,6 +190,13 @@
 
   <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
   <script>
+// Substitua estas credenciais básicas
+const BASIC_AUTH = {
+  username: "admin",
+  password: "senhaSegura123"
+};
+
+    
     Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
     Parse.serverURL = "https://parseapi.back4app.com";
 
@@ -195,11 +210,33 @@
       };
     }
 
-    async function initPage() {
+   async function initPage() {
+  const user = Parse.User.current();
+  if (!user) {
+    document.getElementById('loginOverlay').style.display = 'flex';
+    return;
+  }
+  loadProducts();
+}
+// Adicione esta função de login
+async function basicLogin() {
+  const username = document.getElementById('loginUsername').value;
+  const password = document.getElementById('loginPassword').value;
+  
+  if (username === BASIC_AUTH.username && password === BASIC_AUTH.password) {
+    try {
+      const user = await Parse.User.logIn(username, password);
+      document.getElementById('loginOverlay').style.display = 'none';
       loadProducts();
-      setupEditableFields();
+    } catch (error) {
+      alert("Erro de login: " + error.message);
     }
+  } else {
+    alert("Credenciais inválidas!");
+  }
+}
 
+    
     async function loadProducts() {
       const query = new Parse.Query(Produto);
       query.ascending("order");
