@@ -190,19 +190,22 @@
     const auth = firebase.auth();
 
     // Sincronizar autenticação
-    const syncAuth = async (user) => {
-      if (user) {
-        const token = await user.getIdToken();
-        try {
-          await Parse.User.logInWith('firebase', { authData: { token } });
-        } catch {
-          const parseUser = new Parse.User();
-          parseUser.set('username', user.uid);
-          parseUser.set('authData', { token });
-          await parseUser.save();
-        }
-      }
-    };
+   const syncAuth = async (user) => {
+  if (user) {
+    // Criar/Atualizar usuário no Parse com dados do Firebase
+    const parseUser = new Parse.User();
+    parseUser.set('username', user.uid);
+    parseUser.set('email', user.email);
+    parseUser.set('password', user.uid); // Senha fictícia
+    
+    try {
+      await parseUser.signUp();
+    } catch (error) {
+      // Se usuário já existir, faça login
+      await Parse.User.logIn(user.uid, user.uid);
+    }
+  }
+};
 
     // Monitorar autenticação
     auth.onAuthStateChanged(async (user) => {
