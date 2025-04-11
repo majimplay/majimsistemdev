@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Teste Parse</title>
+    <title>Teste - Login</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -11,7 +11,7 @@
             background: #f5f5f5;
         }
         .container {
-            max-width: 600px;
+            max-width: 800px;
             margin: 2rem auto;
             padding: 2rem;
             background: white;
@@ -27,50 +27,106 @@
             border-bottom: 2px solid #eee;
         }
         .profile-photo {
-            width: 80px;
-            height: 80px;
+            width: 120px;
+            height: 120px;
             border-radius: 50%;
             object-fit: cover;
-            border: 2px solid #007BFF;
-            margin-right: 1rem;
+            border: 3px solid #007BFF;
+            margin-right: 2rem;
         }
-        .profile-info h1, .profile-info p {
+        .profile-info h1 {
             margin: 0;
             color: #333;
         }
-        .input-group {
-            margin-bottom: 1.5rem;
+        .profile-info p {
+            color: #666;
+            margin: 0.5rem 0;
         }
-        label {
+        .teste {
+            margin-top: 2rem;
+            padding: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            background: #fafafa;
+        }
+        .teste label {
             display: block;
-            margin-bottom: 0.5rem;
+            margin-bottom: 8px;
             font-weight: bold;
         }
-        input, textarea {
+        .teste input[type="text"] {
             width: 100%;
-            padding: 0.75rem;
+            padding: 10px;
+            margin-bottom: 1rem;
             border: 1px solid #ccc;
             border-radius: 4px;
-            font-size: 1rem;
-            resize: vertical;
+            font-size: 16px;
         }
-        button {
-            padding: 0.75rem 1.5rem;
+        .teste button {
+            padding: 0.8rem 1.5rem;
             border: none;
             border-radius: 6px;
-            background: #007BFF;
-            color: white;
-            font-size: 1rem;
             cursor: pointer;
-        }
-        button:disabled {
-            background: #aaa;
-            cursor: not-allowed;
+            font-weight: 600;
+            background-color: #007BFF;
+            color: #fff;
         }
     </style>
-
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <!-- Parse SDK -->
     <script src="https://unpkg.com/parse@3.5.0/dist/parse.min.js"></script>
+    <script>
+        // Configurações Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyDlUQbbTP29VqBVmzOGHhfc67R1DTRPwxg",
+            authDomain: "gitautenticatio.firebaseapp.com",
+            databaseURL: "https://gitautenticatio-default-rtdb.firebaseio.com",
+            projectId: "gitautenticatio",
+            storageBucket: "gitautenticatio.appspot.com",
+            messagingSenderId: "21514234895",
+            appId: "1:21514234895:web:d34dc4c44baf586d2cc77a"
+        };
+
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        // Monitorar estado de autenticação
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                document.getElementById('userId').textContent = user.uid;
+                document.getElementById('userName').textContent = '👤 ' + (user.displayName || 'Usuário');
+                document.getElementById('userEmail').textContent = '📧 ' + user.email;
+                document.getElementById('profilePhoto').src = user.photoURL || 'imagens/avatar-padrao.jpg';
+            } else {
+                window.location.href = 'index.html';
+            }
+        });
+
+        // Configuração do Parse para registrar os dados na classe "teste"
+        Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
+        Parse.serverURL = 'https://parseapi.back4app.com';
+
+        // Função para registrar os dados
+        async function registrarDados() {
+            const campo1 = document.getElementById('campo1').value;
+            const userId = document.getElementById('userId').textContent;
+            const Teste = Parse.Object.extend("teste");
+            const teste = new Teste();
+            teste.set("userId", userId);
+            teste.set("campo1", campo1);
+            try {
+                const result = await teste.save();
+                alert('Dados registrados com sucesso!');
+                console.log('Registro criado: ', result);
+            } catch (error) {
+                alert('Erro ao registrar dados: ' + error.message);
+                console.error('Erro ao salvar no Parse: ', error);
+            }
+        }
+    </script>
 </head>
 <body>
     <div class="container">
@@ -79,84 +135,20 @@
             <div style="display: flex; align-items: center;">
                 <img id="profilePhoto" class="profile-photo" src="imagens/avatar-padrao.jpg" alt="Foto do Perfil">
                 <div class="profile-info">
-                    <h1 id="userName">👤 Carregando...</h1>
+                    <h1 id="userName">📱 Carregando...</h1>
                     <p id="userEmail"></p>
                 </div>
             </div>
-            <button id="logoutBtn">🚪 Sair</button>
+            <button id="logoutBtn" class="btn" onclick="firebase.auth().signOut()">🚪 Sair</button>
         </div>
 
-        <!-- Formulário de Teste -->
-        <div class="input-group">
-            <label for="userId">User ID</label>
-            <textarea id="userId" rows="2" readonly>Carregando...</textarea>
+        <!-- Conteúdo do Teste -->
+        <div class="teste">
+            <p>ID do usuário: <span id="userId">Carregando...</span></p>
+            <label for="campo1">Campo1:</label>
+            <input type="text" id="campo1" placeholder="Digite o valor para campo1">
+            <button onclick="registrarDados()">Registrar</button>
         </div>
-        <div class="input-group">
-            <label for="campo1">Campo 1</label>
-            <input type="text" id="campo1" placeholder="Digite algo...">
-        </div>
-        <button id="registrarBtn" disabled>Registrar</button>
     </div>
-
-    <script>
-        // Inicializa Parse
-        Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
-        Parse.serverURL = 'https://parseapi.back4app.com'; // ajuste conforme seu servidor
-
-        // Autenticação simulada (substitua pela sua lógica real)
-        let currentUser = null;
-        async function mockLogin() {
-            // Exemplo: Loga anonimamente
-            currentUser = await Parse.User.logIn("usuario_teste", "senha_teste")
-                .catch(async () => {
-                    // Se não existir, cria
-                    const user = new Parse.User();
-                    user.set("username", "usuario_teste");
-                    user.set("password", "senha_teste");
-                    return await user.signUp();
-                });
-            onUserReady();
-        }
-
-        function onUserReady() {
-            // Atualiza cabeçalho
-            document.getElementById('profilePhoto').src = currentUser.get("photoURL") || 'imagens/avatar-padrao.jpg';
-            document.getElementById('userName').textContent = '👤 ' + (currentUser.get("username") || "Usuário");
-            document.getElementById('userEmail').textContent = '📧 ' + (currentUser.get("email") || "");
-            // Preenche userId e habilita botão
-            document.getElementById('userId').value = currentUser.id;
-            document.getElementById('registrarBtn').disabled = false;
-        }
-
-        // Logout
-        document.getElementById('logoutBtn').addEventListener('click', async () => {
-            await Parse.User.logOut();
-            window.location.reload();
-        });
-
-        // Registrar no Parse Classe "Teste"
-        document.getElementById('registrarBtn').addEventListener('click', async () => {
-            const valorCampo1 = document.getElementById('campo1').value.trim();
-            if (!valorCampo1) {
-                alert('Preencha o Campo 1 antes de registrar.');
-                return;
-            }
-            const Teste = Parse.Object.extend("Teste");
-            const obj = new Teste();
-            obj.set("userId", currentUser.id);
-            obj.set("campo1", valorCampo1);
-            try {
-                await obj.save();
-                alert("Registro salvo com sucesso!");
-                document.getElementById('campo1').value = "";
-            } catch (err) {
-                console.error(err);
-                alert("Erro ao salvar: " + err.message);
-            }
-        });
-
-        // Inicia
-        mockLogin();
-    </script>
 </body>
 </html>
