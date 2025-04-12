@@ -201,7 +201,7 @@
       currentLoja = await query.first();
       
       if (!currentLoja) {
-        const nomeLoja = prompt("📢 Digite o nome da sua nova loja:");
+        const nomeLoja = prompt("📢 Bem-vindo ao criador de lojas!\nDigite o nome da sua nova loja:");
         if (!nomeLoja) return;
 
         currentLoja = new Loja();
