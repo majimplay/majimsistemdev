@@ -271,40 +271,61 @@
     };
 
     // Evento de Formulário
-    document.getElementById('productForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      const productData = {
-        nome: document.getElementById('productName').value,
-        preco: parseFloat(document.getElementById('productPrice').value),
-        imagem: document.getElementById('productImage').files[0]
-      };
+document.getElementById('productForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  // Verificar se a loja existe
+  if (!currentLoja) {
+    alert('Você precisa criar uma loja antes de adicionar produtos!');
+    return;
+  }
 
-      try {
-        // Upload da imagem
-        const parseFile = new Parse.File(productData.imagem.name, productData.imagem);
-        await parseFile.save();
+  // Validar campos do formulário
+  const productData = {
+    nome: document.getElementById('productName').value.trim(),
+    preco: parseFloat(document.getElementById('productPrice').value),
+    imagem: document.getElementById('productImage').files[0]
+  };
 
-        // Criar novo produto
-        const novoProduto = new Produto();
-        novoProduto.set("nome", productData.nome);
-        novoProduto.set("preco", productData.preco);
-        novoProduto.set("imagem", parseFile);
-        novoProduto.set("loja", currentLoja);
-        await novoProduto.save();
+  if (!productData.nome || isNaN(productData.preco) {
+    alert('Preencha todos os campos corretamente!');
+    return;
+  }
 
-        // Atualizar loja
-        currentLoja.add("produtos", novoProduto.id);
-        await currentLoja.save();
+  try {
+    // Upload da imagem
+    const parseFile = new Parse.File(productData.imagem.name, productData.imagem);
+    await parseFile.save();
 
-        // Resetar formulário
-        document.getElementById('productForm').reset();
-        document.getElementById('imagePreview').style.display = 'none';
-        loadProducts();
-      } catch (error) {
-        alert("Erro ao adicionar produto: " + error.message);
-      }
-    });
+    // Criar novo produto
+    const novoProduto = new Produto();
+    novoProduto.set("nome", productData.nome);
+    novoProduto.set("preco", productData.preco);
+    novoProduto.set("imagem", parseFile);
+    novoProduto.set("loja", currentLoja);
+    
+    // Salvar produto primeiro
+    await novoProduto.save();
+
+    // Atualizar lista de produtos da loja
+    currentLoja.add("produtos", novoProduto.id);
+    await currentLoja.save();
+
+    // Resetar formulário
+    document.getElementById('productForm').reset();
+    document.getElementById('imagePreview').style.display = 'none';
+    loadProducts();
+    
+  } catch (error) {
+    console.error('Erro completo:', error);
+    alert("Erro ao adicionar produto: " + error.message);
+    
+    // Reverter alterações em caso de erro
+    if (novoProduto.id) {
+      await novoProduto.destroy();
+    }
+  }
+});
 
     // Monitorar Estado de Autenticação
     auth.onAuthStateChanged(async (user) => {
