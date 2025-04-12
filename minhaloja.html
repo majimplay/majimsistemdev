@@ -292,7 +292,7 @@
         const novoProduto = new Produto();
         novoProduto.set("nome", productData.nome);
         novoProduto.set("preco", productData.preco);
-        novoProduto.set("imagem", parseFile);
+        novoProduto.set("imagens", [parseFile]);
         novoProduto.set("loja", currentLoja);
         await novoProduto.save();
 
