@@ -239,7 +239,7 @@
       produtos.forEach(produto => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td><img src="${produto.get("imagems").url()}" class="product-image"></td>
+          <td><img src="${produto.get("imagens").url()}" class="product-image"></td>
           <td>${produto.get("nome")}</td>
           <td>R$ ${produto.get("preco").toFixed(2)}</td>
           <td>
