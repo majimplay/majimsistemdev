@@ -139,6 +139,20 @@
       height: calc(100vh - 120px);
       border: none;
     }
+    .user-info a.minha-loja-btn {
+      margin-left: 10px;
+      color: white;
+      text-decoration: none;
+      padding: 5px 10px;
+      border: 2px solid transparent;
+      border-radius: 3px;
+      transition: background-color 0.3s, border-color 0.3s;
+      background: #ffc107;
+    }
+    .user-info a.minha-loja-btn:hover {
+      background-color: #e0a800;
+      border-color: #d39e00;
+    }
   </style>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
@@ -165,6 +179,7 @@
       <div id="userArea" class="user-info" style="display:none;">
         <span id="welcomeUser"></span>
         <a href="minhaconta.html" id="minhaContaLink" rel="noopener noreferrer">Minha Conta 🛒</a>
+         <a href="#" id="minhaLojaBtn" rel="noopener noreferrer"rel="noopener noreferrer" class="minha-loja-btn">🏪 Minha Loja</a>
         <button id="logoutBtn">Sair 🚘</button>
       </div>
     </div>
@@ -260,6 +275,33 @@
         document.getElementById('adminPanel').style.display = 'none';
       }
     }
+
+    document.getElementById('minhaLojaBtn').addEventListener('click', async (e) => {
+      e.preventDefault();
+      const user = auth.currentUser;
+      if (!user) return;
+
+      try {
+        const shopRef = database.ref('lojas/' + user.uid);
+        const snapshot = await shopRef.once('value');
+        
+        if (!snapshot.exists()) {
+          const shopName = prompt('📢 Bem-vindo ao criador de lojas!\nDigite o nome da sua nova loja:');
+          if (!shopName || shopName.trim() === '') return;
+
+          await shopRef.set({
+            nome: shopName.trim(),
+            produtos: {},
+            dono: user.uid,
+            dataCriacao: firebase.database.ServerValue.TIMESTAMP
+          });
+        }
+        window.location.href = 'minhaloja.html';
+      } catch (error) {
+        alert('Erro ao acessar loja: ' + error.message);
+      }
+    });
+    
   </script>
 </body>
 </html>
