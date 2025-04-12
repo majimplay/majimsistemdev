@@ -239,7 +239,7 @@
       produtos.forEach(produto => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td><img src="${produto.get("imagens")[0].url()}" class="product-image"></td>
+          <td><img src="${produto.get("imagens")[0]}" class="product-image"></td>
           <td>${produto.get("nome")}</td>
           <td>R$ ${produto.get("preco").toFixed(2)}</td>
           <td>
@@ -287,12 +287,12 @@
         // Upload da imagem
         const parseFile = new Parse.File(productData.imagem.name, productData.imagem);
         await parseFile.save();
-
+        const imageUrl = parseFile.url();
         // Criar novo produto
         const novoProduto = new Produto();
         novoProduto.set("nome", productData.nome);
         novoProduto.set("preco", productData.preco);
-        novoProduto.set("imagens", [parseFile]);
+        novoProduto.set("imagens", [imageUrl]);
         novoProduto.set("loja", currentLoja);
         await novoProduto.save();
 
