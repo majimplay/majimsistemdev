@@ -179,7 +179,7 @@
       <div id="userArea" class="user-info" style="display:none;">
         <span id="welcomeUser"></span>
         <a href="minhaconta.html" id="minhaContaLink" rel="noopener noreferrer">Minha Conta 🛒</a>
-         <a href="#" id="minhaLojaBtn" rel="noopener noreferrer"rel="noopener noreferrer" class="minha-loja-btn">🏪 Minha Loja</a>
+         <a href="minhaloja.html" id="minhaLojaBtn" rel="noopener noreferrer" class="minha-loja-btn">🏪 Minha Loja</a>
         <button id="logoutBtn">Sair 🚘</button>
       </div>
     </div>
@@ -276,32 +276,6 @@
       }
     }
 
-    document.getElementById('minhaLojaBtn').addEventListener('click', async (e) => {
-      e.preventDefault();
-      const user = auth.currentUser;
-      if (!user) return;
-
-      try {
-        const shopRef = database.ref('lojas/' + user.uid);
-        const snapshot = await shopRef.once('value');
-        
-        if (!snapshot.exists()) {
-          const shopName = prompt('📢 Bem-vindo ao criador de lojas!\nDigite o nome da sua nova loja:');
-          if (!shopName || shopName.trim() === '') return;
-
-          await shopRef.set({
-            nome: shopName.trim(),
-            produtos: {},
-            dono: user.uid,
-            dataCriacao: firebase.database.ServerValue.TIMESTAMP
-          });
-        }
-        window.location.href = 'minhaloja.html';
-      } catch (error) {
-        alert('Erro ao acessar loja: ' + error.message);
-      }
-    });
-    
   </script>
 </body>
 </html>
