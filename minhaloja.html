@@ -273,7 +273,10 @@
     // Evento de Formulário
     document.getElementById('productForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      
+       if (!currentLoja) {
+       alert("❌ Você precisa criar uma loja antes de adicionar produtos!");
+       return;
+       }
       const productData = {
         nome: document.getElementById('productName').value,
         preco: parseFloat(document.getElementById('productPrice').value),
