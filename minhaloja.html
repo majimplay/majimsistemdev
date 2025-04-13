@@ -111,14 +111,18 @@ table {
 }
 
 .image-cell {
-    width: 60%;
+    width: 80%;
   min-width: 500px;
 }
 
 .actions-cell {
-  width: 50px;
+ width: 10%;
+  min-width: 60px;
 }
-
+td:not(.image-cell):not(.actions-cell) {
+  width: 10%;
+  min-width: 100px;
+}
 .image-container {
   display: flex;
   gap: 8px;
