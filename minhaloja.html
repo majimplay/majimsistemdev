@@ -121,14 +121,13 @@
       color: white;
     }
 
-    .reputacao-container {
-      display: inline-block;
-      margin-left: 15px;
+    .reputacao-badge {
       background: #4CAF50;
       color: white;
       padding: 4px 12px;
       border-radius: 20px;
       font-size: 0.9em;
+      margin-left: 10px;
     }
   </style>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -149,7 +148,7 @@
 
   <div class="admin-panel">
     <h1 id="nomeLoja">Carregando...
-      <span class="reputacao-container">⭐ 0.0</span>
+      <span id="reputacaoLoja" class="reputacao-badge">⭐ 0.0</span>
     </h1>
     
     <form id="productForm">
@@ -241,8 +240,8 @@
       
       // Atualizar UI
       document.getElementById('nomeLoja').innerHTML = `
-        ${currentLoja.get("nome")}
-        <span class="reputacao-container">⭐ ${currentLoja.get("reputacao").toFixed(1)}</span>
+        ${currentLoja.get("nome")} 
+        <span class="reputacao-badge">⭐ ${currentLoja.get("reputacao").toFixed(1)}</span>
       `;
       
       loadProducts();
@@ -262,7 +261,7 @@
       }
     };
 
-    // Atualizar Tabela com todas imagens
+    // Atualizar Tabela com todas as imagens
     const updateTable = (produtos) => {
       const tbody = document.querySelector('#productsTable tbody');
       tbody.innerHTML = "";
@@ -301,6 +300,7 @@
             <button class="btn btn-delete" onclick="deleteProduct('${produto.id}')">Excluir</button>
           </td>
         `;
+        
         tbody.appendChild(tr);
       });
 
@@ -327,17 +327,6 @@
       };
     }
 
-    async function updateProductField(id, field, value) {
-      const query = new Parse.Query(Produto);
-      try {
-        const produto = await query.get(id);
-        produto.set(field, value);
-        await produto.save();
-      } catch (error) {
-        alert("Erro na atualização: " + error.message);
-      }
-    }
-
     // Movimentação de produtos
     window.moveProduct = async (id, direction) => {
       const query = new Parse.Query(Produto);
@@ -362,7 +351,7 @@
       }
     };
 
-    // Adicionar Produto
+    // Adicionar produto
     document.getElementById('productForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       if (!currentLoja) {
@@ -395,55 +384,10 @@
         document.getElementById('imagePreview').style.display = 'none';
         loadProducts();
       } catch (error) {
-        alert("Erro ao adicionar produto: " + error.message);
+        alert("Erro: " + error.message);
       }
     });
-
-    // Deletar Produto
-    window.deleteProduct = async (id) => {
-      if (!confirm("Confirmar exclusão?")) return;
-      
-      try {
-        currentLoja.remove("produtos", id);
-        await currentLoja.save();
-        
-        const query = new Parse.Query(Produto);
-        const produto = await query.get(id);
-        await produto.destroy();
-        
-        loadProducts();
-      } catch (error) {
-        alert("Erro na exclusão: " + error.message);
-      }
-    };
-
-    // Adicionar Imagem
-    window.addImage = async (produtoId) => {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = 'image/*';
-      input.onchange = async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        
-        try {
-          const parseFile = new Parse.File(file.name, file);
-          await parseFile.save();
-          const query = new Parse.Query(Produto);
-          const produto = await query.get(produtoId);
-          const imagens = produto.get("imagens") || [];
-          imagens.push(parseFile.url());
-          produto.set("imagens", imagens);
-          await produto.save();
-          loadProducts();
-        } catch (error) {
-          alert("Erro ao adicionar imagem: " + error.message);
-        }
-      };
-      input.click();
-    };
-
-    // Monitorar Autenticação
+    // Monitorar Estado de Autenticação
     auth.onAuthStateChanged(async (user) => {
       if (user) {
         await syncAuth(user);
