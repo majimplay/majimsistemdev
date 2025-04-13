@@ -49,6 +49,7 @@
 
     table {
       width: 100%;
+      table-layout: fixed;
       border-collapse: collapse;
       margin: 2rem 0;
     }
@@ -57,10 +58,18 @@
       padding: 1rem;
       text-align: left;
       border-bottom: 1px solid #ddd;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     th { background: #f8f9fa; }
     tr:hover { background: #f9f9f9; }
+
+    /* Definindo larguras proporcionais */
+    .image-cell { width: 80%; }
+    .text-cell { width: 10%; }
+    .actions-cell { width: 10%; }
 
     input[type="text"], input[type="number"] {
       padding: 8px;
@@ -97,55 +106,29 @@
       display: block !important;
     }
 
-.product-image {
-  height: 50px;
-  width: 50px;
-  min-width: 50px; /* Impede redução de tamanho */
-  border-radius: 4px;
-  object-fit: cover;
-  border: 1px solid #ddd;
-}
-    
-table {
-  table-layout: fixed;
-}
+    .product-image {
+      height: 50px;
+      width: 50px;
+      min-width: 50px;
+      border-radius: 4px;
+      object-fit: cover;
+      border: 1px solid #ddd;
+    }
 
-.image-cell {
-    width: 80%;
-  min-width: 500px;
-}
+    .image-container {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      max-height: 50px;
+      overflow-y: auto;
+      padding: 4px 0;
+    }
 
-.actions-cell {
- width: 10%;
-  min-width: 60px;
-}
-td:not(.image-cell):not(.actions-cell) {
-  width: 10%;
-  min-width: 100px;
-}
-.image-container {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  max-height: 50px;
-  overflow-y: auto;
-  padding: 4px 0;
-}
-
-.actions-container {
-  display: flex;
-  gap: 8px;
-  flex-wrap: nowrap;
-}
-
-/* Garantir que as células de texto não quebrem */
-td:not(.image-cell) {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-
+    .actions-container {
+      display: flex;
+      gap: 8px;
+      flex-wrap: nowrap;
+    }
 	  
   </style>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
