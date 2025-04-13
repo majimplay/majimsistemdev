@@ -102,6 +102,44 @@
       border-radius: 4px;
       object-fit: cover;
     }
+    
+table {
+  table-layout: fixed;
+}
+
+.image-cell {
+  width: 40%;
+  min-width: 200px;
+}
+
+.actions-cell {
+  width: 150px;
+}
+
+.image-container {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  max-height: 150px;
+  overflow-y: auto;
+  padding: 4px 0;
+}
+
+.actions-container {
+  display: flex;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+/* Garantir que as células de texto não quebrem */
+td:not(.image-cell) {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+	  
   </style>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
@@ -231,15 +269,15 @@
       }
     };
 
-  const updateTable = (produtos) => {
+const updateTable = (produtos) => {
   const tbody = document.querySelector('#productsTable tbody');
   tbody.innerHTML = "";
   
   produtos.forEach(produto => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td>
-        <div style="display: flex; gap: 8px;">
+      <td class="image-cell">
+        <div class="image-container">
           ${produto.get("imagens").map(url => 
             `<img src="${url}" class="product-image">`
           ).join('')}
@@ -247,9 +285,11 @@
       </td>
       <td>${produto.get("nome")}</td>
       <td>R$ ${produto.get("preco").toFixed(2)}</td>
-      <td>
-        <button class="btn btn-edit" onclick="editProduct('${produto.id}')">Editar</button>
-        <button class="btn btn-delete" onclick="deleteProduct('${produto.id}')">Excluir</button>
+      <td class="actions-cell">
+        <div class="actions-container">
+          <button class="btn btn-edit" onclick="editProduct('${produto.id}')">Editar</button>
+          <button class="btn btn-delete" onclick="deleteProduct('${produto.id}')">Excluir</button>
+        </div>
       </td>
     `;
     tbody.appendChild(tr);
