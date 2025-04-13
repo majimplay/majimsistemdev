@@ -231,25 +231,30 @@
       }
     };
 
-    // Atualizar Tabela
-    const updateTable = (produtos) => {
-      const tbody = document.querySelector('#productsTable tbody');
-      tbody.innerHTML = "";
-      
-      produtos.forEach(produto => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td><img src="${produto.get("imagens")[0]}" class="product-image"></td>
-          <td>${produto.get("nome")}</td>
-          <td>R$ ${produto.get("preco").toFixed(2)}</td>
-          <td>
-            <button class="btn btn-edit" onclick="editProduct('${produto.id}')">Editar</button>
-            <button class="btn btn-delete" onclick="deleteProduct('${produto.id}')">Excluir</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-    };
+  const updateTable = (produtos) => {
+  const tbody = document.querySelector('#productsTable tbody');
+  tbody.innerHTML = "";
+  
+  produtos.forEach(produto => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>
+        <div style="display: flex; gap: 8px;">
+          ${produto.get("imagens").map(url => 
+            `<img src="${url}" class="product-image">`
+          ).join('')}
+        </div>
+      </td>
+      <td>${produto.get("nome")}</td>
+      <td>R$ ${produto.get("preco").toFixed(2)}</td>
+      <td>
+        <button class="btn btn-edit" onclick="editProduct('${produto.id}')">Editar</button>
+        <button class="btn btn-delete" onclick="deleteProduct('${produto.id}')">Excluir</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+};
 
     // Deletar Produto
     window.deleteProduct = async (id) => {
