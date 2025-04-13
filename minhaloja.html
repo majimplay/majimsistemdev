@@ -129,7 +129,6 @@
       gap: 8px;
       flex-wrap: nowrap;
     }
-	  
   </style>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
@@ -172,10 +171,10 @@
     <table id="productsTable">
       <thead>
         <tr>
-          <th>Imagem</th>
-          <th>Produto</th>
-          <th>Preço</th>
-          <th>Ações</th>
+          <th class="image-cell">Imagem</th>
+          <th class="text-cell">Produto</th>
+          <th class="text-cell">Preço</th>
+          <th class="actions-cell">Ações</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -273,8 +272,8 @@ const updateTable = (produtos) => {
           ).join('')}
         </div>
       </td>
-      <td>${produto.get("nome")}</td>
-      <td>R$ ${produto.get("preco").toFixed(2)}</td>
+      <td class="text-cell">${produto.get("nome")}</td>
+      <td class="text-cell">R$ ${produto.get("preco").toFixed(2)}</td>
       <td class="actions-cell">
         <div class="actions-container">
           <button class="btn btn-edit" onclick="editProduct('${produto.id}')">Editar</button>
@@ -306,7 +305,7 @@ const updateTable = (produtos) => {
       }
     };
 async function editProduct(id) {
-		window.location.href = `editar.html?id=${id}`;
+	window.location.href = `editar.html?id=${id}`;
 	}
     // Evento de Formulário
     document.getElementById('productForm').addEventListener('submit', async (e) => {
