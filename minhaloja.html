@@ -243,6 +243,7 @@
           <td>${produto.get("nome")}</td>
           <td>R$ ${produto.get("preco").toFixed(2)}</td>
           <td>
+            <button class="btn btn-edit" onclick="editProduct('${produto.id}')">Editar</button>
             <button class="btn btn-delete" onclick="deleteProduct('${produto.id}')">Excluir</button>
           </td>
         `;
@@ -269,7 +270,9 @@
         alert("Erro na exclusão: " + error.message);
       }
     };
-
+async function editProduct(id) {
+		window.location.href = `editar.html?id=${id}`;
+	}
     // Evento de Formulário
     document.getElementById('productForm').addEventListener('submit', async (e) => {
       e.preventDefault();
