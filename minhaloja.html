@@ -97,34 +97,10 @@
       display: block !important;
     }
 
-    .image-gallery {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
     .product-image {
       height: 50px;
       border-radius: 4px;
       object-fit: cover;
-    }
-
-    .image-container {
-      position: relative;
-      margin: 5px;
-    }
-
-    .order-controls .btn {
-      margin: 2px;
-      padding: 4px 8px;
-      background: #2196F3;
-      color: white;
-    }
-
-    .reputacao {
-      color: #28a745;
-      font-weight: bold;
-      margin-left: 10px;
     }
   </style>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -136,13 +112,15 @@
     <div style="display: flex; align-items: center;">
       <img id="profilePhoto" class="profile-photo" src="avatar-padrao.jpeg">
       <div class="profile-info">
-        <h1 id="userName">Carregando...
-          <span class="reputacao" id="reputacaoLoja"></span>
-        </h1>
+        <h1 id="userName">Carregando...</h1>
         <p id="userEmail"></p>
       </div>
     </div>
     <button id="logoutBtn" class="btn btn-secondary">🚪 Sair</button>
+  </div>
+
+  <div class="store-header">
+    <h1 id="nomeLoja">Carregando nome da loja...</h1>
   </div>
 
   <div class="admin-panel">
@@ -166,7 +144,6 @@
     <table id="productsTable">
       <thead>
         <tr>
-          <th>Ordem</th>
           <th>Imagem</th>
           <th>Produto</th>
           <th>Preço</th>
@@ -231,30 +208,24 @@
         currentLoja.set("nome", nomeLoja);
         currentLoja.set("dono", Parse.User.current());
         currentLoja.set("produtos", []);
-        currentLoja.set("ordemloja", []);
-        currentLoja.set("reputacao", 0);
         await currentLoja.save();
       }
       
       document.getElementById('nomeLoja').textContent = currentLoja.get("nome");
-      document.getElementById('reputacaoLoja').textContent = `⭐ ${currentLoja.get("reputacao")}`;
       loadProducts();
     };
 
     // Carregar Produtos
     const loadProducts = async () => {
-      const ordemIds = currentLoja.get("ordemloja");
-      if (ordemIds.length === 0) return;
+      const productIds = currentLoja.get("produtos");
+      if (productIds.length === 0) return;
 
       const query = new Parse.Query(Produto);
-      query.containedIn("objectId", ordemIds);
+      query.containedIn("objectId", productIds);
       
       try {
         const results = await query.find();
-        const orderedResults = ordemIds.map(id => 
-          results.find(p => p.id === id)
-        ).filter(p => p);
-        updateTable(orderedResults);
+        updateTable(results);
       } catch (error) {
         alert("Erro ao carregar produtos: " + error.message);
       }
@@ -266,148 +237,30 @@
       tbody.innerHTML = "";
       
       produtos.forEach(produto => {
-        const imagens = produto.get("imagens") || [];
         const tr = document.createElement('tr');
-        
         tr.innerHTML = `
-          <td>
-            <div class="order-controls">
-              <button class="btn" onclick="moveProductUp('${produto.id}')">↑</button>
-              <button class="btn" onclick="moveProductDown('${produto.id}')">↓</button>
-            </div>
-          </td>
-          <td>
-            <div class="image-gallery">
-              ${imagens.length > 0 ? `
-                <div class="image-container">
-                  <img src="${imagens[0]}" class="product-image">
-                </div>
-              ` : ''}
-            </div>
-            <button class="btn btn-edit" onclick="addImage('${produto.id}')">Adicionar Imagem</button>
-          </td>
-          <td>
-            <div class="editable-field" contenteditable="true" data-id="${produto.id}" data-field="nome">
-              ${produto.get("nome")}
-            </div>
-          </td>
-          <td>
-            <div class="editable-field" contenteditable="true" data-id="${produto.id}" data-field="preco">
-              R$ ${parseFloat(produto.get("preco")).toFixed(2)}
-            </div>
-          </td>
+          <td><img src="${produto.get("imagens")[0]}" class="product-image"></td>
+          <td>${produto.get("nome")}</td>
+          <td>R$ ${produto.get("preco").toFixed(2)}</td>
           <td>
             <button class="btn btn-edit" onclick="editProduct('${produto.id}')">Editar</button>
             <button class="btn btn-delete" onclick="deleteProduct('${produto.id}')">Excluir</button>
           </td>
         `;
-        
         tbody.appendChild(tr);
-      });
-
-      document.querySelectorAll('.editable-field').forEach(field => {
-        field.addEventListener('input', debounce(() => {
-          const id = field.dataset.id;
-          const fieldName = field.dataset.field;
-          const value = fieldName === "preco" 
-            ? parseFloat(field.textContent.replace('R$ ', '')) 
-            : field.textContent;
-          
-          updateProductField(id, fieldName, value);
-        }, 500));
       });
     };
 
-    // Funções auxiliares
-    function debounce(func, timeout = 300) {
-      let timer;
-      return (...args) => {
-        clearTimeout(timer);
-        timer = setTimeout(() => func.apply(this, args), timeout);
-      };
-    }
-
-    async function updateProductField(id, field, value) {
-      const query = new Parse.Query(Produto);
-      try {
-        const produto = await query.get(id);
-        produto.set(field, value);
-        await produto.save();
-      } catch (error) {
-        alert("Erro na atualização: " + error.message);
-      }
-    }
-
-    async function moveProductUp(id) {
-      const ordemloja = [...currentLoja.get("ordemloja")];
-      const index = ordemloja.indexOf(id);
-      
-      if(index > 0) {
-        [ordemloja[index], ordemloja[index-1]] = [ordemloja[index-1], ordemloja[index]];
-        currentLoja.set("ordemloja", ordemloja);
-        await currentLoja.save();
-        loadProducts();
-      }
-    }
-
-    async function moveProductDown(id) {
-      const ordemloja = [...currentLoja.get("ordemloja")];
-      const index = ordemloja.indexOf(id);
-      
-      if(index < ordemloja.length - 1) {
-        [ordemloja[index], ordemloja[index+1]] = [ordemloja[index+1], ordemloja[index]];
-        currentLoja.set("ordemloja", ordemloja);
-        await currentLoja.save();
-        loadProducts();
-      }
-    }
-
-    // Evento de Formulário
-    document.getElementById('productForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      if (!currentLoja) {
-        alert("❌ Você precisa criar uma loja antes de adicionar produtos!");
-        return;
-      }
-
-      const productData = {
-        nome: document.getElementById('productName').value,
-        preco: parseFloat(document.getElementById('productPrice').value),
-        imagem: document.getElementById('productImage').files[0]
-      };
-
-      try {
-        const parseFile = new Parse.File(productData.imagem.name, productData.imagem);
-        await parseFile.save();
-
-        const novoProduto = new Produto();
-        novoProduto.set("nome", productData.nome);
-        novoProduto.set("preco", productData.preco);
-        novoProduto.set("imagens", [parseFile.url()]);
-        novoProduto.set("loja", currentLoja);
-        await novoProduto.save();
-
-        currentLoja.add("produtos", novoProduto.id);
-        currentLoja.add("ordemloja", novoProduto.id);
-        await currentLoja.save();
-
-        document.getElementById('productForm').reset();
-        document.getElementById('imagePreview').style.display = 'none';
-        loadProducts();
-      } catch (error) {
-        alert("Erro ao adicionar produto: " + error.message);
-      }
-    });
-
-    async function deleteProduct(id) {
+    // Deletar Produto
+    window.deleteProduct = async (id) => {
       if (!confirm("Confirmar exclusão?")) return;
       
       try {
+        // Remover da lista da loja
         currentLoja.remove("produtos", id);
-        const ordemloja = currentLoja.get("ordemloja").filter(i => i !== id);
-        currentLoja.set("ordemloja", ordemloja);
         await currentLoja.save();
         
+        // Deletar objeto do produto
         const query = new Parse.Query(Produto);
         const produto = await query.get(id);
         await produto.destroy();
@@ -416,31 +269,48 @@
       } catch (error) {
         alert("Erro na exclusão: " + error.message);
       }
-    }
-
-    async function addImage(produtoId) {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = 'image/*';
-      input.onchange = async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        try {
-          const parseFile = new Parse.File(file.name, file);
-          await parseFile.save();
-          const query = new Parse.Query(Produto);
-          const produto = await query.get(produtoId);
-          const imagens = produto.get("imagens") || [];
-          imagens.push(parseFile.url());
-          produto.set("imagens", imagens);
-          await produto.save();
-          loadProducts();
-        } catch (error) {
-          alert("Erro ao adicionar imagem: " + error.message);
-        }
+    };
+async function editProduct(id) {
+		window.location.href = `editar.html?id=${id}`;
+	}
+    // Evento de Formulário
+    document.getElementById('productForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+       if (!currentLoja) {
+       alert("❌ Você precisa criar uma loja antes de adicionar produtos!");
+       return;
+       }
+      const productData = {
+        nome: document.getElementById('productName').value,
+        preco: parseFloat(document.getElementById('productPrice').value),
+        imagem: document.getElementById('productImage').files[0]
       };
-      input.click();
-    }
+
+      try {
+        // Upload da imagem
+        const parseFile = new Parse.File(productData.imagem.name, productData.imagem);
+        await parseFile.save();
+        const imageUrl = parseFile.url();
+        // Criar novo produto
+        const novoProduto = new Produto();
+        novoProduto.set("nome", productData.nome);
+        novoProduto.set("preco", productData.preco);
+        novoProduto.set("imagens", [imageUrl]);
+        novoProduto.set("loja", currentLoja);
+        await novoProduto.save();
+
+        // Atualizar loja
+        currentLoja.add("produtos", novoProduto.id);
+        await currentLoja.save();
+
+        // Resetar formulário
+        document.getElementById('productForm').reset();
+        document.getElementById('imagePreview').style.display = 'none';
+        loadProducts();
+      } catch (error) {
+        alert("Erro ao adicionar produto: " + error.message);
+      }
+    });
 
     // Monitorar Estado de Autenticação
     auth.onAuthStateChanged(async (user) => {
