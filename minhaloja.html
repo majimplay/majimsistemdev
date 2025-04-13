@@ -97,11 +97,14 @@
       display: block !important;
     }
 
-    .product-image {
-      height: 50px;
-      border-radius: 4px;
-      object-fit: cover;
-    }
+.product-image {
+  height: 50px;
+  width: 50px;
+  min-width: 50px; /* Impede redução de tamanho */
+  border-radius: 4px;
+  object-fit: cover;
+  border: 1px solid #ddd;
+}
     
 table {
   table-layout: fixed;
