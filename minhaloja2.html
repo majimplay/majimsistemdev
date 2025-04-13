@@ -239,10 +239,11 @@
       produtos.forEach(produto => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td><img src="${produto.get("imagem").url()}" class="product-image"></td>
+          <td><img src="${produto.get("imagens")[0]}" class="product-image"></td>
           <td>${produto.get("nome")}</td>
           <td>R$ ${produto.get("preco").toFixed(2)}</td>
           <td>
+            <button class="btn btn-edit" onclick="editProduct('${produto.id}')">Editar</button>
             <button class="btn btn-delete" onclick="deleteProduct('${produto.id}')">Excluir</button>
           </td>
         `;
@@ -269,11 +270,16 @@
         alert("Erro na exclusão: " + error.message);
       }
     };
-
+async function editProduct(id) {
+		window.location.href = `editar.html?id=${id}`;
+	}
     // Evento de Formulário
     document.getElementById('productForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      
+       if (!currentLoja) {
+       alert("❌ Você precisa criar uma loja antes de adicionar produtos!");
+       return;
+       }
       const productData = {
         nome: document.getElementById('productName').value,
         preco: parseFloat(document.getElementById('productPrice').value),
@@ -284,12 +290,12 @@
         // Upload da imagem
         const parseFile = new Parse.File(productData.imagem.name, productData.imagem);
         await parseFile.save();
-
+        const imageUrl = parseFile.url();
         // Criar novo produto
         const novoProduto = new Produto();
         novoProduto.set("nome", productData.nome);
         novoProduto.set("preco", productData.preco);
-        novoProduto.set("imagem", parseFile);
+        novoProduto.set("imagens", [imageUrl]);
         novoProduto.set("loja", currentLoja);
         await novoProduto.save();
 
