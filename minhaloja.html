@@ -97,10 +97,38 @@
       display: block !important;
     }
 
+    .image-gallery {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
     .product-image {
       height: 50px;
       border-radius: 4px;
       object-fit: cover;
+    }
+
+    .image-container {
+      position: relative;
+      margin: 5px;
+    }
+
+    .order-controls .btn {
+      margin: 2px;
+      padding: 4px 8px;
+      background: #2196F3;
+      color: white;
+    }
+
+    .reputacao-container {
+      display: inline-block;
+      margin-left: 15px;
+      background: #4CAF50;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.9em;
     }
   </style>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -119,12 +147,10 @@
     <button id="logoutBtn" class="btn btn-secondary">🚪 Sair</button>
   </div>
 
-  <div class="store-header">
-    <h1 id="nomeLoja">Carregando nome da loja...</h1>
-  </div>
-
   <div class="admin-panel">
-    <h2>Gerenciamento de Produtos</h2>
+    <h1 id="nomeLoja">Carregando...
+      <span class="reputacao-container">⭐ 0.0</span>
+    </h1>
     
     <form id="productForm">
       <div style="display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;">
@@ -144,7 +170,8 @@
     <table id="productsTable">
       <thead>
         <tr>
-          <th>Imagem</th>
+          <th>Ordem</th>
+          <th>Imagens</th>
           <th>Produto</th>
           <th>Preço</th>
           <th>Ações</th>
@@ -193,7 +220,7 @@
       }
     };
 
-    // Verificar/Criar Loja
+    // Verificar/Criar Loja com reputação
     const checkOrCreateLoja = async (user) => {
       const query = new Parse.Query(Loja);
       query.equalTo("dono", Parse.User.current());
@@ -208,20 +235,24 @@
         currentLoja.set("nome", nomeLoja);
         currentLoja.set("dono", Parse.User.current());
         currentLoja.set("produtos", []);
+        currentLoja.set("reputacao", 0.0);
         await currentLoja.save();
       }
       
-      document.getElementById('nomeLoja').textContent = currentLoja.get("nome");
+      // Atualizar UI
+      document.getElementById('nomeLoja').innerHTML = `
+        ${currentLoja.get("nome")}
+        <span class="reputacao-container">⭐ ${currentLoja.get("reputacao").toFixed(1)}</span>
+      `;
+      
       loadProducts();
     };
 
-    // Carregar Produtos
+    // Carregar Produtos ordenados
     const loadProducts = async () => {
-      const productIds = currentLoja.get("produtos");
-      if (productIds.length === 0) return;
-
       const query = new Parse.Query(Produto);
-      query.containedIn("objectId", productIds);
+      query.equalTo("loja", currentLoja);
+      query.ascending("ordemLoja");
       
       try {
         const results = await query.find();
@@ -231,17 +262,40 @@
       }
     };
 
-    // Atualizar Tabela
+    // Atualizar Tabela com todas imagens
     const updateTable = (produtos) => {
       const tbody = document.querySelector('#productsTable tbody');
       tbody.innerHTML = "";
       
       produtos.forEach(produto => {
+        const imagens = produto.get("imagens") || [];
         const tr = document.createElement('tr');
+        
         tr.innerHTML = `
-          <td><img src="${produto.get("imagens")[0]}" class="product-image"></td>
-          <td>${produto.get("nome")}</td>
-          <td>R$ ${produto.get("preco").toFixed(2)}</td>
+          <td>
+            <div class="order-controls">
+              <button class="btn" onclick="moveProduct('${produto.id}', 'up')">↑</button>
+              <button class="btn" onclick="moveProduct('${produto.id}', 'down')">↓</button>
+            </div>
+          </td>
+          <td>
+            <div class="image-gallery">
+              ${imagens.map(url => `
+                <img src="${url}" class="product-image">
+              `).join('')}
+            </div>
+            <button class="btn btn-edit" onclick="addImage('${produto.id}')">Adicionar Imagem</button>
+          </td>
+          <td>
+            <div class="editable-field" contenteditable="true" data-id="${produto.id}" data-field="nome">
+              ${produto.get("nome")}
+            </div>
+          </td>
+          <td>
+            <div class="editable-field" contenteditable="true" data-id="${produto.id}" data-field="preco">
+              R$ ${parseFloat(produto.get("preco")).toFixed(2)}
+            </div>
+          </td>
           <td>
             <button class="btn btn-edit" onclick="editProduct('${produto.id}')">Editar</button>
             <button class="btn btn-delete" onclick="deleteProduct('${produto.id}')">Excluir</button>
@@ -249,18 +303,110 @@
         `;
         tbody.appendChild(tr);
       });
+
+      // Atualização em tempo real
+      document.querySelectorAll('.editable-field').forEach(field => {
+        field.addEventListener('input', debounce(() => {
+          const id = field.dataset.id;
+          const fieldName = field.dataset.field;
+          const value = fieldName === "preco" 
+            ? parseFloat(field.textContent.replace('R$ ', '')) 
+            : field.textContent;
+          
+          updateProductField(id, fieldName, value);
+        }, 500));
+      });
     };
+
+    // Funções auxiliares
+    function debounce(func, timeout = 300) {
+      let timer;
+      return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => func.apply(this, args), timeout);
+      };
+    }
+
+    async function updateProductField(id, field, value) {
+      const query = new Parse.Query(Produto);
+      try {
+        const produto = await query.get(id);
+        produto.set(field, value);
+        await produto.save();
+      } catch (error) {
+        alert("Erro na atualização: " + error.message);
+      }
+    }
+
+    // Movimentação de produtos
+    window.moveProduct = async (id, direction) => {
+      const query = new Parse.Query(Produto);
+      const currentProduct = await query.get(id);
+      const currentOrder = currentProduct.get("ordemLoja");
+
+      const adjacentQuery = new Parse.Query(Produto);
+      adjacentQuery.equalTo("loja", currentLoja);
+      direction === 'up' 
+        ? adjacentQuery.lessThan("ordemLoja", currentOrder).descending("ordemLoja")
+        : adjacentQuery.greaterThan("ordemLoja", currentOrder).ascending("ordemLoja");
+      
+      const adjacentProduct = await adjacentQuery.first();
+
+      if (adjacentProduct) {
+        const swapOrder = adjacentProduct.get("ordemLoja");
+        currentProduct.set("ordemLoja", swapOrder);
+        adjacentProduct.set("ordemLoja", currentOrder);
+        await currentProduct.save();
+        await adjacentProduct.save();
+        loadProducts();
+      }
+    };
+
+    // Adicionar Produto
+    document.getElementById('productForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!currentLoja) {
+        alert("❌ Crie uma loja primeiro!");
+        return;
+      }
+
+      const productData = {
+        nome: document.getElementById('productName').value,
+        preco: parseFloat(document.getElementById('productPrice').value),
+        imagem: document.getElementById('productImage').files[0]
+      };
+
+      try {
+        const parseFile = new Parse.File(productData.imagem.name, productData.imagem);
+        await parseFile.save();
+
+        const novoProduto = new Produto();
+        novoProduto.set("nome", productData.nome);
+        novoProduto.set("preco", productData.preco);
+        novoProduto.set("imagens", [parseFile.url()]);
+        novoProduto.set("ordemLoja", (await new Parse.Query(Produto).count()) + 1);
+        novoProduto.set("loja", currentLoja);
+        await novoProduto.save();
+
+        currentLoja.add("produtos", novoProduto.id);
+        await currentLoja.save();
+
+        document.getElementById('productForm').reset();
+        document.getElementById('imagePreview').style.display = 'none';
+        loadProducts();
+      } catch (error) {
+        alert("Erro ao adicionar produto: " + error.message);
+      }
+    });
 
     // Deletar Produto
     window.deleteProduct = async (id) => {
       if (!confirm("Confirmar exclusão?")) return;
       
       try {
-        // Remover da lista da loja
         currentLoja.remove("produtos", id);
         await currentLoja.save();
         
-        // Deletar objeto do produto
         const query = new Parse.Query(Produto);
         const produto = await query.get(id);
         await produto.destroy();
@@ -270,49 +416,34 @@
         alert("Erro na exclusão: " + error.message);
       }
     };
-async function editProduct(id) {
-		window.location.href = `editar.html?id=${id}`;
-	}
-    // Evento de Formulário
-    document.getElementById('productForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-       if (!currentLoja) {
-       alert("❌ Você precisa criar uma loja antes de adicionar produtos!");
-       return;
-       }
-      const productData = {
-        nome: document.getElementById('productName').value,
-        preco: parseFloat(document.getElementById('productPrice').value),
-        imagem: document.getElementById('productImage').files[0]
+
+    // Adicionar Imagem
+    window.addImage = async (produtoId) => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        try {
+          const parseFile = new Parse.File(file.name, file);
+          await parseFile.save();
+          const query = new Parse.Query(Produto);
+          const produto = await query.get(produtoId);
+          const imagens = produto.get("imagens") || [];
+          imagens.push(parseFile.url());
+          produto.set("imagens", imagens);
+          await produto.save();
+          loadProducts();
+        } catch (error) {
+          alert("Erro ao adicionar imagem: " + error.message);
+        }
       };
+      input.click();
+    };
 
-      try {
-        // Upload da imagem
-        const parseFile = new Parse.File(productData.imagem.name, productData.imagem);
-        await parseFile.save();
-        const imageUrl = parseFile.url();
-        // Criar novo produto
-        const novoProduto = new Produto();
-        novoProduto.set("nome", productData.nome);
-        novoProduto.set("preco", productData.preco);
-        novoProduto.set("imagens", [imageUrl]);
-        novoProduto.set("loja", currentLoja);
-        await novoProduto.save();
-
-        // Atualizar loja
-        currentLoja.add("produtos", novoProduto.id);
-        await currentLoja.save();
-
-        // Resetar formulário
-        document.getElementById('productForm').reset();
-        document.getElementById('imagePreview').style.display = 'none';
-        loadProducts();
-      } catch (error) {
-        alert("Erro ao adicionar produto: " + error.message);
-      }
-    });
-
-    // Monitorar Estado de Autenticação
+    // Monitorar Autenticação
     auth.onAuthStateChanged(async (user) => {
       if (user) {
         await syncAuth(user);
