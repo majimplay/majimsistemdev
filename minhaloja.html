@@ -102,24 +102,6 @@
       border-radius: 4px;
       object-fit: cover;
     }
-      .image-container {
-      position: relative;
-      margin: 5px;
-    }
- .order-controls .btn {
-      margin: 2px;
-      padding: 4px 8px;
-      background: #2196F3;
-      color: white;
-    }
-     .reputacao-badge {
-      background: #4CAF50;
-      color: white;
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 0.9em;
-      margin-left: 10px;
-    }
   </style>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
@@ -138,9 +120,7 @@
   </div>
 
   <div class="store-header">
-   <h1 id="nomeLoja">Carregando...
-      <span id="reputacaoLoja" class="reputacao-badge">⭐ 0.0</span>
-    </h1>
+    <h1 id="nomeLoja">Carregando nome da loja...</h1>
   </div>
 
   <div class="admin-panel">
@@ -164,7 +144,6 @@
     <table id="productsTable">
       <thead>
         <tr>
-          <th>Ordem</th>
           <th>Imagem</th>
           <th>Produto</th>
           <th>Preço</th>
@@ -229,12 +208,10 @@
         currentLoja.set("nome", nomeLoja);
         currentLoja.set("dono", Parse.User.current());
         currentLoja.set("produtos", []);
-        currentLoja.set("reputacao", 0.0);
         await currentLoja.save();
       }
       
       document.getElementById('nomeLoja').textContent = currentLoja.get("nome");
-	//  <span class="reputacao-badge">⭐ ${currentLoja.get("reputacao").toFixed(1)}</span>
       loadProducts();
     };
 
