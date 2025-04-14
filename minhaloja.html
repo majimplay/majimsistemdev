@@ -390,24 +390,24 @@ async function editProduct(id) {
         reader.readAsDataURL(file);
       }
     });
-	  <script>
+	// drag-to-scroll dragging active
   const containers = document.querySelectorAll('.image-container');
   containers.forEach(container => {
     let isDown = false, startX, scrollLeft;
 
     container.addEventListener('mousedown', e => {
       isDown = true;
-      container.classList.add('active'); // opcional para styling
+      container.classList.add('dragging'); // opcional para styling
       startX = e.pageX - container.offsetLeft;
       scrollLeft = container.scrollLeft;
     });
     container.addEventListener('mouseleave', () => {
       isDown = false;
-      container.classList.remove('active');
+      container.classList.remove('dragging');
     });
     container.addEventListener('mouseup', () => {
       isDown = false;
-      container.classList.remove('active');
+      container.classList.remove('dragging');
     });
     container.addEventListener('mousemove', e => {
       if (!isDown) return;
