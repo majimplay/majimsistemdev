@@ -49,6 +49,7 @@
 
     table {
       width: 100%;
+      table-layout: fixed;
       border-collapse: collapse;
       margin: 2rem 0;
     }
@@ -57,10 +58,18 @@
       padding: 1rem;
       text-align: left;
       border-bottom: 1px solid #ddd;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     th { background: #f8f9fa; }
     tr:hover { background: #f9f9f9; }
+
+    /* Definindo larguras proporcionais */
+    .image-cell { width: 80%; }
+    .text-cell { width: 10%; }
+    .actions-cell { width: 10%; }
 
     input[type="text"], input[type="number"] {
       padding: 8px;
@@ -97,52 +106,32 @@
       display: block !important;
     }
 
-.product-image {
-  height: 50px;
-  width: 50px;
-  min-width: 50px; /* Impede redução de tamanho */
-  border-radius: 4px;
-  object-fit: cover;
-  border: 1px solid #ddd;
-}
-    
-table {
-  table-layout: fixed;
-}
+    .product-image {
+      height: 50px;
+      width: 50px;
+      min-width: 50px;
+      border-radius: 4px;
+      object-fit: cover;
+      border: 1px solid #ddd;
+    }
 
-.image-cell {
-  width: 40%;
-  min-width: 200px;
-}
-
-.actions-cell {
-  width: 150px;
-}
-
-.image-container {
+ .image-container {
   display: flex;
+  flex-direction: row;
   gap: 8px;
-  flex-wrap: wrap;
-  max-height: 150px;
-  overflow-y: auto;
+  overflow-x: auto;      /* rolagem horizontal */
+  overflow-y: hidden;    /* esconde rolagem vertical */
   padding: 4px 0;
+  white-space: nowrap;    /* garante uma linha única */
+  cursor: grab;          /* cursor de arraste */
 }
 
-.actions-container {
+   .actions-container {
   display: flex;
+  flex-direction: column; /* empilha verticalmente */
   gap: 8px;
-  flex-wrap: nowrap;
+  align-items: flex-start; /* alinha à esquerda */
 }
-
-/* Garantir que as células de texto não quebrem */
-td:not(.image-cell) {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-
-	  
   </style>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
@@ -185,10 +174,10 @@ td:not(.image-cell) {
     <table id="productsTable">
       <thead>
         <tr>
-          <th>Imagem</th>
-          <th>Produto</th>
-          <th>Preço</th>
-          <th>Ações</th>
+          <th class="image-cell">Imagem</th>
+          <th class="text-cell">Produto</th>
+          <th class="text-cell">Preço</th>
+          <th class="actions-cell">Ações</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -286,8 +275,8 @@ const updateTable = (produtos) => {
           ).join('')}
         </div>
       </td>
-      <td>${produto.get("nome")}</td>
-      <td>R$ ${produto.get("preco").toFixed(2)}</td>
+      <td class="text-cell">${produto.get("nome")}</td>
+      <td class="text-cell">R$ ${produto.get("preco").toFixed(2)}</td>
       <td class="actions-cell">
         <div class="actions-container">
           <button class="btn btn-edit" onclick="editProduct('${produto.id}')">Editar</button>
@@ -319,7 +308,7 @@ const updateTable = (produtos) => {
       }
     };
 async function editProduct(id) {
-		window.location.href = `editar.html?id=${id}`;
+	window.location.href = `editar.html?id=${id}`;
 	}
     // Evento de Formulário
     document.getElementById('productForm').addEventListener('submit', async (e) => {
@@ -401,6 +390,33 @@ async function editProduct(id) {
         reader.readAsDataURL(file);
       }
     });
+	// drag-to-scroll dragging active
+  const containers = document.querySelectorAll('.image-container');
+  containers.forEach(container => {
+    let isDown = false, startX, scrollLeft;
+
+    container.addEventListener('mousedown', e => {
+      isDown = true;
+      container.classList.add('dragging'); // opcional para styling
+      startX = e.pageX - container.offsetLeft;
+      scrollLeft = container.scrollLeft;
+    });
+    container.addEventListener('mouseleave', () => {
+      isDown = false;
+      container.classList.remove('dragging');
+    });
+    container.addEventListener('mouseup', () => {
+      isDown = false;
+      container.classList.remove('dragging');
+    });
+    container.addEventListener('mousemove', e => {
+      if (!isDown) return;
+      e.preventDefault();
+      const x = e.pageX - container.offsetLeft;
+      const walk = (x - startX) * 1; // 1 = sensibilidade
+      container.scrollLeft = scrollLeft - walk;
+    });
+  });
   </script>
 </body>
 </html>
