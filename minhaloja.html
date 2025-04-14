@@ -207,25 +207,28 @@
     const auth = firebase.auth();
     let currentLoja = null;
 
-    // Sincronização de autenticação
-    const syncAuth = async (user) => {
+   // Monitorar estado de autenticação
+    auth.onAuthStateChanged(async (user) => {
       if (user) {
         try {
-          await Parse.User.logIn(user.uid, user.uid);
-          await checkOrCreateLoja(user);
+          // Sincronizar com Parse usando credenciais do Firebase
+          if (!Parse.User.current()) {
+            await Parse.User.logIn(user.uid, user.uid);
+          }
+          await checkOrCreateLoja();
+          updateHeader(user);
+          loadProducts();
         } catch (error) {
-          const parseUser = new Parse.User();
-          parseUser.set('username', user.uid);
-          parseUser.set('password', user.uid);
-          parseUser.set('email', user.email);
-          await parseUser.signUp();
-          await checkOrCreateLoja(user);
+          alert("Erro de acesso: " + error.message);
+          window.location.href = 'index.html';
         }
+      } else {
+        window.location.href = 'index.html';
       }
-    };
+    });
 
-    // Verificar/Criar Loja
-    const checkOrCreateLoja = async (user) => {
+  // Verificar/Criar Loja
+    const checkOrCreateLoja = async () => {
       const query = new Parse.Query(Loja);
       query.equalTo("dono", Parse.User.current());
       
@@ -239,13 +242,12 @@
         currentLoja.set("nome", nomeLoja);
         currentLoja.set("dono", Parse.User.current());
         currentLoja.set("produtos", []);
-	 currentLoja.set("reputacao", 0);      // <<< inicializa reputação
+        currentLoja.set("reputacao", 0);
         await currentLoja.save();
       }
       
       document.getElementById('nomeLoja').textContent = currentLoja.get("nome");
       document.getElementById('reputacaoLoja').textContent = "Reputação: " + currentLoja.get("reputacao");
-      loadProducts();
     };
 
     // Carregar Produtos
@@ -369,7 +371,7 @@ async function editProduct(id) {
       document.getElementById('userEmail').textContent = user.email;
     }
 
-    // Logout
+  // Logout atualizado
     document.getElementById('logoutBtn').addEventListener('click', async () => {
       try {
         await auth.signOut();
