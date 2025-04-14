@@ -115,20 +115,23 @@
       border: 1px solid #ddd;
     }
 
-    .image-container {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      max-height: 50px;
-      overflow-y: auto;
-      padding: 4px 0;
-    }
+   .image-container {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  overflow-x: auto;      /* rolagem horizontal */
+  overflow-y: hidden;    /* esconde rolagem vertical */
+  padding: 4px 0;
+  white-space: nowrap;    /* garante uma linha única */
+  cursor: grab;          /* cursor de arraste */
+}
 
-    .actions-container {
-      display: flex;
-      gap: 8px;
-      flex-wrap: nowrap;
-    }
+  .actions-container {
+  display: flex;
+  flex-direction: column; /* empilha verticalmente */
+  gap: 8px;
+  align-items: flex-start; /* alinha à esquerda */
+}
   </style>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
@@ -387,6 +390,33 @@ async function editProduct(id) {
         reader.readAsDataURL(file);
       }
     });
+//                                  dragavel 
+	  const containers = document.querySelectorAll('.image-container');
+  containers.forEach(container => {
+    let isDown = false, startX, scrollLeft;
+
+    container.addEventListener('mousedown', e => {
+      isDown = true;
+      container.classList.add('active'); // opcional para styling
+      startX = e.pageX - container.offsetLeft;
+      scrollLeft = container.scrollLeft;
+    });
+    container.addEventListener('mouseleave', () => {
+      isDown = false;
+      container.classList.remove('active');
+    });
+    container.addEventListener('mouseup', () => {
+      isDown = false;
+      container.classList.remove('active');
+    });
+    container.addEventListener('mousemove', e => {
+      if (!isDown) return;
+      e.preventDefault();
+      const x = e.pageX - container.offsetLeft;
+      const walk = (x - startX) * 1; // 1 = sensibilidade
+      container.scrollLeft = scrollLeft - walk;
+    });
+  });  
   </script>
 </body>
 </html>
