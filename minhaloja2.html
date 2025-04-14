@@ -151,6 +151,7 @@
 
   <div class="store-header">
     <h1 id="nomeLoja">Carregando nome da loja...</h1>
+	    <p id="reputacaoLoja">Reputação: 0</p>
   </div>
 
   <div class="admin-panel">
@@ -238,10 +239,12 @@
         currentLoja.set("nome", nomeLoja);
         currentLoja.set("dono", Parse.User.current());
         currentLoja.set("produtos", []);
+	 currentLoja.set("reputacao", 0);      // <<< inicializa reputação
         await currentLoja.save();
       }
       
       document.getElementById('nomeLoja').textContent = currentLoja.get("nome");
+      document.getElementById('reputacaoLoja').textContent = "Reputação: " + currentLoja.get("reputacao");
       loadProducts();
     };
 
