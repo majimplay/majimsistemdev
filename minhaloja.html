@@ -238,6 +238,7 @@
         currentLoja.set("nome", nomeLoja);
         currentLoja.set("dono", Parse.User.current());
         currentLoja.set("produtos", []);
+	 currentLoja.set("reputacao", 0);      // <<< inicializa reputação
         await currentLoja.save();
       }
       
