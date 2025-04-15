@@ -137,7 +137,14 @@
   margin: 2px;
   padding: 4px 8px;
 }
+	  setas-cell
   .actions-container {
+  display: flex;
+  flex-direction: column; /* empilha verticalmente */
+  gap: 8px;
+  align-items: flex-start; /* alinha à esquerda */
+}
+	   .setas-cell {
   display: flex;
   flex-direction: column; /* empilha verticalmente */
   gap: 8px;
@@ -190,7 +197,7 @@
           <th class="text-cell">Produto</th>
           <th class="text-cell">Preço</th>
           <th class="actions-cell">Ações</th>
-		 <th>Ordem</th>
+	  <th class="setas-cell">-><-</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -286,10 +293,7 @@ const updateTable = (produtos) => {
   produtos.forEach(produto => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
-    	  <td>
-          <button class="btn btn-up" onclick="moveProductUp('${produto.id}')">↑</button>
-          <button class="btn btn-down" onclick="moveProductDown('${produto.id}')">↓</button>
-	   </td>
+
       <td class="image-cell">
         <div class="image-container">
           ${produto.get("imagens").map(url => 
@@ -306,6 +310,10 @@ const updateTable = (produtos) => {
           <button class="btn btn-edit" onclick="editProduct('${produto.id}')">Editar</button>
           <button class="btn btn-delete" onclick="deleteProduct('${produto.id}')">Excluir</button>
            </td>
+	   <td>
+          <button class="btn btn-up" onclick="moveProductUp('${produto.id}')">↑</button>
+          <button class="btn btn-down" onclick="moveProductDown('${produto.id}')">↓</button>
+	   </td>
    
         </div>
       </td>
