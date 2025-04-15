@@ -69,9 +69,9 @@
    /* Definindo larguras proporcionais */
 
 .image-cell   { width: 60%; }
-.text-cell    { width: 15%; }
+.text-cell    { width: 10%; }
 .setas-cell   { width: 10%; text-align: center; }
-.actions-cell { width: 15%; }
+.actions-cell { width: 20%; } /* Aumente a largura se necessário */
 
     input[type="text"], input[type="number"] {
       padding: 8px;
@@ -131,16 +131,19 @@
   cursor: grab;          /* cursor de arraste */
 }
 /* Botões de setas */
-.btn-up, .btn-down {
-  margin: 2px;
-  padding: 4px 8px;
+.btn-edit, .btn-delete {
+  padding: 8px 12px;
+  flex-shrink: 0; /* Impede que os botões encolham */
 }
 .actions-cell {
+  width: 15%;
   display: flex;
-  gap: 4px;
+  gap: 8px; /* Aumente o espaço entre os botões */
   justify-content: center;
   align-items: center;
+  flex-wrap: nowrap; /* Impede a quebra de linha */
 }
+
   .actions-container {
   display: flex;
   flex-direction: column; /* empilha verticalmente */
