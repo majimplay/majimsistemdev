@@ -68,7 +68,7 @@
 
    /* Definindo larguras proporcionais */
 
-.image-cell   { width: 60%; }
+.image-cell   { width: 30%; }
 .text-cell    { width: 10%; }
 .setas-cell   { width: 10%; text-align: center; }
 .actions-cell { width: 20%; } /* Aumente a largura se necessário */
@@ -143,7 +143,7 @@
   gap: 8px;
   padding: 1rem;
 }
-	/* Coluna de setas centralizada */
+	
 .setas-cell {
 	 width: 10%;
  display: flex;
@@ -201,9 +201,10 @@
 <table id="productsTable">
   <thead>
     <tr>
-      <th>Imagem</th>
-      <th>Produto</th>
-      <th>Preço</th>
+
+      <th class="image-cell">Imagem</th>
+      <th class="text-cell">Produto</th>
+      <th class="text-cell">Preço</th>
      <th class="actions-cell">Ações</th>
     <th class="setas-cell">Posição</th>
     </tr>
