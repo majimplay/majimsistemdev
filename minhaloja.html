@@ -91,8 +91,8 @@
       transition: 0.3s;
     }
 
-    .btn-edit { background: #4CAF50; color: white; }
-    .btn-delete { background: #f44336; color: white; }
+    .btn-edit { background: #4CAF50; color: white;   width: 100%; /* Ocupa toda a largura da célula */ padding: 8px 12px;  margin: 2px 0;}
+    .btn-delete { background: #f44336; color: white;   width: 100%; /* Ocupa toda a largura da célula */ padding: 8px 12px; margin: 2px 0;}
     .btn:hover { opacity: 0.9; }
 
     .image-upload input[type="file"] { display: none; }
@@ -131,31 +131,33 @@
   cursor: grab;          /* cursor de arraste */
 }
 /* Botões de setas */
-.btn-edit, .btn-delete {
-  padding: 8px 12px;
-  flex-shrink: 0; /* Impede que os botões encolham */
+.btn-up, .btn-down {
+  width: 100%;
+  padding: 8px 0;
+  margin: 2px 0;
 }
 .actions-cell {
-  width: 15%;
+  width: 20%;
   display: flex;
-  gap: 8px; /* Aumente o espaço entre os botões */
-  justify-content: center;
-  align-items: center;
-  flex-wrap: nowrap; /* Impede a quebra de linha */
+  flex-direction: column; /* Empilha verticalmente */
+  gap: 8px;
+  padding: 1rem;
 }
-
+	/* Coluna de setas centralizada */
+.setas-cell {
+	 width: 10%;
+ display: flex;
+  flex-direction: column; /* Empilha verticalmente */
+  gap: 8px;
+  padding: 1rem;
+}
   .actions-container {
   display: flex;
   flex-direction: column; /* empilha verticalmente */
   gap: 8px;
 
 }
-	/* Coluna de setas centralizada */
-.setas-cell {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
+
   </style>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
