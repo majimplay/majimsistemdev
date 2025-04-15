@@ -310,6 +310,12 @@ tr.innerHTML = `
   </td>
   <td class="text-cell">${produto.get("nome")}</td>
   <td class="text-cell">R$ ${produto.get("preco").toFixed(2)}</td>
+  <!-- Coluna das setas -->
+  <td class="setas-cell">
+    <button class="btn-up"   onclick="moveProductUp('${produto.id}')">↑</button>
+    <button class="btn-down" onclick="moveProductDown('${produto.id}')">↓</button>
+  </td>
+`;
 
   <!-- Coluna de editar/excluir -->
   <td class="actions-cell">
@@ -317,12 +323,6 @@ tr.innerHTML = `
     <button class="btn btn-delete" onclick="deleteProduct('${produto.id}')">Excluir</button>
   </td>
 
-  <!-- Coluna das setas -->
-  <td class="setas-cell">
-    <button class="btn-up"   onclick="moveProductUp('${produto.id}')">↑</button>
-    <button class="btn-down" onclick="moveProductDown('${produto.id}')">↓</button>
-  </td>
-`;
 
     tbody.appendChild(tr);
   });
