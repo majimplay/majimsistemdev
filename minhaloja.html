@@ -6,12 +6,12 @@
   <style>
     /* Reset básico e fontes */
     body {
-      font-family: 'Segoe UI', sans-serif; /* Fonte mais moderna */
-      background-color: #f0f2f5; /* Fundo suave */
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f0f2f5;
       margin: 0;
       padding: 20px;
-      color: #333; /* Cor de texto padrão */
-      line-height: 1.6; /* Espaçamento entre linhas */
+      color: #333;
+      line-height: 1.6;
     }
 
     /* Cabeçalho do Perfil */
@@ -19,10 +19,10 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 1rem 1.5rem; /* Mais padding */
+      padding: 1rem 1.5rem;
       background-color: white;
-      border-radius: 12px; /* Bordas mais arredondadas */
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08); /* Sombra mais suave */
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
       margin-bottom: 2rem;
     }
 
@@ -31,23 +31,23 @@
       height: 60px;
       border-radius: 50%;
       object-fit: cover;
-      border: 3px solid #007BFF; /* Borda mais destacada */
+      border: 3px solid #007BFF;
       margin-right: 1rem;
     }
 
     .profile-info h1, .profile-info p {
-        margin: 0; /* Remove margens padrão */
+        margin: 0;
         line-height: 1.3;
     }
 
     .profile-info h1 {
-        font-size: 1.4rem; /* Tamanho do nome */
-        color: #1c1e21; /* Cor mais escura */
+        font-size: 1.4rem;
+        color: #1c1e21;
     }
 
      .profile-info p {
-        font-size: 0.9rem; /* Tamanho do email */
-        color: #606770; /* Cor cinza para o email */
+        font-size: 0.9rem;
+        color: #606770;
     }
 
     /* Cabeçalho da Loja */
@@ -57,18 +57,18 @@
         border-radius: 12px;
         box-shadow: 0 4px 12px rgba(0,0,0,0.08);
         margin-bottom: 2rem;
-        text-align: center; /* Centraliza o conteúdo */
+        text-align: center;
     }
 
     .store-header h1 {
-        margin: 0 0 0.5rem 0; /* Espaçamento abaixo do nome */
-        color: #007BFF; /* Cor azul */
+        margin: 0 0 0.5rem 0;
+        color: #007BFF;
         font-size: 1.8rem;
     }
 
     .store-header p {
         margin: 0;
-        color: #606770; /* Cor cinza para reputação */
+        color: #606770;
         font-size: 1rem;
     }
 
@@ -84,7 +84,7 @@
         margin-top: 0;
         margin-bottom: 1.5rem;
         color: #333;
-        border-bottom: 1px solid #eee; /* Linha separadora */
+        border-bottom: 1px solid #eee;
         padding-bottom: 0.8rem;
     }
 
@@ -93,104 +93,116 @@
       width: 100%;
       border-collapse: collapse;
       margin: 2rem 0;
-      table-layout: fixed; /* Ajuda a controlar largura das colunas */
+      table-layout: fixed;
     }
 
     th, td {
-      padding: 1rem 0.8rem; /* Ajuste no padding */
+      padding: 1rem 0.8rem;
       text-align: left;
-      border-bottom: 1px solid #e0e0e0; /* Linha mais suave */
-      vertical-align: middle; /* Alinha conteúdo verticalmente */
-       /* Evita quebra de linha e adiciona '...' */
+      border-bottom: 1px solid #e0e0e0;
+      vertical-align: middle;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
     th {
-      background-color: #f8f9fa; /* Fundo leve para cabeçalho */
-      font-weight: 600; /* Fonte mais forte */
+      background-color: #f8f9fa;
+      font-weight: 600;
       color: #495057;
     }
 
     tr:hover {
-      background-color: #f1f1f1; /* Destaque suave ao passar o mouse */
+      background-color: #f1f1f1;
     }
 
     /* Larguras das colunas */
-    .image-cell { width: 55%; } /* Mais espaço para imagens */
+    .image-cell { width: 45%; } /* Ajustado */
     .text-cell { width: 15%; }
-    .actions-cell { width: 15%; text-align: center;} /* Ações centralizadas */
+    .order-cell { width: 10%; text-align: center; } /* Nova coluna Ordem */
+    .actions-cell { width: 15%; text-align: center;}
 
     /* Imagens na Tabela */
     .product-image {
       height: 50px;
       width: 50px;
-      min-width: 50px; /* Garante largura mínima */
-      border-radius: 6px; /* Bordas arredondadas */
+      min-width: 50px;
+      border-radius: 6px;
       object-fit: cover;
       border: 1px solid #ddd;
-      margin-right: 5px; /* Espaço entre imagens */
-      vertical-align: middle; /* Alinha com o texto */
+      margin-right: 5px;
+      vertical-align: middle;
     }
 
     /* Contêiner de Imagens com Rolagem */
     .image-container {
-      display: flex; /* Organiza imagens lado a lado */
-      flex-wrap: nowrap; /* Impede quebra de linha */
-      overflow-x: auto; /* Habilita rolagem horizontal */
-      overflow-y: hidden; /* Esconde rolagem vertical */
-      padding: 5px 0; /* Pequeno padding vertical */
-      gap: 8px; /* Espaço entre as imagens */
-      cursor: grab; /* Indica que pode arrastar */
-      -webkit-overflow-scrolling: touch; /* Rolagem suave em iOS */
-      scrollbar-width: thin; /* Barra de rolagem fina (Firefox) */
-      scrollbar-color: #ccc #f0f0f0; /* Cor da barra de rolagem (Firefox) */
-    }
-
-    /* Estilo da barra de rolagem (Webkit - Chrome, Safari) */
-    .image-container::-webkit-scrollbar {
-      height: 6px; /* Altura da barra */
-    }
-    .image-container::-webkit-scrollbar-track {
-      background: #f0f0f0; /* Fundo da barra */
-      border-radius: 3px;
-    }
-    .image-container::-webkit-scrollbar-thumb {
-      background-color: #ccc; /* Cor do 'polegar' da barra */
-      border-radius: 3px;
-    }
-     .image-container::-webkit-scrollbar-thumb:hover {
-        background-color: #aaa; /* Cor ao passar o mouse */
-    }
-
-    /* Contêiner de Ações */
-    .actions-container {
       display: flex;
-      flex-direction: column; /* Botões empilhados */
-      gap: 8px; /* Espaço entre botões */
-      align-items: center; /* Centraliza botões */
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 5px 0;
+      gap: 8px;
+      cursor: grab;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+      scrollbar-color: #ccc #f0f0f0;
     }
+    .image-container::-webkit-scrollbar { height: 6px; }
+    .image-container::-webkit-scrollbar-track { background: #f0f0f0; border-radius: 3px; }
+    .image-container::-webkit-scrollbar-thumb { background-color: #ccc; border-radius: 3px; }
+    .image-container::-webkit-scrollbar-thumb:hover { background-color: #aaa; }
+
+     /* Contêiner de Ordem e Ações */
+    .order-container, .actions-container {
+      display: flex;
+      flex-direction: column; /* Itens empilhados */
+      gap: 8px;
+      align-items: center; /* Centraliza itens */
+      justify-content: center; /* Centraliza verticalmente */
+      height: 100%; /* Ocupa altura da célula */
+    }
+
+    /* Botões de Ordenação */
+    .btn-order {
+      background-color: #6c757d; /* Cinza */
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 4px 8px; /* Menor padding */
+      cursor: pointer;
+      font-size: 0.8rem; /* Tamanho menor */
+      line-height: 1; /* Ajuste linha */
+      transition: background-color 0.2s ease;
+    }
+    .btn-order:hover:not(:disabled) {
+       background-color: #5a6268;
+    }
+    .btn-order:disabled {
+        background-color: #adb5bd; /* Cinza mais claro para desabilitado */
+        cursor: not-allowed;
+        opacity: 0.7;
+    }
+
 
     /* Formulário */
     #productForm {
         display: flex;
-        flex-wrap: wrap; /* Permite quebra de linha em telas menores */
-        gap: 1rem; /* Espaçamento entre elementos */
-        align-items: flex-end; /* Alinha itens na base */
+        flex-wrap: wrap;
+        gap: 1rem;
+        align-items: flex-end;
         margin-bottom: 2rem;
-        padding: 1.5rem; /* Padding interno */
-        background-color: #f8f9fa; /* Fundo leve */
+        padding: 1.5rem;
+        background-color: #f8f9fa;
         border-radius: 8px;
     }
 
     input[type="text"], input[type="number"] {
-      padding: 10px 12px; /* Mais padding interno */
+      padding: 10px 12px;
       border: 1px solid #ccc;
-      border-radius: 6px; /* Bordas arredondadas */
+      border-radius: 6px;
       font-size: 0.95rem;
-      flex-grow: 1; /* Permite que campos cresçam */
-      min-width: 150px; /* Largura mínima */
+      flex-grow: 1;
+      min-width: 150px;
     }
 
     /* Upload de Imagem */
@@ -200,112 +212,74 @@
         gap: 0.8rem;
     }
 
-    .image-upload input[type="file"] {
-      display: none; /* Esconde o input original */
-    }
+    .image-upload input[type="file"] { display: none; }
 
     .upload-label {
-      background-color: #2196F3; /* Azul */
+      background-color: #2196F3;
       color: white;
       padding: 10px 15px;
       border-radius: 6px;
       cursor: pointer;
       transition: background-color 0.3s ease;
       font-size: 0.9rem;
-      display: inline-flex; /* Para alinhar ícone e texto */
+      display: inline-flex;
       align-items: center;
       gap: 5px;
     }
-
-    .upload-label:hover {
-      background-color: #1976D2; /* Azul mais escuro */
-    }
+    .upload-label:hover { background-color: #1976D2; }
 
     #imagePreview {
-      max-height: 50px; /* Altura da miniatura */
+      max-height: 50px;
       max-width: 50px;
-      margin: 0; /* Remove margem padrão */
+      margin: 0;
       border-radius: 4px;
       border: 1px solid #ddd;
-      display: none; /* Começa escondida */
+      display: none;
       object-fit: cover;
     }
 
-    /* Botões */
+    /* Botões Gerais */
     .btn {
-      padding: 10px 18px; /* Mais padding */
+      padding: 10px 18px;
       border: none;
       border-radius: 6px;
       cursor: pointer;
-      transition: all 0.3s ease; /* Transição suave */
+      transition: all 0.3s ease;
       font-size: 0.9rem;
-      font-weight: 500; /* Peso da fonte */
+      font-weight: 500;
       display: inline-flex;
       align-items: center;
-      gap: 5px; /* Espaço entre ícone e texto */
-      text-transform: uppercase; /* Texto em maiúsculas */
-      letter-spacing: 0.5px; /* Espaçamento entre letras */
+      gap: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+     .btn:disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
     }
 
-    .btn-edit {
-      background-color: #4CAF50; /* Verde */
-      color: white;
-    }
-    .btn-edit:hover {
-      background-color: #45a049; /* Verde mais escuro */
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Sombra no hover */
-    }
+    .btn-edit { background-color: #4CAF50; color: white; }
+    .btn-edit:hover:not(:disabled) { background-color: #45a049; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
 
-    .btn-delete {
-      background-color: #f44336; /* Vermelho */
-      color: white;
-    }
-    .btn-delete:hover {
-      background-color: #e53935; /* Vermelho mais escuro */
-       box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    }
+    .btn-delete { background-color: #f44336; color: white; }
+    .btn-delete:hover:not(:disabled) { background-color: #e53935; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
 
-    .btn-secondary { /* Botão Sair */
-      background-color: #6c757d; /* Cinza */
-      color: white;
-    }
-    .btn-secondary:hover {
-      background-color: #5a6268; /* Cinza mais escuro */
-       box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    }
+    .btn-secondary { background-color: #6c757d; color: white; }
+    .btn-secondary:hover:not(:disabled) { background-color: #5a6268; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
 
-    /* Responsividade básica */
+    /* Responsividade */
     @media (max-width: 768px) {
-        .profile-header {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 1rem;
-        }
-        #productForm {
-            flex-direction: column;
-            align-items: stretch; /* Estica itens no modo coluna */
-        }
-        input[type="text"], input[type="number"], .image-upload, .btn {
-            width: 100%; /* Ocupa largura total */
-            box-sizing: border-box; /* Inclui padding na largura */
-        }
-        .actions-cell {
-            text-align: left; /* Alinha ações à esquerda em telas pequenas */
-        }
-        .actions-container {
-            flex-direction: row; /* Botões lado a lado se couber */
-            flex-wrap: wrap; /* Quebra linha se não couber */
-             align-items: center;
-             justify-content: flex-start;
-        }
-        th, td {
-            white-space: normal; /* Permite quebra de linha */
-            overflow: visible;
-            text-overflow: clip;
-        }
-        .image-cell { width: auto; } /* Remove largura fixa */
-        .text-cell { width: auto; }
-        .actions-cell { width: auto;}
+        .profile-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+        #productForm { flex-direction: column; align-items: stretch; }
+        input[type="text"], input[type="number"], .image-upload, .btn { width: 100%; box-sizing: border-box; }
+        .actions-cell, .order-cell { text-align: left; } /* Alinha à esquerda */
+        .actions-container, .order-container { flex-direction: row; flex-wrap: wrap; justify-content: flex-start; } /* Lado a lado */
+        th, td { white-space: normal; overflow: visible; text-overflow: clip; }
+        .image-cell, .text-cell, .actions-cell, .order-cell { width: auto; } /* Largura automática */
+
+        /* Ajuste fino para botões em telas pequenas */
+        .order-container .btn-order { padding: 6px 10px; font-size: 0.9rem; }
+        .actions-container .btn { padding: 8px 12px; }
     }
 
   </style>
@@ -337,7 +311,7 @@
       <input type="text" id="productName" placeholder="Nome do Produto" required>
       <input type="number" id="productPrice" step="0.01" placeholder="Preço (R$)" required>
       <div class="image-upload">
-         <img id="imagePreview" src="" alt="Miniatura">
+        <img id="imagePreview" src="" alt="Miniatura">
         <label class="upload-label">
           📷 Escolher Imagem
           <input type="file" id="productImage" accept="image/*" required>
@@ -352,7 +326,7 @@
           <th class="image-cell">Imagens</th>
           <th class="text-cell">Produto</th>
           <th class="text-cell">Preço</th>
-          <th class="actions-cell">Ações</th>
+          <th class="order-cell">Ordem</th> <th class="actions-cell">Ações</th>
         </tr>
       </thead>
       <tbody>
@@ -363,206 +337,210 @@
   <script>
     // --- Configurações ---
     const firebaseConfig = {
-      apiKey: "AIzaSyDlUQbbTP29VqBVmzOGHhfc67R1DTRPwxg", // ATENÇÃO: Considere mover para variáveis de ambiente
+      apiKey: "AIzaSyDlUQbbTP29VqBVmzOGHhfc67R1DTRPwxg", // ATENÇÃO: Mover para variáveis de ambiente
       authDomain: "gitautenticatio.firebaseapp.com",
       projectId: "gitautenticatio",
       storageBucket: "gitautenticatio.appspot.com",
       messagingSenderId: "21514234895",
       appId: "1:21514234895:web:d34dc4c44baf586d2cc77a"
     };
-
-    // Chaves do Back4App (Parse)
-    // ATENÇÃO: Considere mover para variáveis de ambiente ou Cloud Code
-    Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
+    Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I"); // ATENÇÃO: Mover para variáveis de ambiente
     Parse.serverURL = "https://parseapi.back4app.com/";
 
-    // Definição das Classes (Tabelas) do Parse
     const Produto = Parse.Object.extend("Produto");
     const Loja = Parse.Object.extend("Loja");
 
     // --- Inicialização ---
     const app = firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
-    let currentLoja = null; // Variável para armazenar a loja atual do usuário
+    let currentLoja = null;
+    let isLoadingProducts = false; // Flag para evitar múltiplas chamadas
 
     // --- Lógica Principal ---
-
-    // Monitora o estado de autenticação do Firebase
     auth.onAuthStateChanged(async (user) => {
       if (user) {
-        // Usuário está logado
-        console.log("Usuário autenticado:", user.uid); // Log de autenticação
+        console.log("Usuário autenticado:", user.uid);
         try {
-          // Tenta logar no Parse usando o UID do Firebase como username e password
           if (!Parse.User.current()) {
-             console.log("Tentando login no Parse..."); // Log de tentativa de login Parse
-             // Tenta fazer login. Se falhar (usuário não existe), tenta cadastrar.
+             console.log("Tentando login no Parse...");
             try {
                 await Parse.User.logIn(user.uid, user.uid);
-                console.log("Login no Parse bem-sucedido."); // Log de sucesso login Parse
+                console.log("Login no Parse bem-sucedido.");
             } catch (loginError) {
-                // Se o login falhar (provavelmente usuário não existe no Parse)
                 if (loginError.code === Parse.Error.OBJECT_NOT_FOUND) {
-                    console.log("Usuário não encontrado no Parse. Tentando cadastrar..."); // Log de cadastro
+                    console.log("Usuário não encontrado no Parse. Tentando cadastrar...");
                     const newUser = new Parse.User();
                     newUser.set("username", user.uid);
-                    newUser.set("password", user.uid); // Use o UID como senha inicial
-                    newUser.set("email", user.email); // Opcional: salvar email
-                    newUser.set("firebaseUID", user.uid); // Link explícito
-
+                    newUser.set("password", user.uid);
+                    newUser.set("email", user.email);
+                    newUser.set("firebaseUID", user.uid);
                     try {
                         await newUser.signUp();
-                        console.log("Novo usuário cadastrado e logado no Parse."); // Log de sucesso cadastro Parse
+                        console.log("Novo usuário cadastrado e logado no Parse.");
                     } catch (signUpError) {
-                        console.error("Erro ao cadastrar usuário no Parse:", signUpError); // Log de erro cadastro
-                        alert("Erro crítico ao sincronizar contas. Tente novamente mais tarde.");
-                        // Forçar logout se não conseguir sincronizar
-                        await auth.signOut();
-                        return; // Interrompe a execução
+                        console.error("Erro ao cadastrar usuário no Parse:", signUpError);
+                        alert("Erro crítico ao sincronizar contas.");
+                        await auth.signOut(); return;
                     }
                 } else {
-                    // Outro erro de login no Parse
-                    console.error("Erro ao fazer login no Parse:", loginError); // Log de erro login
-                    alert("Erro ao acessar sua conta no sistema. Tente novamente.");
-                     await auth.signOut(); // Força logout em caso de erro inesperado
-                    return; // Interrompe
+                    console.error("Erro ao fazer login no Parse:", loginError);
+                    alert("Erro ao acessar sua conta no sistema.");
+                     await auth.signOut(); return;
                 }
             }
           } else {
-            console.log("Sessão Parse já existente."); // Log sessão existente
+            console.log("Sessão Parse já existente.");
           }
 
-          // Após garantir login no Parse, verifica/cria a loja
           await checkOrCreateLoja();
-          // Atualiza o cabeçalho da página com dados do usuário
           updateHeader(user);
-          // Carrega os produtos da loja atual
-          if (currentLoja) { // Só carrega produtos se a loja foi definida
-             loadProducts(); // Chama o carregamento de produtos
+          if (currentLoja) {
+             loadProducts();
           }
 
         } catch (error) {
-          // Captura erros gerais durante o processo de login/verificação
-          console.error("Erro durante a inicialização do usuário:", error); // Log de erro geral
+          console.error("Erro durante a inicialização do usuário:", error);
           alert("Ocorreu um erro ao carregar seus dados: " + error.message);
-          // Redireciona para a página de login em caso de erro grave
           window.location.href = 'index.html';
         }
       } else {
-        // Usuário não está logado, redireciona para a página de login
-        console.log("Usuário não autenticado. Redirecionando para login."); // Log usuário não autenticado
+        console.log("Usuário não autenticado. Redirecionando para login.");
         window.location.href = 'index.html';
       }
     });
 
-    // Verifica se o usuário atual já tem uma loja; se não, pede para criar uma
     const checkOrCreateLoja = async () => {
       const currentUser = Parse.User.current();
       if (!currentUser) {
-          console.error("Tentativa de verificar loja sem usuário Parse logado."); // Log erro usuário Parse
-          alert("Erro: Usuário não sincronizado. Por favor, recarregue a página.");
-          return; // Interrompe
+          console.error("Tentativa de verificar loja sem usuário Parse logado.");
+          alert("Erro: Usuário não sincronizado."); return;
       }
-
       const query = new Parse.Query(Loja);
-      // Busca a loja onde o campo 'dono' é um ponteiro para o usuário atual
       query.equalTo("dono", currentUser);
-
       try {
-          currentLoja = await query.first(); // Tenta encontrar a loja
-
+          currentLoja = await query.first();
           if (!currentLoja) {
-            // Se não encontrou a loja, pede um nome e cria uma nova
-            console.log("Nenhuma loja encontrada para o usuário. Solicitando criação."); // Log loja não encontrada
-            const nomeLoja = prompt("📢 Bem-vindo! Parece que você ainda não tem uma loja.\nDigite um nome para sua nova loja:");
-
+            console.log("Nenhuma loja encontrada. Solicitando criação.");
+            const nomeLoja = prompt("📢 Bem-vindo! Digite um nome para sua nova loja:");
             if (!nomeLoja || nomeLoja.trim() === "") {
-                alert("❌ Nome da loja inválido. A criação foi cancelada.");
-                document.getElementById('nomeLoja').textContent = "Crie uma loja para começar!";
-                document.getElementById('reputacaoLoja').textContent = "";
-                return; // Sai da função se o nome for inválido ou cancelado
+                alert("❌ Nome da loja inválido.");
+                document.getElementById('nomeLoja').textContent = "Crie uma loja!";
+                document.getElementById('reputacaoLoja').textContent = ""; return;
             }
-
-            console.log("Criando nova loja:", nomeLoja); // Log criação de loja
+            console.log("Criando nova loja:", nomeLoja);
             currentLoja = new Loja();
             currentLoja.set("nome", nomeLoja.trim());
-            currentLoja.set("dono", currentUser); // Associa a loja ao usuário logado
-            currentLoja.set("produtos", []); // Inicializa a lista de produtos vazia (COMO ARRAY)
-            currentLoja.set("reputacao", 0); // Reputação inicial
-            await currentLoja.save(); // Salva a nova loja no Back4App
-            console.log("Loja criada com sucesso:", currentLoja.id); // Log loja criada
-            alert(`🎉 Loja "${nomeLoja}" criada com sucesso!`);
+            currentLoja.set("dono", currentUser);
+            currentLoja.set("produtos", []); // Inicializa array de produtos
+            currentLoja.set("reputacao", 0);
+            await currentLoja.save();
+            console.log("Loja criada:", currentLoja.id);
+            alert(`🎉 Loja "${nomeLoja}" criada!`);
           } else {
-              console.log("Loja encontrada:", currentLoja.id, "Nome:", currentLoja.get("nome")); // Log loja encontrada
+              console.log("Loja encontrada:", currentLoja.id, "Nome:", currentLoja.get("nome"));
+              // Garante que o campo 'produtos' existe e é um array
+              if (!Array.isArray(currentLoja.get("produtos"))) {
+                  console.warn("Campo 'produtos' não é um array. Inicializando.");
+                  currentLoja.set("produtos", []);
+                  await currentLoja.save(); // Salva a correção
+              }
           }
-
-          // Atualiza o nome e a reputação da loja na página
           document.getElementById('nomeLoja').textContent = currentLoja.get("nome");
           document.getElementById('reputacaoLoja').textContent = "Reputação: " + currentLoja.get("reputacao");
-
       } catch (error) {
-          console.error("Erro ao verificar ou criar loja:", error); // Log erro loja
-          alert("Erro ao carregar ou criar sua loja: " + error.message);
+          console.error("Erro ao verificar/criar loja:", error);
+          alert("Erro ao carregar/criar sua loja: " + error.message);
       }
     };
 
-    // Carrega os produtos associados à loja atual (USANDO ARRAY DE IDS)
+    // Carrega os produtos BASEADO NA ORDEM DO ARRAY 'produtos' da loja
     const loadProducts = async () => {
-       if (!currentLoja) {
-        console.warn("Tentativa de carregar produtos sem uma loja definida."); // Log aviso
-        document.querySelector('#productsTable tbody').innerHTML = "<tr><td colspan='4'>Crie ou selecione uma loja para ver os produtos.</td></tr>";
-        return;
+       if (!currentLoja || isLoadingProducts) {
+           console.warn("Carregamento de produtos pulado (sem loja ou já em andamento).");
+           return;
+       }
+       isLoadingProducts = true; // Define a flag
+       console.log("Iniciando carregamento de produtos...");
+       setTableLoading(true); // Mostra feedback de carregamento na tabela
+
+       const productIds = currentLoja.get("produtos") || [];
+
+       if (productIds.length === 0) {
+          console.log("Nenhum ID de produto na loja.");
+          updateTable([]); // Mostra tabela vazia
+          isLoadingProducts = false; // Reseta a flag
+          setTableLoading(false);
+          return;
        }
 
-      // Pega a lista de IDs de produtos do ARRAY 'produtos' da loja atual
-      const productIds = currentLoja.get("produtos") || []; // Pega o array de IDs
+       console.log("Carregando produtos com IDs (na ordem do array):", productIds);
 
-      if (productIds.length === 0) {
-          console.log("Nenhum ID de produto encontrado na loja."); // Log array vazio
-          updateTable([]); // Chama updateTable com array vazio para mostrar mensagem
-          return;
-      }
+       const query = new Parse.Query(Produto);
+       query.containedIn("objectId", productIds);
+       // NÃO ordene aqui (query.ascending/descending)
+       // A ordem virá do array productIds
 
-      console.log("Carregando produtos com IDs:", productIds); // Log IDs a carregar
+       try {
+         const results = await query.find();
+         console.log("Produtos encontrados:", results.length);
 
-      // Cria uma query para buscar Produtos cujos objectIds estão na lista 'productIds'
-      const query = new Parse.Query(Produto);
-      query.containedIn("objectId", productIds); // Busca pelos IDs no array
-      query.descending("createdAt"); // Opcional: Ordenar
+         // Reordena os resultados para GARANTIR a ordem do array 'productIds'
+         const orderedResults = productIds.map(id => results.find(p => p.id === id)).filter(p => p); // Encontra cada produto na ordem e filtra nulos
 
-      try {
-        const results = await query.find(); // Busca os produtos correspondentes
-        console.log("Produtos carregados:", results.length); // Log produtos carregados
-        updateTable(results); // Atualiza a tabela HTML com os produtos encontrados
-      } catch (error) {
-        console.error("Erro ao carregar produtos:", error); // Log erro carregamento
-        alert("Erro ao carregar produtos da loja: " + error.message);
-         document.querySelector('#productsTable tbody').innerHTML = `<tr><td colspan='4'>Erro ao carregar produtos: ${error.message}</td></tr>`;
-      }
+         if (orderedResults.length !== results.length) {
+             console.warn("Alguns produtos do array não foram encontrados na busca.");
+             // Poderia adicionar lógica para limpar IDs órfãos do array aqui
+         }
+
+         console.log("Produtos reordenados conforme array:", orderedResults.map(p => p.id));
+         updateTable(orderedResults); // Atualiza a tabela com os produtos na ordem correta
+
+       } catch (error) {
+         console.error("Erro ao carregar produtos:", error);
+         alert("Erro ao carregar produtos da loja: " + error.message);
+         document.querySelector('#productsTable tbody').innerHTML = `<tr><td colspan='5'>Erro ao carregar produtos: ${error.message}</td></tr>`; // Colspan 5 agora
+       } finally {
+           isLoadingProducts = false; // Reseta a flag
+           setTableLoading(false); // Remove feedback de carregamento
+       }
     };
 
-    // Atualiza a tabela HTML com a lista de produtos
+    // Atualiza a tabela HTML com a lista de produtos (na ordem recebida)
     const updateTable = (produtos) => {
       const tbody = document.querySelector('#productsTable tbody');
-      tbody.innerHTML = ""; // Limpa a tabela antes de adicionar as novas linhas
+      tbody.innerHTML = ""; // Limpa tabela
 
-      if (!produtos || produtos.length === 0) { // Verifica se produtos é nulo ou vazio
-          tbody.innerHTML = "<tr><td colspan='4' style='text-align:center; padding: 20px;'>🛒 Sua loja ainda não tem produtos cadastrados.</td></tr>";
+      // Pega a ordem atual dos IDs diretamente da loja para referência dos botões
+      const currentProductIds = currentLoja.get("produtos") || [];
+
+      if (!produtos || produtos.length === 0) {
+          tbody.innerHTML = "<tr><td colspan='5' style='text-align:center; padding: 20px;'>🛒 Sua loja ainda não tem produtos.</td></tr>"; // Colspan 5
           return;
       }
 
-      produtos.forEach(produto => {
+      produtos.forEach((produto, index) => { // Usa o índice da lista ordenada recebida
         const tr = document.createElement('tr');
-        tr.dataset.productId = produto.id; // Adiciona ID ao elemento TR para referência
+        tr.dataset.productId = produto.id;
 
-        // Coluna de Imagens
-        const imagens = produto.get("imagens") || []; // Pega array de URLs ou array vazio
+        // Imagens
+        const imagens = produto.get("imagens") || [];
         const imagensHtml = imagens.length > 0
-            ? imagens.map(url => `<img src="${url}" class="product-image" alt="Imagem do produto" onerror="this.src='placeholder-imagem.png'; this.alt='Imagem indisponível'">`).join('')
-            : '<span>Sem imagem</span>'; // Mensagem se não houver imagens
+            ? imagens.map(url => `<img src="${url}" class="product-image" alt="Imagem" onerror="this.src='placeholder.png';">`).join('')
+            : '<span>Sem imagem</span>';
 
-        // Coluna de Ações
-        const acoesHtml = `
+        // Botões de Ordem
+        // O índice aqui é o da lista 'produtos' recebida, que deve espelhar currentProductIds
+        const isFirst = index === 0;
+        const isLast = index === produtos.length - 1;
+        const orderButtonsHtml = `
+          <div class="order-container">
+            <button class="btn-order btn-move-up" onclick="moveProduct('${produto.id}', 'up')" ${isFirst ? 'disabled' : ''}>▲</button>
+            <button class="btn-order btn-move-down" onclick="moveProduct('${produto.id}', 'down')" ${isLast ? 'disabled' : ''}>▼</button>
+          </div>
+        `;
+
+        // Botões de Ações
+        const actionButtonsHtml = `
           <div class="actions-container">
             <button class="btn btn-edit" onclick="editProduct('${produto.id}')">✏️ Editar</button>
             <button class="btn btn-delete" onclick="deleteProduct('${produto.id}')">🗑️ Excluir</button>
@@ -570,76 +548,114 @@
         `;
 
         tr.innerHTML = `
-          <td class="image-cell">
-            <div class="image-container">${imagensHtml}</div>
-          </td>
+          <td class="image-cell"><div class="image-container">${imagensHtml}</div></td>
           <td class="text-cell">${produto.get("nome") || 'Sem nome'}</td>
           <td class="text-cell">R$ ${(produto.get("preco") || 0).toFixed(2)}</td>
-          <td class="actions-cell">${acoesHtml}</td>
+          <td class="order-cell">${orderButtonsHtml}</td> <td class="actions-cell">${actionButtonsHtml}</td>
         `;
         tbody.appendChild(tr);
       });
 
-      // Reativar funcionalidade de arrastar para rolar após atualizar a tabela
-      enableDragToScroll();
+      enableDragToScroll(); // Reativa drag-scroll para imagens
     };
 
-    // Função para deletar um produto (USANDO ARRAY DE IDS)
+    // Função para MOVER um produto para cima ou para baixo na ordem
+    window.moveProduct = async (productId, direction) => {
+        if (!currentLoja || isLoadingProducts) return; // Impede ação se não houver loja ou estiver carregando
+
+        console.log(`Tentando mover produto ${productId} para ${direction}`);
+        setOrderButtonsLoading(true); // Desabilita botões de ordem durante a operação
+
+        let productIds = currentLoja.get("produtos") || [];
+        const currentIndex = productIds.indexOf(productId);
+
+        if (currentIndex === -1) {
+            console.error("ID do produto não encontrado no array da loja.");
+            setOrderButtonsLoading(false);
+            return;
+        }
+
+        let newIndex;
+        if (direction === 'up' && currentIndex > 0) {
+            newIndex = currentIndex - 1;
+        } else if (direction === 'down' && currentIndex < productIds.length - 1) {
+            newIndex = currentIndex + 1;
+        } else {
+            console.log("Movimento inválido (já no topo ou na base).");
+            setOrderButtonsLoading(false);
+            return; // Movimento inválido
+        }
+
+        // Cria novo array com a ordem trocada
+        const newProductIds = [...productIds]; // Copia o array
+        [newProductIds[currentIndex], newProductIds[newIndex]] = [newProductIds[newIndex], newProductIds[currentIndex]]; // Troca os elementos
+
+        console.log("Nova ordem de IDs:", newProductIds);
+
+        // Atualiza a loja no Parse
+        currentLoja.set("produtos", newProductIds);
+        try {
+            await currentLoja.save();
+            console.log("Ordem salva no Parse.");
+            // Recarrega a lista para refletir a nova ordem salva
+            await loadProducts();
+        } catch (error) {
+            console.error("Erro ao salvar nova ordem:", error);
+            alert("Erro ao salvar a nova ordem: " + error.message);
+            // Poderia tentar reverter a mudança localmente, mas recarregar é mais seguro
+            await loadProducts(); // Recarrega mesmo em caso de erro para garantir consistência visual
+        } finally {
+             // Botões serão reabilitados pelo loadProducts que chama setTableLoading(false) -> setOrderButtonsLoading(false)
+             // setOrderButtonsLoading(false); // Reabilita botões (feito pelo finally do loadProducts)
+        }
+    };
+
+
+    // Função para deletar um produto
     window.deleteProduct = async (id) => {
-      if (!confirm("❓ Tem certeza que deseja excluir este produto? Esta ação não pode ser desfeita.")) {
-          return; // Cancela se o usuário não confirmar
-      }
-
-      if (!currentLoja) {
-          alert("❌ Erro: Loja não encontrada para remover o produto.");
-          return;
-      }
-
-      console.log("Tentando excluir produto:", id); // Log exclusão
+      if (!confirm("❓ Tem certeza que deseja excluir este produto?")) return;
+      if (!currentLoja) { alert("❌ Erro: Loja não encontrada."); return; }
+      console.log("Tentando excluir produto:", id);
+      setTableLoading(true); // Desabilita botões durante a exclusão
 
       try {
-        // 1. Remove o ID do produto do ARRAY 'produtos' na Loja
-        currentLoja.remove("produtos", id); // Remove o ID do array
-        await currentLoja.save(); // Salva a loja com o array atualizado
-        console.log("ID do produto removido do array da loja."); // Log remoção do array
+        // Remove ID do array na Loja
+        currentLoja.remove("produtos", id);
+        await currentLoja.save();
+        console.log("ID removido do array da loja.");
 
-        // 2. Encontra e deleta o objeto do produto permanentemente
+        // Deleta o objeto Produto
         const query = new Parse.Query(Produto);
-        const produto = await query.get(id); // Busca o produto pelo ID
-        await produto.destroy(); // Deleta o objeto Produto
-        console.log("Objeto do produto destruído:", id); // Log destruição do objeto
+        const produto = await query.get(id);
+        await produto.destroy();
+        console.log("Objeto produto destruído:", id);
 
-        // 3. Remove a linha da tabela na interface
-        const rowToRemove = document.querySelector(`tr[data-product-id="${id}"]`);
-        if (rowToRemove) {
-            rowToRemove.remove();
-             console.log("Linha da tabela removida."); // Log remoção da linha
-        }
-         alert("✅ Produto excluído com sucesso!");
+        // Remove linha da tabela (ou recarrega)
+        // const rowToRemove = document.querySelector(`tr[data-product-id="${id}"]`);
+        // if (rowToRemove) rowToRemove.remove();
+        alert("✅ Produto excluído!");
+        await loadProducts(); // Recarrega para atualizar a tabela e ordem
 
       } catch (error) {
-        console.error("Erro na exclusão do produto:", error); // Log erro exclusão
-        alert("❌ Erro ao excluir o produto: " + error.message);
+        console.error("Erro na exclusão:", error);
+        alert("❌ Erro ao excluir: " + error.message);
+        setTableLoading(false); // Reabilita botões se houve erro
       }
+       // finally não é necessário aqui pois loadProducts já chama setTableLoading(false)
     };
 
     // Função para redirecionar para a página de edição
     window.editProduct = (id) => {
-        console.log("Redirecionando para editar produto:", id); // Log edição
+        console.log("Redirecionando para editar:", id);
         window.location.href = `editar.html?id=${id}`;
     }
 
     // --- Event Listeners ---
 
-    // Listener para o envio do formulário de adicionar produto (USANDO ARRAY DE IDS)
+    // Listener para o formulário de adicionar produto
     document.getElementById('productForm').addEventListener('submit', async (e) => {
-      e.preventDefault(); // Impede o envio padrão do formulário
-
-      if (!currentLoja) {
-       alert("⚠️ Atenção: Você precisa ter uma loja definida para adicionar produtos!");
-       console.warn("Tentativa de adicionar produto sem loja definida."); // Log aviso
-       return; // Interrompe se não houver loja
-      }
+      e.preventDefault();
+      if (!currentLoja) { alert("⚠️ Crie uma loja primeiro!"); return; }
 
       const nomeInput = document.getElementById('productName');
       const precoInput = document.getElementById('productPrice');
@@ -649,195 +665,136 @@
       const productData = {
         nome: nomeInput.value.trim(),
         preco: parseFloat(precoInput.value),
-        imagemFile: imagemInput.files[0] // Pega o arquivo de imagem
+        imagemFile: imagemInput.files[0]
       };
 
-      // Validações básicas
-      if (!productData.nome) {
-          alert("❌ Por favor, insira o nome do produto.");
-          nomeInput.focus();
-          return;
-      }
-       if (isNaN(productData.preco) || productData.preco <= 0) {
-          alert("❌ Por favor, insira um preço válido maior que zero.");
-          precoInput.focus();
-          return;
-      }
-       if (!productData.imagemFile) {
-          alert("❌ Por favor, escolha uma imagem para o produto.");
-          return;
+      if (!productData.nome || isNaN(productData.preco) || productData.preco <= 0 || !productData.imagemFile) {
+          alert("❌ Preencha todos os campos corretamente (nome, preço > 0, imagem)."); return;
       }
 
-      console.log("Adicionando novo produto:", productData.nome); // Log adição
-      submitButton.disabled = true; // Desabilita botão
-      submitButton.textContent = 'Enviando...'; // Feedback visual
+      console.log("Adicionando produto:", productData.nome);
+      submitButton.disabled = true; submitButton.textContent = 'Enviando...';
 
       try {
-        // 1. Faz upload da imagem para o Back4App
-        console.log("Fazendo upload da imagem..."); // Log upload
+        // Upload imagem
+        console.log("Fazendo upload...");
         const parseFile = new Parse.File(productData.imagemFile.name, productData.imagemFile);
-        await parseFile.save(); // Salva o arquivo no Parse
-        const imageUrl = parseFile.url(); // Obtém a URL pública
-        console.log("Upload da imagem concluído:", imageUrl); // Log upload sucesso
+        await parseFile.save();
+        const imageUrl = parseFile.url();
+        console.log("Upload concluído:", imageUrl);
 
-        // 2. Cria o novo objeto Produto no Back4App
+        // Cria Produto
         const novoProduto = new Produto();
         novoProduto.set("nome", productData.nome);
         novoProduto.set("preco", productData.preco);
-        novoProduto.set("imagens", [imageUrl]); // Salva a URL da imagem num array
-        novoProduto.set("dono", Parse.User.current()); // Associa ao dono (opcional)
-        await novoProduto.save(); // Salva o objeto Produto
-        console.log("Novo produto salvo no Parse:", novoProduto.id); // Log produto salvo
+        novoProduto.set("imagens", [imageUrl]);
+        novoProduto.set("dono", Parse.User.current());
+        await novoProduto.save();
+        console.log("Produto salvo:", novoProduto.id);
 
-        // 3. Adiciona o ID do novo produto ao ARRAY 'produtos' na Loja
-        currentLoja.addUnique("produtos", novoProduto.id); // Adiciona ID ao array (addUnique evita duplicados)
-        await currentLoja.save(); // Salva a loja com o array atualizado
-        console.log("ID do produto adicionado ao array da loja."); // Log ID adicionado ao array
+        // Adiciona ID ao INÍCIO do array da Loja
+        currentLoja.addUnique("produtos", novoProduto.id); // Adiciona normalmente
+        // Pega o array atual, remove o ID e adiciona no início
+        let currentIds = currentLoja.get("produtos") || [];
+        currentIds = currentIds.filter(id => id !== novoProduto.id); // Remove se já existir (caso addUnique falhe)
+        currentIds.unshift(novoProduto.id); // Adiciona no início
+        currentLoja.set("produtos", currentIds); // Define o novo array ordenado
 
-        // 4. Limpa o formulário e atualiza a interface
-        document.getElementById('productForm').reset(); // Limpa os campos
-        document.getElementById('imagePreview').style.display = 'none'; // Esconde miniatura
-        document.getElementById('imagePreview').src = ''; // Limpa miniatura
-        submitButton.disabled = false; // Reabilita o botão
-        submitButton.innerHTML = '➕ Adicionar Produto'; // Restaura texto
+        await currentLoja.save();
+        console.log("ID adicionado ao início do array da loja.");
 
-        // Adiciona o novo produto à tabela imediatamente
-        addProductToTable(novoProduto);
-
-        alert(`✅ Produto "${productData.nome}" adicionado com sucesso!`);
+        // Limpa form e recarrega
+        document.getElementById('productForm').reset();
+        document.getElementById('imagePreview').style.display = 'none';
+        document.getElementById('imagePreview').src = '';
+        alert(`✅ Produto "${productData.nome}" adicionado!`);
+        await loadProducts(); // Recarrega para mostrar na nova ordem
 
       } catch (error) {
-        console.error("Erro ao adicionar produto:", error); // Log erro adição
-        alert("❌ Erro ao adicionar produto: " + error.message);
-        submitButton.disabled = false; // Reabilita botão
-        submitButton.innerHTML = '➕ Adicionar Produto';
+        console.error("Erro ao adicionar:", error);
+        alert("❌ Erro ao adicionar: " + error.message);
+      } finally {
+          submitButton.disabled = false; submitButton.innerHTML = '➕ Adicionar Produto';
       }
     });
-
-    // Adiciona uma linha de produto à tabela (usado após adicionar novo produto)
-    function addProductToTable(produto) {
-        const tbody = document.querySelector('#productsTable tbody');
-        const noProductRow = tbody.querySelector("td[colspan='4']");
-        if (noProductRow) {
-            noProductRow.parentElement.remove();
-        }
-
-        const tr = document.createElement('tr');
-        tr.dataset.productId = produto.id;
-
-        const imagens = produto.get("imagens") || [];
-        const imagensHtml = imagens.length > 0
-            ? imagens.map(url => `<img src="${url}" class="product-image" alt="Imagem do produto" onerror="this.src='placeholder-imagem.png'; this.alt='Imagem indisponível'">`).join('')
-            : '<span>Sem imagem</span>';
-
-        const acoesHtml = `
-          <div class="actions-container">
-            <button class="btn btn-edit" onclick="editProduct('${produto.id}')">✏️ Editar</button>
-            <button class="btn btn-delete" onclick="deleteProduct('${produto.id}')">🗑️ Excluir</button>
-          </div>
-        `;
-
-        tr.innerHTML = `
-          <td class="image-cell">
-            <div class="image-container">${imagensHtml}</div>
-          </td>
-          <td class="text-cell">${produto.get("nome") || 'Sem nome'}</td>
-          <td class="text-cell">R$ ${(produto.get("preco") || 0).toFixed(2)}</td>
-          <td class="actions-cell">${acoesHtml}</td>
-        `;
-        tbody.prepend(tr); // Adiciona no início
-
-        enableDragToScrollForElement(tr.querySelector('.image-container'));
-    }
-
 
     // Listener para o botão de logout
     document.getElementById('logoutBtn').addEventListener('click', async () => {
-      console.log("Iniciando processo de logout..."); // Log logout
+      console.log("Iniciando logout...");
       try {
-        await auth.signOut(); // Logout Firebase
-        console.log("Logout do Firebase concluído."); // Log logout Firebase ok
-        await Parse.User.logOut(); // Logout Parse
-        console.log("Logout do Parse concluído."); // Log logout Parse ok
-        window.location.href = 'index.html'; // Redireciona
+        await auth.signOut(); console.log("Logout Firebase ok.");
+        await Parse.User.logOut(); console.log("Logout Parse ok.");
+        window.location.href = 'index.html';
       } catch (error) {
-        console.error('Erro no logout:', error); // Log erro logout
-        alert('❌ Erro ao tentar sair: ' + error.message);
+        console.error('Erro no logout:', error);
+        alert('❌ Erro ao sair: ' + error.message);
       }
     });
 
-    // Listener para mostrar a pré-visualização da imagem ao escolher um arquivo
+    // Listener para preview da imagem
     document.getElementById('productImage').addEventListener('change', function(event) {
       const file = event.target.files[0];
       const preview = document.getElementById('imagePreview');
       if (file) {
         const reader = new FileReader();
         reader.onload = function(e) {
-          preview.src = e.target.result; // Define o src da img
-          preview.style.display = 'block'; // Mostra a imagem
+          preview.src = e.target.result;
+          preview.style.display = 'block';
         };
-        reader.readAsDataURL(file); // Lê como Data URL
+        reader.readAsDataURL(file);
       } else {
-          preview.style.display = 'none'; // Esconde preview
-          preview.src = ''; // Limpa src
+          preview.style.display = 'none'; preview.src = '';
       }
     });
 
     // --- Funções Auxiliares ---
 
-    // Atualiza o cabeçalho da página com informações do usuário Firebase
+    // Atualiza cabeçalho com dados do usuário
     function updateHeader(user) {
       if (!user) return;
       document.getElementById('profilePhoto').src = user.photoURL || 'avatar-padrao.jpeg';
-      document.getElementById('userName').textContent = user.displayName || user.email || 'Usuário Anônimo';
+      document.getElementById('userName').textContent = user.displayName || user.email || 'Usuário';
       document.getElementById('userEmail').textContent = user.email || '';
     }
 
-    // Habilita a funcionalidade de arrastar para rolar nos contêineres de imagem
-    function enableDragToScroll() {
-        const containers = document.querySelectorAll('.image-container');
-        containers.forEach(container => {
-            enableDragToScrollForElement(container);
-        });
+    // Habilita/desabilita botões da tabela durante carregamento/ações
+    function setTableLoading(isLoading) {
+        const buttons = document.querySelectorAll('#productsTable .btn, #productsTable .btn-order');
+        buttons.forEach(btn => btn.disabled = isLoading);
+        // Poderia adicionar um spinner/overlay na tabela também
+        console.log(`Table buttons ${isLoading ? 'disabled' : 'enabled'}`);
+        // Garante que os botões de ordem sejam especificamente controlados
+        setOrderButtonsLoading(isLoading);
     }
 
-    // Aplica a lógica de arrastar para rolar a um elemento específico
+    // Habilita/desabilita APENAS os botões de ordem
+    function setOrderButtonsLoading(isLoading) {
+        const orderButtons = document.querySelectorAll('#productsTable .btn-order');
+        orderButtons.forEach(btn => {
+            // Mantém desabilitado se já estiver (ex: primeiro/último item)
+            if (!isLoading && (btn.classList.contains('btn-move-up') || btn.classList.contains('btn-move-down'))) {
+                 // Reavalia se deve estar desabilitado com base na nova ordem (feito em updateTable)
+            } else {
+                btn.disabled = isLoading;
+            }
+        });
+         console.log(`Order buttons ${isLoading ? 'disabled' : 'enabled'}`);
+    }
+
+
+    // Habilita drag-scroll para containers de imagem
+    function enableDragToScroll() {
+        document.querySelectorAll('.image-container').forEach(enableDragToScrollForElement);
+    }
     function enableDragToScrollForElement(container) {
         if (!container) return;
-        let isDown = false;
-        let startX;
-        let scrollLeft;
-
-        container.addEventListener('mousedown', (e) => {
-            isDown = true;
-            container.style.cursor = 'grabbing';
-            startX = e.pageX - container.offsetLeft;
-            scrollLeft = container.scrollLeft;
-        });
-
-        container.addEventListener('mouseleave', () => {
-            if (!isDown) return;
-            isDown = false;
-            container.style.cursor = 'grab';
-        });
-
-        container.addEventListener('mouseup', () => {
-             if (!isDown) return;
-            isDown = false;
-            container.style.cursor = 'grab';
-        });
-
-        container.addEventListener('mousemove', (e) => {
-            if (!isDown) return;
-            e.preventDefault();
-            const x = e.pageX - container.offsetLeft;
-            const walk = (x - startX) * 1.5;
-            container.scrollLeft = scrollLeft - walk;
-        });
+        let isDown = false, startX, scrollLeft;
+        container.addEventListener('mousedown', (e) => { isDown = true; container.style.cursor = 'grabbing'; startX = e.pageX - container.offsetLeft; scrollLeft = container.scrollLeft; });
+        container.addEventListener('mouseleave', () => { if (!isDown) return; isDown = false; container.style.cursor = 'grab'; });
+        container.addEventListener('mouseup', () => { if (!isDown) return; isDown = false; container.style.cursor = 'grab'; });
+        container.addEventListener('mousemove', (e) => { if (!isDown) return; e.preventDefault(); const x = e.pageX - container.offsetLeft; const walk = (x - startX) * 1.5; container.scrollLeft = scrollLeft - walk; });
     }
-
-    // Habilita o arraste para rolar inicialmente
-    enableDragToScroll();
+    enableDragToScroll(); // Inicializa
 
   </script>
 </body>
