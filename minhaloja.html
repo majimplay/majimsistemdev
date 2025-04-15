@@ -125,12 +125,22 @@
   white-space: nowrap;    /* garante uma linha única */
   cursor: grab;          /* cursor de arraste */
 }
-
-   .actions-container {
-  display: flex;
-  flex-direction: column; /* empilha verticalmente */
-  gap: 8px;
-  align-items: flex-start; /* alinha à esquerda */
+.btn-up { 
+  background: #ffc107; 
+  color: black; 
+  margin: 2px;
+  padding: 4px 8px;
+}
+.btn-down { 
+  background: #17a2b8; 
+  color: white; 
+  margin: 2px;
+  padding: 4px 8px;
+}
+.actions-container {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 4px;
 }
   </style>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
