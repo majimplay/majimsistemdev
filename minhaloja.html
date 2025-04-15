@@ -198,18 +198,18 @@
       </div>
     </form>
 
-    <table id="productsTable">
-    <thead>
-  <tr>
-    <th class="image-cell">Imagem</th>
-    <th class="text-cell">Produto</th>
-    <th class="text-cell">Preço</th>
-    <th class="setas-cell">Posição</th>
-    <th class="actions-cell">Ações</th>
-  </tr>
-</thead>
-      <tbody></tbody>
-    </table>
+<table id="productsTable">
+  <thead>
+    <tr>
+      <th class="image-cell">Imagem</th>
+      <th class="text-cell">Produto</th>
+      <th class="text-cell">Preço</th>
+      <th class="actions-cell">Ações</th>
+      <th class="setas-cell">Posição</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
   </div>
 
   <script>
@@ -300,7 +300,7 @@ const updateTable = (produtos) => {
 
   produtos.forEach(produto => {
     const tr = document.createElement('tr');
-  tr.innerHTML = `
+tr.innerHTML = `
   <td class="image-cell">
     <div class="image-container">
       ${produto.get("imagens").map(url =>
