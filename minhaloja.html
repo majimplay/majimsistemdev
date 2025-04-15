@@ -300,29 +300,30 @@ const updateTable = (produtos) => {
 
   produtos.forEach(produto => {
     const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td class="image-cell">
-        <div class="image-container">
-          ${produto.get("imagens").map(url => 
-            `<img src="${url}" class="product-image">`
-          ).join('')}
-        </div>
-      </td>
-      <td class="text-cell">${produto.get("nome")}</td>
-      <td class="text-cell">R$ ${produto.get("preco").toFixed(2)}</td>
+  tr.innerHTML = `
+  <td class="image-cell">
+    <div class="image-container">
+      ${produto.get("imagens").map(url =>
+        `<img src="${url}" class="product-image">`
+      ).join('')}
+    </div>
+  </td>
+  <td class="text-cell">${produto.get("nome")}</td>
+  <td class="text-cell">R$ ${produto.get("preco").toFixed(2)}</td>
 
-      <!-- Coluna das setas -->
-      <td class="setas-cell">
-        <button class="btn-up"   onclick="moveProductUp('${produto.id}')">↑</button>
-        <button class="btn-down" onclick="moveProductDown('${produto.id}')">↓</button>
-      </td>
+  <!-- Coluna de editar/excluir -->
+  <td class="actions-cell">
+    <button class="btn btn-edit"   onclick="editProduct('${produto.id}')">Editar</button>
+    <button class="btn btn-delete" onclick="deleteProduct('${produto.id}')">Excluir</button>
+  </td>
 
-      <!-- Coluna de editar/excluir -->
-      <td class="actions-cell">
-        <button class="btn btn-edit"   onclick="editProduct('${produto.id}')">Editar</button>
-        <button class="btn btn-delete" onclick="deleteProduct('${produto.id}')">Excluir</button>
-      </td>
-    `;
+  <!-- Coluna das setas -->
+  <td class="setas-cell">
+    <button class="btn-up"   onclick="moveProductUp('${produto.id}')">↑</button>
+    <button class="btn-down" onclick="moveProductDown('${produto.id}')">↓</button>
+  </td>
+`;
+
     tbody.appendChild(tr);
   });
 };
