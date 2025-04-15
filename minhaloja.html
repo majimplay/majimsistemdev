@@ -261,21 +261,22 @@
     };
 
     // Carregar Produtos
-    const loadProducts = async () => {
-      const productIds = currentLoja.get("produtos");
-      if (productIds.length === 0) return;
+ const loadProducts = async () => {
+  const productIds = currentLoja.get("produtos");
+  if(productIds.length === 0) return;
 
-      const query = new Parse.Query(Produto);
-      query.containedIn("objectId", productIds);
-      
-      try {
-        const results = await query.find();
-        updateTable(results);
-      } catch (error) {
-        alert("Erro ao carregar produtos: " + error.message);
-      }
-    };
-
+  const query = new Parse.Query(Produto);
+  query.containedIn("objectId", productIds);
+  
+  try {
+    const results = await query.find();
+    // Ordena os resultados conforme o array de IDs
+    results.sort((a, b) => productIds.indexOf(a.id) - productIds.indexOf(b.id));
+    updateTable(results);
+  } catch(error) {
+    alert("Erro ao carregar produtos: " + error.message);
+  }
+};
 const updateTable = (produtos) => {
   const tbody = document.querySelector('#productsTable tbody');
   tbody.innerHTML = "";
@@ -294,6 +295,8 @@ const updateTable = (produtos) => {
       <td class="text-cell">R$ ${produto.get("preco").toFixed(2)}</td>
       <td class="actions-cell">
         <div class="actions-container">
+          <button class="btn btn-up" onclick="moveProductUp('${produto.id}')">↑</button>
+          <button class="btn btn-down" onclick="moveProductDown('${produto.id}')">↓</button>
           <button class="btn btn-edit" onclick="editProduct('${produto.id}')">Editar</button>
           <button class="btn btn-delete" onclick="deleteProduct('${produto.id}')">Excluir</button>
         </div>
@@ -322,6 +325,34 @@ const updateTable = (produtos) => {
         alert("Erro na exclusão: " + error.message);
       }
     };
+
+
+window.moveProductUp = async (productId) => {
+  const produtos = currentLoja.get("produtos");
+  const index = produtos.indexOf(productId);
+  
+  if(index > 0) {
+    // Swap positions
+    [produtos[index], produtos[index - 1]] = [produtos[index - 1], produtos[index]];
+    currentLoja.set("produtos", produtos);
+    await currentLoja.save();
+    loadProducts();
+  }
+};
+
+window.moveProductDown = async (productId) => {
+  const produtos = currentLoja.get("produtos");
+  const index = produtos.indexOf(productId);
+  
+  if(index < produtos.length - 1 && index !== -1) {
+    // Swap positions
+    [produtos[index], produtos[index + 1]] = [produtos[index + 1], produtos[index]];
+    currentLoja.set("produtos", produtos);
+    await currentLoja.save();
+    loadProducts();
+  }
+};
+	  
 async function editProduct(id) {
 	window.location.href = `editar.html?id=${id}`;
 	}
