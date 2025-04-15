@@ -67,10 +67,11 @@
     tr:hover { background: #f9f9f9; }
 
    /* Definindo larguras proporcionais */
-.image-cell { width: 70%; }
-.text-cell  { width: 8%; }
-.setas-cell { width: 4%;  }
-.actions-cell { width: 8%; }
+
+.image-cell   { width: 60%; }
+.text-cell    { width: 15%; }
+.setas-cell   { width: 10%; text-align: center; }
+.actions-cell { width: 15%; }
 
     input[type="text"], input[type="number"] {
       padding: 8px;
@@ -129,30 +130,28 @@
   white-space: nowrap;    /* garante uma linha única */
   cursor: grab;          /* cursor de arraste */
 }
-.btn-up { 
-  background: #ffc107; 
-  color: black; 
+/* Botões de setas */
+.btn-up, .btn-down {
   margin: 2px;
   padding: 4px 8px;
 }
-.btn-down { 
-  background: #17a2b8; 
-  color: white; 
-  margin: 2px;
-  padding: 4px 8px;
+.actions-cell {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  align-items: center;
 }
-	 
   .actions-container {
   display: flex;
   flex-direction: column; /* empilha verticalmente */
   gap: 8px;
 
 }
-	   .setas-cell {
+	/* Coluna de setas centralizada */
+.setas-cell {
   display: flex;
-  flex-direction: column; /* empilha verticalmente */
-  gap: 8px;
-  align-items: flex-start; /* alinha à esquerda */
+  justify-content: center;
+  align-items: center;
 }
   </style>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -293,11 +292,10 @@
 const updateTable = (produtos) => {
   const tbody = document.querySelector('#productsTable tbody');
   tbody.innerHTML = "";
-  
+
   produtos.forEach(produto => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
-
       <td class="image-cell">
         <div class="image-container">
           ${produto.get("imagens").map(url => 
@@ -307,7 +305,7 @@ const updateTable = (produtos) => {
       </td>
       <td class="text-cell">${produto.get("nome")}</td>
       <td class="text-cell">R$ ${produto.get("preco").toFixed(2)}</td>
-     
+
       <!-- Coluna das setas -->
       <td class="setas-cell">
         <button class="btn-up"   onclick="moveProductUp('${produto.id}')">↑</button>
