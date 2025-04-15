@@ -391,33 +391,30 @@
     auth.onAuthStateChanged(async (user) => {
       if (user) {
         // Usuário está logado
-        console.log("Usuário autenticado:", user.uid);
+        console.log("Usuário autenticado:", user.uid); // Log de autenticação
         try {
           // Tenta logar no Parse usando o UID do Firebase como username e password
-          // Isso assume que você criou usuários no Parse com UID do Firebase
-          // Se for a primeira vez, pode precisar registrar ou usar outro método de link
           if (!Parse.User.current()) {
-             console.log("Tentando login no Parse...");
+             console.log("Tentando login no Parse..."); // Log de tentativa de login Parse
              // Tenta fazer login. Se falhar (usuário não existe), tenta cadastrar.
             try {
                 await Parse.User.logIn(user.uid, user.uid);
-                console.log("Login no Parse bem-sucedido.");
+                console.log("Login no Parse bem-sucedido."); // Log de sucesso login Parse
             } catch (loginError) {
                 // Se o login falhar (provavelmente usuário não existe no Parse)
                 if (loginError.code === Parse.Error.OBJECT_NOT_FOUND) {
-                    console.log("Usuário não encontrado no Parse. Tentando cadastrar...");
+                    console.log("Usuário não encontrado no Parse. Tentando cadastrar..."); // Log de cadastro
                     const newUser = new Parse.User();
                     newUser.set("username", user.uid);
                     newUser.set("password", user.uid); // Use o UID como senha inicial
                     newUser.set("email", user.email); // Opcional: salvar email
-                    // Adicione outros campos se necessário (ex: nome do Firebase)
                     newUser.set("firebaseUID", user.uid); // Link explícito
 
                     try {
                         await newUser.signUp();
-                        console.log("Novo usuário cadastrado e logado no Parse.");
+                        console.log("Novo usuário cadastrado e logado no Parse."); // Log de sucesso cadastro Parse
                     } catch (signUpError) {
-                        console.error("Erro ao cadastrar usuário no Parse:", signUpError);
+                        console.error("Erro ao cadastrar usuário no Parse:", signUpError); // Log de erro cadastro
                         alert("Erro crítico ao sincronizar contas. Tente novamente mais tarde.");
                         // Forçar logout se não conseguir sincronizar
                         await auth.signOut();
@@ -425,14 +422,14 @@
                     }
                 } else {
                     // Outro erro de login no Parse
-                    console.error("Erro ao fazer login no Parse:", loginError);
+                    console.error("Erro ao fazer login no Parse:", loginError); // Log de erro login
                     alert("Erro ao acessar sua conta no sistema. Tente novamente.");
                      await auth.signOut(); // Força logout em caso de erro inesperado
                     return; // Interrompe
                 }
             }
           } else {
-            console.log("Sessão Parse já existente.");
+            console.log("Sessão Parse já existente."); // Log sessão existente
           }
 
           // Após garantir login no Parse, verifica/cria a loja
@@ -441,19 +438,19 @@
           updateHeader(user);
           // Carrega os produtos da loja atual
           if (currentLoja) { // Só carrega produtos se a loja foi definida
-             loadProducts();
+             loadProducts(); // Chama o carregamento de produtos
           }
 
         } catch (error) {
           // Captura erros gerais durante o processo de login/verificação
-          console.error("Erro durante a inicialização do usuário:", error);
+          console.error("Erro durante a inicialização do usuário:", error); // Log de erro geral
           alert("Ocorreu um erro ao carregar seus dados: " + error.message);
           // Redireciona para a página de login em caso de erro grave
           window.location.href = 'index.html';
         }
       } else {
         // Usuário não está logado, redireciona para a página de login
-        console.log("Usuário não autenticado. Redirecionando para login.");
+        console.log("Usuário não autenticado. Redirecionando para login."); // Log usuário não autenticado
         window.location.href = 'index.html';
       }
     });
@@ -462,8 +459,7 @@
     const checkOrCreateLoja = async () => {
       const currentUser = Parse.User.current();
       if (!currentUser) {
-          console.error("Tentativa de verificar loja sem usuário Parse logado.");
-          // Idealmente, isso não deveria acontecer por causa da lógica em onAuthStateChanged
+          console.error("Tentativa de verificar loja sem usuário Parse logado."); // Log erro usuário Parse
           alert("Erro: Usuário não sincronizado. Por favor, recarregue a página.");
           return; // Interrompe
       }
@@ -477,29 +473,27 @@
 
           if (!currentLoja) {
             // Se não encontrou a loja, pede um nome e cria uma nova
-            console.log("Nenhuma loja encontrada para o usuário. Solicitando criação.");
+            console.log("Nenhuma loja encontrada para o usuário. Solicitando criação."); // Log loja não encontrada
             const nomeLoja = prompt("📢 Bem-vindo! Parece que você ainda não tem uma loja.\nDigite um nome para sua nova loja:");
 
             if (!nomeLoja || nomeLoja.trim() === "") {
                 alert("❌ Nome da loja inválido. A criação foi cancelada.");
-                // Poderia forçar logout ou dar outra chance, mas por ora só avisa.
-                // Sem loja, o usuário não poderá adicionar produtos.
                 document.getElementById('nomeLoja').textContent = "Crie uma loja para começar!";
                 document.getElementById('reputacaoLoja').textContent = "";
                 return; // Sai da função se o nome for inválido ou cancelado
             }
 
-            console.log("Criando nova loja:", nomeLoja);
+            console.log("Criando nova loja:", nomeLoja); // Log criação de loja
             currentLoja = new Loja();
             currentLoja.set("nome", nomeLoja.trim());
             currentLoja.set("dono", currentUser); // Associa a loja ao usuário logado
-            currentLoja.set("produtos", []); // Inicializa a lista de produtos vazia
+            currentLoja.set("produtos", []); // Inicializa a lista de produtos vazia (COMO ARRAY)
             currentLoja.set("reputacao", 0); // Reputação inicial
             await currentLoja.save(); // Salva a nova loja no Back4App
-            console.log("Loja criada com sucesso:", currentLoja.id);
+            console.log("Loja criada com sucesso:", currentLoja.id); // Log loja criada
             alert(`🎉 Loja "${nomeLoja}" criada com sucesso!`);
           } else {
-              console.log("Loja encontrada:", currentLoja.id, "Nome:", currentLoja.get("nome"));
+              console.log("Loja encontrada:", currentLoja.id, "Nome:", currentLoja.get("nome")); // Log loja encontrada
           }
 
           // Atualiza o nome e a reputação da loja na página
@@ -507,36 +501,41 @@
           document.getElementById('reputacaoLoja').textContent = "Reputação: " + currentLoja.get("reputacao");
 
       } catch (error) {
-          console.error("Erro ao verificar ou criar loja:", error);
+          console.error("Erro ao verificar ou criar loja:", error); // Log erro loja
           alert("Erro ao carregar ou criar sua loja: " + error.message);
-          // Considerar o que fazer aqui - talvez redirecionar ou mostrar mensagem de erro persistente
       }
     };
 
-    // Carrega os produtos associados à loja atual
+    // Carrega os produtos associados à loja atual (USANDO ARRAY DE IDS)
     const loadProducts = async () => {
        if (!currentLoja) {
-        console.warn("Tentativa de carregar produtos sem uma loja definida.");
-        // Limpa a tabela caso não haja loja (ou tenha ocorrido erro)
+        console.warn("Tentativa de carregar produtos sem uma loja definida."); // Log aviso
         document.querySelector('#productsTable tbody').innerHTML = "<tr><td colspan='4'>Crie ou selecione uma loja para ver os produtos.</td></tr>";
         return;
        }
 
-      // Pega a lista de IDs de produtos da loja atual
-      const productRelation = currentLoja.relation("produtos"); // Usando Relation
-      const query = productRelation.query(); // Cria uma query a partir da Relation
+      // Pega a lista de IDs de produtos do ARRAY 'produtos' da loja atual
+      const productIds = currentLoja.get("produtos") || []; // Pega o array de IDs
 
-      // Opcional: Ordenar produtos, por exemplo, por data de criação
-      query.descending("createdAt");
+      if (productIds.length === 0) {
+          console.log("Nenhum ID de produto encontrado na loja."); // Log array vazio
+          updateTable([]); // Chama updateTable com array vazio para mostrar mensagem
+          return;
+      }
 
-      console.log("Carregando produtos da loja:", currentLoja.id);
+      console.log("Carregando produtos com IDs:", productIds); // Log IDs a carregar
+
+      // Cria uma query para buscar Produtos cujos objectIds estão na lista 'productIds'
+      const query = new Parse.Query(Produto);
+      query.containedIn("objectId", productIds); // Busca pelos IDs no array
+      query.descending("createdAt"); // Opcional: Ordenar
 
       try {
-        const results = await query.find(); // Busca os produtos relacionados
-        console.log("Produtos carregados:", results.length);
+        const results = await query.find(); // Busca os produtos correspondentes
+        console.log("Produtos carregados:", results.length); // Log produtos carregados
         updateTable(results); // Atualiza a tabela HTML com os produtos encontrados
       } catch (error) {
-        console.error("Erro ao carregar produtos:", error);
+        console.error("Erro ao carregar produtos:", error); // Log erro carregamento
         alert("Erro ao carregar produtos da loja: " + error.message);
          document.querySelector('#productsTable tbody').innerHTML = `<tr><td colspan='4'>Erro ao carregar produtos: ${error.message}</td></tr>`;
       }
@@ -547,7 +546,7 @@
       const tbody = document.querySelector('#productsTable tbody');
       tbody.innerHTML = ""; // Limpa a tabela antes de adicionar as novas linhas
 
-      if (produtos.length === 0) {
+      if (!produtos || produtos.length === 0) { // Verifica se produtos é nulo ou vazio
           tbody.innerHTML = "<tr><td colspan='4' style='text-align:center; padding: 20px;'>🛒 Sua loja ainda não tem produtos cadastrados.</td></tr>";
           return;
       }
@@ -585,7 +584,7 @@
       enableDragToScroll();
     };
 
-    // Função para deletar um produto
+    // Função para deletar um produto (USANDO ARRAY DE IDS)
     window.deleteProduct = async (id) => {
       if (!confirm("❓ Tem certeza que deseja excluir este produto? Esta ação não pode ser desfeita.")) {
           return; // Cancela se o usuário não confirmar
@@ -596,56 +595,49 @@
           return;
       }
 
-      console.log("Tentando excluir produto:", id);
+      console.log("Tentando excluir produto:", id); // Log exclusão
 
       try {
-        // 1. Encontra o objeto do produto a ser deletado
+        // 1. Remove o ID do produto do ARRAY 'produtos' na Loja
+        currentLoja.remove("produtos", id); // Remove o ID do array
+        await currentLoja.save(); // Salva a loja com o array atualizado
+        console.log("ID do produto removido do array da loja."); // Log remoção do array
+
+        // 2. Encontra e deleta o objeto do produto permanentemente
         const query = new Parse.Query(Produto);
-        const produto = await query.get(id);
+        const produto = await query.get(id); // Busca o produto pelo ID
+        await produto.destroy(); // Deleta o objeto Produto
+        console.log("Objeto do produto destruído:", id); // Log destruição do objeto
 
-        // 2. Remove a relação do produto com a loja
-        const relation = currentLoja.relation("produtos");
-        relation.remove(produto); // Remove o objeto Produto da relação
-        await currentLoja.save(); // Salva a loja com a relação atualizada
-        console.log("Relação do produto removida da loja.");
-
-        // 3. Deleta o objeto do produto permanentemente
-        await produto.destroy();
-        console.log("Objeto do produto destruído:", id);
-
-        // 4. Remove a linha da tabela na interface
+        // 3. Remove a linha da tabela na interface
         const rowToRemove = document.querySelector(`tr[data-product-id="${id}"]`);
         if (rowToRemove) {
             rowToRemove.remove();
-             console.log("Linha da tabela removida.");
+             console.log("Linha da tabela removida."); // Log remoção da linha
         }
-         // Opcional: Recarregar a lista completa para garantir consistência
-         // loadProducts();
          alert("✅ Produto excluído com sucesso!");
 
-
       } catch (error) {
-        console.error("Erro na exclusão do produto:", error);
+        console.error("Erro na exclusão do produto:", error); // Log erro exclusão
         alert("❌ Erro ao excluir o produto: " + error.message);
       }
     };
 
     // Função para redirecionar para a página de edição
     window.editProduct = (id) => {
-        console.log("Redirecionando para editar produto:", id);
-        // Passa o ID do produto como parâmetro na URL
+        console.log("Redirecionando para editar produto:", id); // Log edição
         window.location.href = `editar.html?id=${id}`;
     }
 
     // --- Event Listeners ---
 
-    // Listener para o envio do formulário de adicionar produto
+    // Listener para o envio do formulário de adicionar produto (USANDO ARRAY DE IDS)
     document.getElementById('productForm').addEventListener('submit', async (e) => {
       e.preventDefault(); // Impede o envio padrão do formulário
 
       if (!currentLoja) {
        alert("⚠️ Atenção: Você precisa ter uma loja definida para adicionar produtos!");
-       console.warn("Tentativa de adicionar produto sem loja definida.");
+       console.warn("Tentativa de adicionar produto sem loja definida."); // Log aviso
        return; // Interrompe se não houver loja
       }
 
@@ -676,52 +668,48 @@
           return;
       }
 
-      console.log("Adicionando novo produto:", productData.nome);
-      submitButton.disabled = true; // Desabilita botão para evitar cliques duplos
+      console.log("Adicionando novo produto:", productData.nome); // Log adição
+      submitButton.disabled = true; // Desabilita botão
       submitButton.textContent = 'Enviando...'; // Feedback visual
 
       try {
         // 1. Faz upload da imagem para o Back4App
-        console.log("Fazendo upload da imagem...");
+        console.log("Fazendo upload da imagem..."); // Log upload
         const parseFile = new Parse.File(productData.imagemFile.name, productData.imagemFile);
         await parseFile.save(); // Salva o arquivo no Parse
-        const imageUrl = parseFile.url(); // Obtém a URL pública do arquivo salvo
-        console.log("Upload da imagem concluído:", imageUrl);
+        const imageUrl = parseFile.url(); // Obtém a URL pública
+        console.log("Upload da imagem concluído:", imageUrl); // Log upload sucesso
 
         // 2. Cria o novo objeto Produto no Back4App
         const novoProduto = new Produto();
         novoProduto.set("nome", productData.nome);
         novoProduto.set("preco", productData.preco);
         novoProduto.set("imagens", [imageUrl]); // Salva a URL da imagem num array
-        // Associa o produto ao usuário dono da loja (opcional, mas pode ser útil)
-        novoProduto.set("dono", Parse.User.current());
+        novoProduto.set("dono", Parse.User.current()); // Associa ao dono (opcional)
+        await novoProduto.save(); // Salva o objeto Produto
+        console.log("Novo produto salvo no Parse:", novoProduto.id); // Log produto salvo
 
-        // Salva o objeto Produto
-        await novoProduto.save();
-        console.log("Novo produto salvo no Parse:", novoProduto.id);
-
-        // 3. Adiciona a relação entre a Loja e o novo Produto
-        const relation = currentLoja.relation("produtos");
-        relation.add(novoProduto); // Adiciona o objeto Produto à relação
-        await currentLoja.save(); // Salva a loja com a nova relação
-        console.log("Produto adicionado à relação da loja.");
+        // 3. Adiciona o ID do novo produto ao ARRAY 'produtos' na Loja
+        currentLoja.addUnique("produtos", novoProduto.id); // Adiciona ID ao array (addUnique evita duplicados)
+        await currentLoja.save(); // Salva a loja com o array atualizado
+        console.log("ID do produto adicionado ao array da loja."); // Log ID adicionado ao array
 
         // 4. Limpa o formulário e atualiza a interface
         document.getElementById('productForm').reset(); // Limpa os campos
-        document.getElementById('imagePreview').style.display = 'none'; // Esconde a miniatura
-        document.getElementById('imagePreview').src = ''; // Limpa a miniatura
+        document.getElementById('imagePreview').style.display = 'none'; // Esconde miniatura
+        document.getElementById('imagePreview').src = ''; // Limpa miniatura
         submitButton.disabled = false; // Reabilita o botão
-        submitButton.innerHTML = '➕ Adicionar Produto'; // Restaura texto do botão
+        submitButton.innerHTML = '➕ Adicionar Produto'; // Restaura texto
 
-        // Adiciona o novo produto à tabela imediatamente (melhor UX que recarregar tudo)
+        // Adiciona o novo produto à tabela imediatamente
         addProductToTable(novoProduto);
 
         alert(`✅ Produto "${productData.nome}" adicionado com sucesso!`);
 
       } catch (error) {
-        console.error("Erro ao adicionar produto:", error);
+        console.error("Erro ao adicionar produto:", error); // Log erro adição
         alert("❌ Erro ao adicionar produto: " + error.message);
-        submitButton.disabled = false; // Reabilita botão em caso de erro
+        submitButton.disabled = false; // Reabilita botão
         submitButton.innerHTML = '➕ Adicionar Produto';
       }
     });
@@ -729,7 +717,6 @@
     // Adiciona uma linha de produto à tabela (usado após adicionar novo produto)
     function addProductToTable(produto) {
         const tbody = document.querySelector('#productsTable tbody');
-        // Remove mensagem de "sem produtos" se existir
         const noProductRow = tbody.querySelector("td[colspan='4']");
         if (noProductRow) {
             noProductRow.parentElement.remove();
@@ -758,26 +745,23 @@
           <td class="text-cell">R$ ${(produto.get("preco") || 0).toFixed(2)}</td>
           <td class="actions-cell">${acoesHtml}</td>
         `;
-        // Adiciona a nova linha no início da tabela (ou no final com appendChild)
-        tbody.prepend(tr);
+        tbody.prepend(tr); // Adiciona no início
 
-        // Reativa o drag-to-scroll para o novo container de imagem
         enableDragToScrollForElement(tr.querySelector('.image-container'));
     }
 
 
     // Listener para o botão de logout
     document.getElementById('logoutBtn').addEventListener('click', async () => {
-      console.log("Iniciando processo de logout...");
+      console.log("Iniciando processo de logout..."); // Log logout
       try {
-        await auth.signOut(); // Faz logout do Firebase
-        console.log("Logout do Firebase concluído.");
-        await Parse.User.logOut(); // Faz logout do Parse
-        console.log("Logout do Parse concluído.");
-        // Redireciona para a página de login após logout bem-sucedido
-        window.location.href = 'index.html';
+        await auth.signOut(); // Logout Firebase
+        console.log("Logout do Firebase concluído."); // Log logout Firebase ok
+        await Parse.User.logOut(); // Logout Parse
+        console.log("Logout do Parse concluído."); // Log logout Parse ok
+        window.location.href = 'index.html'; // Redireciona
       } catch (error) {
-        console.error('Erro no logout:', error);
+        console.error('Erro no logout:', error); // Log erro logout
         alert('❌ Erro ao tentar sair: ' + error.message);
       }
     });
@@ -789,14 +773,13 @@
       if (file) {
         const reader = new FileReader();
         reader.onload = function(e) {
-          preview.src = e.target.result; // Define o src da img com o Data URL
-          preview.style.display = 'block'; // Mostra a imagem de preview
+          preview.src = e.target.result; // Define o src da img
+          preview.style.display = 'block'; // Mostra a imagem
         };
-        reader.readAsDataURL(file); // Lê o arquivo como Data URL
+        reader.readAsDataURL(file); // Lê como Data URL
       } else {
-          // Se nenhum arquivo for selecionado (ou seleção cancelada)
-          preview.style.display = 'none'; // Esconde a preview
-          preview.src = ''; // Limpa o src
+          preview.style.display = 'none'; // Esconde preview
+          preview.src = ''; // Limpa src
       }
     });
 
@@ -804,10 +787,10 @@
 
     // Atualiza o cabeçalho da página com informações do usuário Firebase
     function updateHeader(user) {
-      if (!user) return; // Não faz nada se o usuário for nulo
-      document.getElementById('profilePhoto').src = user.photoURL || 'avatar-padrao.jpeg'; // Usa foto do perfil ou padrão
-      document.getElementById('userName').textContent = user.displayName || user.email || 'Usuário Anônimo'; // Nome, email ou genérico
-      document.getElementById('userEmail').textContent = user.email || ''; // Email
+      if (!user) return;
+      document.getElementById('profilePhoto').src = user.photoURL || 'avatar-padrao.jpeg';
+      document.getElementById('userName').textContent = user.displayName || user.email || 'Usuário Anônimo';
+      document.getElementById('userEmail').textContent = user.email || '';
     }
 
     // Habilita a funcionalidade de arrastar para rolar nos contêineres de imagem
@@ -827,7 +810,7 @@
 
         container.addEventListener('mousedown', (e) => {
             isDown = true;
-            container.style.cursor = 'grabbing'; // Muda cursor ao clicar
+            container.style.cursor = 'grabbing';
             startX = e.pageX - container.offsetLeft;
             scrollLeft = container.scrollLeft;
         });
@@ -835,20 +818,20 @@
         container.addEventListener('mouseleave', () => {
             if (!isDown) return;
             isDown = false;
-            container.style.cursor = 'grab'; // Restaura cursor
+            container.style.cursor = 'grab';
         });
 
         container.addEventListener('mouseup', () => {
              if (!isDown) return;
             isDown = false;
-            container.style.cursor = 'grab'; // Restaura cursor
+            container.style.cursor = 'grab';
         });
 
         container.addEventListener('mousemove', (e) => {
             if (!isDown) return;
-            e.preventDefault(); // Previne seleção de texto ao arrastar
+            e.preventDefault();
             const x = e.pageX - container.offsetLeft;
-            const walk = (x - startX) * 1.5; // Multiplicador para sensibilidade do arraste
+            const walk = (x - startX) * 1.5;
             container.scrollLeft = scrollLeft - walk;
         });
     }
