@@ -286,6 +286,10 @@ const updateTable = (produtos) => {
   produtos.forEach(produto => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
+    	  <td>
+          <button class="btn btn-up" onclick="moveProductUp('${produto.id}')">↑</button>
+          <button class="btn btn-down" onclick="moveProductDown('${produto.id}')">↓</button>
+	   </td>
       <td class="image-cell">
         <div class="image-container">
           ${produto.get("imagens").map(url => 
@@ -297,10 +301,7 @@ const updateTable = (produtos) => {
       <td class="text-cell">R$ ${produto.get("preco").toFixed(2)}</td>
       <td class="actions-cell">
         <div class="actions-container">
-	  <td>
-          <button class="btn btn-up" onclick="moveProductUp('${produto.id}')">↑</button>
-          <button class="btn btn-down" onclick="moveProductDown('${produto.id}')">↓</button>
-	   </td>
+
            <td>
           <button class="btn btn-edit" onclick="editProduct('${produto.id}')">Editar</button>
           <button class="btn btn-delete" onclick="deleteProduct('${produto.id}')">Excluir</button>
