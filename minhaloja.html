@@ -100,27 +100,44 @@
       padding: 1rem 0.8rem;
       text-align: left;
       border-bottom: 1px solid #e0e0e0;
-      vertical-align: middle;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      vertical-align: middle; /* Alterado para middle para alinhar melhor com botões */
+      /* white-space: nowrap; */ /* Removido para permitir quebra de linha */
+      overflow: hidden; /* Mantido para caso de texto muito longo */
+      text-overflow: ellipsis; /* Mantido */
     }
+
+     /* Célula de Produto/Preço */
+     td.product-details-cell {
+        white-space: normal; /* Permite quebra de linha */
+        line-height: 1.4; /* Ajusta espaçamento entre nome e preço */
+        vertical-align: top; /* Alinha conteúdo no topo */
+     }
 
     th {
       background-color: #f8f9fa;
       font-weight: 600;
       color: #495057;
+      white-space: nowrap; /* Cabeçalho não quebra linha */
     }
 
     tr:hover {
       background-color: #f1f1f1;
     }
 
-    /* Larguras das colunas */
-    .image-cell { width: 60%; } /* Ajustado */
-    .text-cell { width: 10%; }
-    .order-cell { width: 10%; text-align: center; } /* Nova coluna Ordem */
-    .actions-cell { width: 10%; text-align: center;}
+    /* Larguras das colunas - AJUSTADAS */
+    .image-cell { width: 40%; }
+    .product-details-cell { width: 25%; } /* Coluna combinada Produto/Preço */
+    .order-cell { width: 10%; text-align: center; }
+    .actions-cell { width: 15%; text-align: center;} /* Total: 90% */
+
+    /* Estilo para o preço abaixo do nome */
+    .product-price-inline {
+        display: block; /* Faz o preço ir para a linha de baixo */
+        font-size: 0.9em; /* Fonte um pouco menor */
+        color: #555; /* Cor cinza escuro */
+        margin-top: 4px; /* Pequeno espaço acima do preço */
+    }
+
 
     /* Imagens na Tabela */
     .product-image {
@@ -155,33 +172,27 @@
      /* Contêiner de Ordem e Ações */
     .order-container, .actions-container {
       display: flex;
-      flex-direction: column; /* Itens empilhados */
+      flex-direction: column;
       gap: 8px;
-      align-items: center; /* Centraliza itens */
-      justify-content: center; /* Centraliza verticalmente */
-      height: 100%; /* Ocupa altura da célula */
+      align-items: center;
+      justify-content: center;
+      height: 100%;
     }
 
     /* Botões de Ordenação */
     .btn-order {
-      background-color: #6c757d; /* Cinza */
+      background-color: #6c757d;
       color: white;
       border: none;
       border-radius: 4px;
-      padding: 4px 8px; /* Menor padding */
+      padding: 4px 8px;
       cursor: pointer;
-      font-size: 0.8rem; /* Tamanho menor */
-      line-height: 1; /* Ajuste linha */
+      font-size: 0.8rem;
+      line-height: 1;
       transition: background-color 0.2s ease;
     }
-    .btn-order:hover:not(:disabled) {
-       background-color: #5a6268;
-    }
-    .btn-order:disabled {
-        background-color: #adb5bd; /* Cinza mais claro para desabilitado */
-        cursor: not-allowed;
-        opacity: 0.7;
-    }
+    .btn-order:hover:not(:disabled) { background-color: #5a6268; }
+    .btn-order:disabled { background-color: #adb5bd; cursor: not-allowed; opacity: 0.7; }
 
 
     /* Formulário */
@@ -206,64 +217,31 @@
     }
 
     /* Upload de Imagem */
-    .image-upload {
-        display: flex;
-        align-items: center;
-        gap: 0.8rem;
-    }
-
+    .image-upload { display: flex; align-items: center; gap: 0.8rem; }
     .image-upload input[type="file"] { display: none; }
-
     .upload-label {
-      background-color: #2196F3;
-      color: white;
-      padding: 10px 15px;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-      font-size: 0.9rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
+      background-color: #2196F3; color: white; padding: 10px 15px;
+      border-radius: 6px; cursor: pointer; transition: background-color 0.3s ease;
+      font-size: 0.9rem; display: inline-flex; align-items: center; gap: 5px;
     }
     .upload-label:hover { background-color: #1976D2; }
-
     #imagePreview {
-      max-height: 50px;
-      max-width: 50px;
-      margin: 0;
-      border-radius: 4px;
-      border: 1px solid #ddd;
-      display: none;
-      object-fit: cover;
+      max-height: 50px; max-width: 50px; margin: 0; border-radius: 4px;
+      border: 1px solid #ddd; display: none; object-fit: cover;
     }
 
     /* Botões Gerais */
     .btn {
-      padding: 10px 18px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-size: 0.9rem;
-      font-weight: 500;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+      padding: 10px 18px; border: none; border-radius: 6px; cursor: pointer;
+      transition: all 0.3s ease; font-size: 0.9rem; font-weight: 500;
+      display: inline-flex; align-items: center; gap: 5px;
+      text-transform: uppercase; letter-spacing: 0.5px;
     }
-     .btn:disabled {
-        cursor: not-allowed;
-        opacity: 0.6;
-    }
-
+     .btn:disabled { cursor: not-allowed; opacity: 0.6; }
     .btn-edit { background-color: #4CAF50; color: white; }
     .btn-edit:hover:not(:disabled) { background-color: #45a049; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-
     .btn-delete { background-color: #f44336; color: white; }
     .btn-delete:hover:not(:disabled) { background-color: #e53935; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-
     .btn-secondary { background-color: #6c757d; color: white; }
     .btn-secondary:hover:not(:disabled) { background-color: #5a6268; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
 
@@ -272,12 +250,12 @@
         .profile-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
         #productForm { flex-direction: column; align-items: stretch; }
         input[type="text"], input[type="number"], .image-upload, .btn { width: 100%; box-sizing: border-box; }
-        .actions-cell, .order-cell { text-align: left; } /* Alinha à esquerda */
-        .actions-container, .order-container { flex-direction: row; flex-wrap: wrap; justify-content: flex-start; } /* Lado a lado */
-        th, td { white-space: normal; overflow: visible; text-overflow: clip; }
-        .image-cell, .text-cell, .actions-cell, .order-cell { width: auto; } /* Largura automática */
+        .actions-cell, .order-cell { text-align: left; }
+        .actions-container, .order-container { flex-direction: row; flex-wrap: wrap; justify-content: flex-start; }
+        th, td { /* white-space: normal; */ overflow: visible; text-overflow: clip; } /* Mantém nowrap no TH, normal no TD */
+        td.product-details-cell { white-space: normal; } /* Garante quebra de linha nesta célula */
+        .image-cell, .product-details-cell, .actions-cell, .order-cell { width: auto; } /* Largura automática */
 
-        /* Ajuste fino para botões em telas pequenas */
         .order-container .btn-order { padding: 6px 10px; font-size: 0.9rem; }
         .actions-container .btn { padding: 8px 12px; }
     }
@@ -324,9 +302,8 @@
       <thead>
         <tr>
           <th class="image-cell">Imagens</th>
-          <th class="text-cell">Produto</th>
-          <th class="text-cell">Preço</th>
-          <th class="order-cell">Ordem</th> <th class="actions-cell">Ações</th>
+          <th class="product-details-cell">Produto</th> <th class="order-cell">Ordem</th>
+          <th class="actions-cell">Ações</th>
         </tr>
       </thead>
       <tbody>
@@ -354,10 +331,11 @@
     const app = firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     let currentLoja = null;
-    let isLoadingProducts = false; // Flag para evitar múltiplas chamadas
+    let isLoadingProducts = false;
 
-    // --- Lógica Principal ---
-    auth.onAuthStateChanged(async (user) => {
+    // --- Lógica Principal (Autenticação, Criação/Verificação de Loja) ---
+    // (Mantida igual à versão anterior)
+     auth.onAuthStateChanged(async (user) => {
       if (user) {
         console.log("Usuário autenticado:", user.uid);
         try {
@@ -370,10 +348,8 @@
                 if (loginError.code === Parse.Error.OBJECT_NOT_FOUND) {
                     console.log("Usuário não encontrado no Parse. Tentando cadastrar...");
                     const newUser = new Parse.User();
-                    newUser.set("username", user.uid);
-                    newUser.set("password", user.uid);
-                    newUser.set("email", user.email);
-                    newUser.set("firebaseUID", user.uid);
+                    newUser.set("username", user.uid); newUser.set("password", user.uid);
+                    newUser.set("email", user.email); newUser.set("firebaseUID", user.uid);
                     try {
                         await newUser.signUp();
                         console.log("Novo usuário cadastrado e logado no Parse.");
@@ -391,30 +367,23 @@
           } else {
             console.log("Sessão Parse já existente.");
           }
-
           await checkOrCreateLoja();
           updateHeader(user);
-          if (currentLoja) {
-             loadProducts();
-          }
-
+          if (currentLoja) { loadProducts(); }
         } catch (error) {
-          console.error("Erro durante a inicialização do usuário:", error);
+          console.error("Erro durante a inicialização:", error);
           alert("Ocorreu um erro ao carregar seus dados: " + error.message);
           window.location.href = 'index.html';
         }
       } else {
-        console.log("Usuário não autenticado. Redirecionando para login.");
+        console.log("Usuário não autenticado. Redirecionando...");
         window.location.href = 'index.html';
       }
     });
 
-    const checkOrCreateLoja = async () => {
+     const checkOrCreateLoja = async () => {
       const currentUser = Parse.User.current();
-      if (!currentUser) {
-          console.error("Tentativa de verificar loja sem usuário Parse logado.");
-          alert("Erro: Usuário não sincronizado."); return;
-      }
+      if (!currentUser) { console.error("Usuário Parse não logado."); alert("Erro: Usuário não sincronizado."); return; }
       const query = new Parse.Query(Loja);
       query.equalTo("dono", currentUser);
       try {
@@ -423,102 +392,74 @@
             console.log("Nenhuma loja encontrada. Solicitando criação.");
             const nomeLoja = prompt("📢 Bem-vindo! Digite um nome para sua nova loja:");
             if (!nomeLoja || nomeLoja.trim() === "") {
-                alert("❌ Nome da loja inválido.");
-                document.getElementById('nomeLoja').textContent = "Crie uma loja!";
+                alert("❌ Nome inválido."); document.getElementById('nomeLoja').textContent = "Crie uma loja!";
                 document.getElementById('reputacaoLoja').textContent = ""; return;
             }
-            console.log("Criando nova loja:", nomeLoja);
+            console.log("Criando loja:", nomeLoja);
             currentLoja = new Loja();
-            currentLoja.set("nome", nomeLoja.trim());
-            currentLoja.set("dono", currentUser);
-            currentLoja.set("produtos", []); // Inicializa array de produtos
-            currentLoja.set("reputacao", 0);
+            currentLoja.set("nome", nomeLoja.trim()); currentLoja.set("dono", currentUser);
+            currentLoja.set("produtos", []); currentLoja.set("reputacao", 0);
             await currentLoja.save();
-            console.log("Loja criada:", currentLoja.id);
-            alert(`🎉 Loja "${nomeLoja}" criada!`);
+            console.log("Loja criada:", currentLoja.id); alert(`🎉 Loja "${nomeLoja}" criada!`);
           } else {
               console.log("Loja encontrada:", currentLoja.id, "Nome:", currentLoja.get("nome"));
-              // Garante que o campo 'produtos' existe e é um array
               if (!Array.isArray(currentLoja.get("produtos"))) {
-                  console.warn("Campo 'produtos' não é um array. Inicializando.");
-                  currentLoja.set("produtos", []);
-                  await currentLoja.save(); // Salva a correção
+                  console.warn("Campo 'produtos' não é array. Inicializando.");
+                  currentLoja.set("produtos", []); await currentLoja.save();
               }
           }
           document.getElementById('nomeLoja').textContent = currentLoja.get("nome");
           document.getElementById('reputacaoLoja').textContent = "Reputação: " + currentLoja.get("reputacao");
       } catch (error) {
           console.error("Erro ao verificar/criar loja:", error);
-          alert("Erro ao carregar/criar sua loja: " + error.message);
+          alert("Erro ao carregar/criar loja: " + error.message);
       }
     };
 
     // Carrega os produtos BASEADO NA ORDEM DO ARRAY 'produtos' da loja
     const loadProducts = async () => {
-       if (!currentLoja || isLoadingProducts) {
-           console.warn("Carregamento de produtos pulado (sem loja ou já em andamento).");
-           return;
-       }
-       isLoadingProducts = true; // Define a flag
-       console.log("Iniciando carregamento de produtos...");
-       setTableLoading(true); // Mostra feedback de carregamento na tabela
+       if (!currentLoja || isLoadingProducts) { console.warn("Carregamento pulado."); return; }
+       isLoadingProducts = true; console.log("Iniciando carregamento...");
+       setTableLoading(true);
 
        const productIds = currentLoja.get("produtos") || [];
-
        if (productIds.length === 0) {
-          console.log("Nenhum ID de produto na loja.");
-          updateTable([]); // Mostra tabela vazia
-          isLoadingProducts = false; // Reseta a flag
-          setTableLoading(false);
-          return;
+          console.log("Nenhum ID na loja."); updateTable([]);
+          isLoadingProducts = false; setTableLoading(false); return;
        }
-
-       console.log("Carregando produtos com IDs (na ordem do array):", productIds);
-
+       console.log("Carregando IDs (na ordem):", productIds);
        const query = new Parse.Query(Produto);
        query.containedIn("objectId", productIds);
-       // NÃO ordene aqui (query.ascending/descending)
-       // A ordem virá do array productIds
 
        try {
-         const results = await query.find();
-         console.log("Produtos encontrados:", results.length);
-
-         // Reordena os resultados para GARANTIR a ordem do array 'productIds'
-         const orderedResults = productIds.map(id => results.find(p => p.id === id)).filter(p => p); // Encontra cada produto na ordem e filtra nulos
-
-         if (orderedResults.length !== results.length) {
-             console.warn("Alguns produtos do array não foram encontrados na busca.");
-             // Poderia adicionar lógica para limpar IDs órfãos do array aqui
-         }
-
-         console.log("Produtos reordenados conforme array:", orderedResults.map(p => p.id));
-         updateTable(orderedResults); // Atualiza a tabela com os produtos na ordem correta
-
+         const results = await query.find(); console.log("Produtos encontrados:", results.length);
+         const orderedResults = productIds.map(id => results.find(p => p.id === id)).filter(p => p);
+         if (orderedResults.length !== results.length) { console.warn("Alguns produtos não encontrados."); }
+         console.log("Produtos reordenados:", orderedResults.map(p => p.id));
+         updateTable(orderedResults); // Atualiza a tabela com a ordem correta
        } catch (error) {
          console.error("Erro ao carregar produtos:", error);
-         alert("Erro ao carregar produtos da loja: " + error.message);
-         document.querySelector('#productsTable tbody').innerHTML = `<tr><td colspan='5'>Erro ao carregar produtos: ${error.message}</td></tr>`; // Colspan 5 agora
+         alert("Erro ao carregar produtos: " + error.message);
+         document.querySelector('#productsTable tbody').innerHTML = `<tr><td colspan='4'>Erro: ${error.message}</td></tr>`; // Colspan 4
        } finally {
-           isLoadingProducts = false; // Reseta a flag
-           setTableLoading(false); // Remove feedback de carregamento
+           isLoadingProducts = false; setTableLoading(false);
        }
     };
 
-    // Atualiza a tabela HTML com a lista de produtos (na ordem recebida)
+    // Atualiza a tabela HTML com a lista de produtos
     const updateTable = (produtos) => {
       const tbody = document.querySelector('#productsTable tbody');
-      tbody.innerHTML = ""; // Limpa tabela
+      tbody.innerHTML = "";
 
-      // Pega a ordem atual dos IDs diretamente da loja para referência dos botões
       const currentProductIds = currentLoja.get("produtos") || [];
 
       if (!produtos || produtos.length === 0) {
-          tbody.innerHTML = "<tr><td colspan='5' style='text-align:center; padding: 20px;'>🛒 Sua loja ainda não tem produtos.</td></tr>"; // Colspan 5
+          // Atualiza colspan para 4 colunas
+          tbody.innerHTML = "<tr><td colspan='4' style='text-align:center; padding: 20px;'>🛒 Sua loja ainda não tem produtos.</td></tr>";
           return;
       }
 
-      produtos.forEach((produto, index) => { // Usa o índice da lista ordenada recebida
+      produtos.forEach((produto, index) => {
         const tr = document.createElement('tr');
         tr.dataset.productId = produto.id;
 
@@ -528,8 +469,13 @@
             ? imagens.map(url => `<img src="${url}" class="product-image" alt="Imagem" onerror="this.src='placeholder.png';">`).join('')
             : '<span>Sem imagem</span>';
 
+        // --- Célula Combinada: Produto e Preço ---
+        const productDetailsHtml = `
+            ${produto.get("nome") || 'Sem nome'}
+            <span class="product-price-inline">R$ ${(produto.get("preco") || 0).toFixed(2)}</span>
+        `;
+
         // Botões de Ordem
-        // O índice aqui é o da lista 'produtos' recebida, que deve espelhar currentProductIds
         const isFirst = index === 0;
         const isLast = index === produtos.length - 1;
         const orderButtonsHtml = `
@@ -547,209 +493,114 @@
           </div>
         `;
 
+        // Monta a linha da tabela (4 células agora)
         tr.innerHTML = `
           <td class="image-cell"><div class="image-container">${imagensHtml}</div></td>
-          <td class="text-cell">${produto.get("nome") || 'Sem nome'}</td>
-          <td class="text-cell">R$ ${(produto.get("preco") || 0).toFixed(2)}</td>
-          <td class="order-cell">${orderButtonsHtml}</td> <td class="actions-cell">${actionButtonsHtml}</td>
+          <td class="product-details-cell">${productDetailsHtml}</td> <td class="order-cell">${orderButtonsHtml}</td>
+          <td class="actions-cell">${actionButtonsHtml}</td>
         `;
         tbody.appendChild(tr);
       });
 
-      enableDragToScroll(); // Reativa drag-scroll para imagens
+      enableDragToScroll();
     };
 
-    // Função para MOVER um produto para cima ou para baixo na ordem
+    // Função para MOVER um produto na ordem
+    // (Mantida igual à versão anterior)
     window.moveProduct = async (productId, direction) => {
-        if (!currentLoja || isLoadingProducts) return; // Impede ação se não houver loja ou estiver carregando
-
-        console.log(`Tentando mover produto ${productId} para ${direction}`);
-        setOrderButtonsLoading(true); // Desabilita botões de ordem durante a operação
-
+        if (!currentLoja || isLoadingProducts) return;
+        console.log(`Movendo ${productId} ${direction}`);
+        setOrderButtonsLoading(true);
         let productIds = currentLoja.get("produtos") || [];
         const currentIndex = productIds.indexOf(productId);
-
-        if (currentIndex === -1) {
-            console.error("ID do produto não encontrado no array da loja.");
-            setOrderButtonsLoading(false);
-            return;
-        }
-
+        if (currentIndex === -1) { console.error("ID não encontrado."); setOrderButtonsLoading(false); return; }
         let newIndex;
-        if (direction === 'up' && currentIndex > 0) {
-            newIndex = currentIndex - 1;
-        } else if (direction === 'down' && currentIndex < productIds.length - 1) {
-            newIndex = currentIndex + 1;
-        } else {
-            console.log("Movimento inválido (já no topo ou na base).");
-            setOrderButtonsLoading(false);
-            return; // Movimento inválido
-        }
-
-        // Cria novo array com a ordem trocada
-        const newProductIds = [...productIds]; // Copia o array
-        [newProductIds[currentIndex], newProductIds[newIndex]] = [newProductIds[newIndex], newProductIds[currentIndex]]; // Troca os elementos
-
-        console.log("Nova ordem de IDs:", newProductIds);
-
-        // Atualiza a loja no Parse
+        if (direction === 'up' && currentIndex > 0) { newIndex = currentIndex - 1; }
+        else if (direction === 'down' && currentIndex < productIds.length - 1) { newIndex = currentIndex + 1; }
+        else { console.log("Movimento inválido."); setOrderButtonsLoading(false); return; }
+        const newProductIds = [...productIds];
+        [newProductIds[currentIndex], newProductIds[newIndex]] = [newProductIds[newIndex], newProductIds[currentIndex]];
+        console.log("Nova ordem:", newProductIds);
         currentLoja.set("produtos", newProductIds);
         try {
-            await currentLoja.save();
-            console.log("Ordem salva no Parse.");
-            // Recarrega a lista para refletir a nova ordem salva
-            await loadProducts();
+            await currentLoja.save(); console.log("Ordem salva.");
+            await loadProducts(); // Recarrega para refletir
         } catch (error) {
-            console.error("Erro ao salvar nova ordem:", error);
-            alert("Erro ao salvar a nova ordem: " + error.message);
-            // Poderia tentar reverter a mudança localmente, mas recarregar é mais seguro
-            await loadProducts(); // Recarrega mesmo em caso de erro para garantir consistência visual
-        } finally {
-             // Botões serão reabilitados pelo loadProducts que chama setTableLoading(false) -> setOrderButtonsLoading(false)
-             // setOrderButtonsLoading(false); // Reabilita botões (feito pelo finally do loadProducts)
+            console.error("Erro ao salvar ordem:", error); alert("Erro ao salvar ordem: " + error.message);
+            await loadProducts(); // Recarrega mesmo com erro
         }
     };
 
 
     // Função para deletar um produto
+    // (Mantida igual, mas loadProducts no final atualizará corretamente)
     window.deleteProduct = async (id) => {
-      if (!confirm("❓ Tem certeza que deseja excluir este produto?")) return;
+      if (!confirm("❓ Excluir este produto?")) return;
       if (!currentLoja) { alert("❌ Erro: Loja não encontrada."); return; }
-      console.log("Tentando excluir produto:", id);
-      setTableLoading(true); // Desabilita botões durante a exclusão
-
+      console.log("Excluindo produto:", id);
+      setTableLoading(true);
       try {
-        // Remove ID do array na Loja
-        currentLoja.remove("produtos", id);
-        await currentLoja.save();
-        console.log("ID removido do array da loja.");
-
-        // Deleta o objeto Produto
-        const query = new Parse.Query(Produto);
-        const produto = await query.get(id);
-        await produto.destroy();
-        console.log("Objeto produto destruído:", id);
-
-        // Remove linha da tabela (ou recarrega)
-        // const rowToRemove = document.querySelector(`tr[data-product-id="${id}"]`);
-        // if (rowToRemove) rowToRemove.remove();
+        currentLoja.remove("produtos", id); await currentLoja.save(); console.log("ID removido.");
+        const query = new Parse.Query(Produto); const produto = await query.get(id);
+        await produto.destroy(); console.log("Objeto destruído:", id);
         alert("✅ Produto excluído!");
-        await loadProducts(); // Recarrega para atualizar a tabela e ordem
-
+        await loadProducts(); // Recarrega
       } catch (error) {
-        console.error("Erro na exclusão:", error);
-        alert("❌ Erro ao excluir: " + error.message);
-        setTableLoading(false); // Reabilita botões se houve erro
+        console.error("Erro na exclusão:", error); alert("❌ Erro ao excluir: " + error.message);
+        setTableLoading(false); // Reabilita em caso de erro aqui
       }
-       // finally não é necessário aqui pois loadProducts já chama setTableLoading(false)
     };
 
-    // Função para redirecionar para a página de edição
-    window.editProduct = (id) => {
-        console.log("Redirecionando para editar:", id);
-        window.location.href = `editar.html?id=${id}`;
-    }
+    // Função para redirecionar para edição
+    window.editProduct = (id) => { console.log("Editando:", id); window.location.href = `editar.html?id=${id}`; }
 
-    // --- Event Listeners ---
-
-    // Listener para o formulário de adicionar produto
-    document.getElementById('productForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      if (!currentLoja) { alert("⚠️ Crie uma loja primeiro!"); return; }
-
-      const nomeInput = document.getElementById('productName');
-      const precoInput = document.getElementById('productPrice');
-      const imagemInput = document.getElementById('productImage');
-      const submitButton = e.target.querySelector('button[type="submit"]');
-
-      const productData = {
-        nome: nomeInput.value.trim(),
-        preco: parseFloat(precoInput.value),
-        imagemFile: imagemInput.files[0]
-      };
-
-      if (!productData.nome || isNaN(productData.preco) || productData.preco <= 0 || !productData.imagemFile) {
-          alert("❌ Preencha todos os campos corretamente (nome, preço > 0, imagem)."); return;
-      }
-
-      console.log("Adicionando produto:", productData.nome);
-      submitButton.disabled = true; submitButton.textContent = 'Enviando...';
-
+    // --- Event Listeners (Formulário, Logout, Preview) ---
+    // (Mantidos iguais à versão anterior)
+     document.getElementById('productForm').addEventListener('submit', async (e) => {
+      e.preventDefault(); if (!currentLoja) { alert("⚠️ Crie uma loja!"); return; }
+      const nomeInput = document.getElementById('productName'); const precoInput = document.getElementById('productPrice');
+      const imagemInput = document.getElementById('productImage'); const submitButton = e.target.querySelector('button[type="submit"]');
+      const productData = { nome: nomeInput.value.trim(), preco: parseFloat(precoInput.value), imagemFile: imagemInput.files[0] };
+      if (!productData.nome || isNaN(productData.preco) || productData.preco <= 0 || !productData.imagemFile) { alert("❌ Preencha tudo."); return; }
+      console.log("Adicionando:", productData.nome); submitButton.disabled = true; submitButton.textContent = 'Enviando...';
       try {
-        // Upload imagem
-        console.log("Fazendo upload...");
-        const parseFile = new Parse.File(productData.imagemFile.name, productData.imagemFile);
-        await parseFile.save();
-        const imageUrl = parseFile.url();
-        console.log("Upload concluído:", imageUrl);
-
-        // Cria Produto
+        console.log("Upload..."); const parseFile = new Parse.File(productData.imagemFile.name, productData.imagemFile);
+        await parseFile.save(); const imageUrl = parseFile.url(); console.log("Upload ok:", imageUrl);
         const novoProduto = new Produto();
-        novoProduto.set("nome", productData.nome);
-        novoProduto.set("preco", productData.preco);
-        novoProduto.set("imagens", [imageUrl]);
-        novoProduto.set("dono", Parse.User.current());
-        await novoProduto.save();
-        console.log("Produto salvo:", novoProduto.id);
-
-        // Adiciona ID ao INÍCIO do array da Loja
-        currentLoja.addUnique("produtos", novoProduto.id); // Adiciona normalmente
-        // Pega o array atual, remove o ID e adiciona no início
+        novoProduto.set("nome", productData.nome); novoProduto.set("preco", productData.preco);
+        novoProduto.set("imagens", [imageUrl]); novoProduto.set("dono", Parse.User.current());
+        await novoProduto.save(); console.log("Produto salvo:", novoProduto.id);
         let currentIds = currentLoja.get("produtos") || [];
-        currentIds = currentIds.filter(id => id !== novoProduto.id); // Remove se já existir (caso addUnique falhe)
-        currentIds.unshift(novoProduto.id); // Adiciona no início
-        currentLoja.set("produtos", currentIds); // Define o novo array ordenado
-
-        await currentLoja.save();
-        console.log("ID adicionado ao início do array da loja.");
-
-        // Limpa form e recarrega
-        document.getElementById('productForm').reset();
-        document.getElementById('imagePreview').style.display = 'none';
-        document.getElementById('imagePreview').src = '';
-        alert(`✅ Produto "${productData.nome}" adicionado!`);
-        await loadProducts(); // Recarrega para mostrar na nova ordem
-
+        currentIds = currentIds.filter(id => id !== novoProduto.id); currentIds.unshift(novoProduto.id);
+        currentLoja.set("produtos", currentIds); await currentLoja.save(); console.log("ID adicionado ao início.");
+        document.getElementById('productForm').reset(); document.getElementById('imagePreview').style.display = 'none';
+        document.getElementById('imagePreview').src = ''; alert(`✅ Produto "${productData.nome}" adicionado!`);
+        await loadProducts(); // Recarrega
       } catch (error) {
-        console.error("Erro ao adicionar:", error);
-        alert("❌ Erro ao adicionar: " + error.message);
-      } finally {
-          submitButton.disabled = false; submitButton.innerHTML = '➕ Adicionar Produto';
-      }
+        console.error("Erro ao adicionar:", error); alert("❌ Erro ao adicionar: " + error.message);
+      } finally { submitButton.disabled = false; submitButton.innerHTML = '➕ Adicionar Produto'; }
     });
 
-    // Listener para o botão de logout
     document.getElementById('logoutBtn').addEventListener('click', async () => {
-      console.log("Iniciando logout...");
+      console.log("Logout...");
       try {
         await auth.signOut(); console.log("Logout Firebase ok.");
         await Parse.User.logOut(); console.log("Logout Parse ok.");
         window.location.href = 'index.html';
-      } catch (error) {
-        console.error('Erro no logout:', error);
-        alert('❌ Erro ao sair: ' + error.message);
-      }
+      } catch (error) { console.error('Erro logout:', error); alert('❌ Erro ao sair: ' + error.message); }
     });
 
-    // Listener para preview da imagem
     document.getElementById('productImage').addEventListener('change', function(event) {
-      const file = event.target.files[0];
-      const preview = document.getElementById('imagePreview');
+      const file = event.target.files[0]; const preview = document.getElementById('imagePreview');
       if (file) {
         const reader = new FileReader();
-        reader.onload = function(e) {
-          preview.src = e.target.result;
-          preview.style.display = 'block';
-        };
+        reader.onload = function(e) { preview.src = e.target.result; preview.style.display = 'block'; };
         reader.readAsDataURL(file);
-      } else {
-          preview.style.display = 'none'; preview.src = '';
-      }
+      } else { preview.style.display = 'none'; preview.src = ''; }
     });
 
-    // --- Funções Auxiliares ---
-
-    // Atualiza cabeçalho com dados do usuário
+    // --- Funções Auxiliares (updateHeader, setTableLoading, enableDragToScroll) ---
+    // (Mantidas iguais à versão anterior)
     function updateHeader(user) {
       if (!user) return;
       document.getElementById('profilePhoto').src = user.photoURL || 'avatar-padrao.jpeg';
@@ -757,44 +608,35 @@
       document.getElementById('userEmail').textContent = user.email || '';
     }
 
-    // Habilita/desabilita botões da tabela durante carregamento/ações
-    function setTableLoading(isLoading) {
+     function setTableLoading(isLoading) {
         const buttons = document.querySelectorAll('#productsTable .btn, #productsTable .btn-order');
         buttons.forEach(btn => btn.disabled = isLoading);
-        // Poderia adicionar um spinner/overlay na tabela também
         console.log(`Table buttons ${isLoading ? 'disabled' : 'enabled'}`);
-        // Garante que os botões de ordem sejam especificamente controlados
-        setOrderButtonsLoading(isLoading);
+        setOrderButtonsLoading(isLoading); // Controla especificamente botões de ordem
     }
 
-    // Habilita/desabilita APENAS os botões de ordem
     function setOrderButtonsLoading(isLoading) {
         const orderButtons = document.querySelectorAll('#productsTable .btn-order');
         orderButtons.forEach(btn => {
-            // Mantém desabilitado se já estiver (ex: primeiro/último item)
-            if (!isLoading && (btn.classList.contains('btn-move-up') || btn.classList.contains('btn-move-down'))) {
-                 // Reavalia se deve estar desabilitado com base na nova ordem (feito em updateTable)
-            } else {
-                btn.disabled = isLoading;
-            }
+            // Se não estiver carregando, a re-habilitação será feita pelo updateTable
+            // que verifica isFirst/isLast. Aqui só desabilitamos se isLoading=true.
+             if (isLoading) {
+                 btn.disabled = true;
+             }
+             // A re-habilitação correta (considerando isFirst/isLast) ocorrerá no updateTable
         });
-         console.log(`Order buttons ${isLoading ? 'disabled' : 'enabled'}`);
+         // console.log(`Order buttons ${isLoading ? 'disabled' : 'enabled (conditionally)'}`); // Log mais preciso
     }
 
-
-    // Habilita drag-scroll para containers de imagem
-    function enableDragToScroll() {
-        document.querySelectorAll('.image-container').forEach(enableDragToScrollForElement);
-    }
+    function enableDragToScroll() { document.querySelectorAll('.image-container').forEach(enableDragToScrollForElement); }
     function enableDragToScrollForElement(container) {
-        if (!container) return;
-        let isDown = false, startX, scrollLeft;
-        container.addEventListener('mousedown', (e) => { isDown = true; container.style.cursor = 'grabbing'; startX = e.pageX - container.offsetLeft; scrollLeft = container.scrollLeft; });
-        container.addEventListener('mouseleave', () => { if (!isDown) return; isDown = false; container.style.cursor = 'grab'; });
-        container.addEventListener('mouseup', () => { if (!isDown) return; isDown = false; container.style.cursor = 'grab'; });
-        container.addEventListener('mousemove', (e) => { if (!isDown) return; e.preventDefault(); const x = e.pageX - container.offsetLeft; const walk = (x - startX) * 1.5; container.scrollLeft = scrollLeft - walk; });
+      if (!container) return; let isDown = false, startX, scrollLeft;
+      container.addEventListener('mousedown', (e) => { isDown = true; container.style.cursor = 'grabbing'; startX = e.pageX - container.offsetLeft; scrollLeft = container.scrollLeft; });
+      container.addEventListener('mouseleave', () => { if (!isDown) return; isDown = false; container.style.cursor = 'grab'; });
+      container.addEventListener('mouseup', () => { if (!isDown) return; isDown = false; container.style.cursor = 'grab'; });
+      container.addEventListener('mousemove', (e) => { if (!isDown) return; e.preventDefault(); const x = e.pageX - container.offsetLeft; const walk = (x - startX) * 1.5; container.scrollLeft = scrollLeft - walk; });
     }
-    enableDragToScroll(); // Inicializa
+    enableDragToScroll();
 
   </script>
 </body>
