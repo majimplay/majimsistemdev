@@ -225,7 +225,7 @@
     }
 
  // Funções do Carrinho (Modificadas para usar Parse)
-    async function addToCart(productId) {
+   async function addToCart(productId) {
       if (!currentUser) {
         alert("Faça login para adicionar produtos ao carrinho!");
         return;
@@ -234,9 +234,14 @@
       try {
         const User = Parse.Object.extend("_User");
         const query = new Parse.Query(User);
-      query.equalTo("username", currentUser.uid); // Busca pelo UID no campo username
-        const parseUser = await query.first(); // Pega o primeiro resultado
-        
+        query.equalTo("username", currentUser.uid); 
+        const parseUser = await query.first();
+
+        // Verificação crítica
+        if (!parseUser) {
+          throw new Error("Usuário não encontrado no Parse!");
+        }
+
         let carrinho = parseUser.get("carrinho") || {};
         
         if (carrinho[productId]) {
@@ -262,8 +267,14 @@
       try {
         const User = Parse.Object.extend("_User");
         const query = new Parse.Query(User);
-         query.equalTo("username", currentUser.uid); // Busca pelo UID no campo username
+        query.equalTo("username", currentUser.uid);
         const parseUser = await query.first();
+
+        // Verificação crítica
+        if (!parseUser) {
+          document.getElementById('cartItems').innerHTML = 'Erro ao carregar carrinho';
+          return;
+        }
         const carrinho = parseUser.get("carrinho") || {};
         const produtos = await getProdutosCarrinho(carrinho);
         let total = 0;
