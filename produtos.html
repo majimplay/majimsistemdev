@@ -224,7 +224,7 @@
       }
     }
 
-    // Funções do Carrinho
+ // Funções do Carrinho (Modificadas para usar Parse)
     async function addToCart(productId) {
       if (!currentUser) {
         alert("Faça login para adicionar produtos ao carrinho!");
@@ -232,10 +232,12 @@
       }
 
       try {
-        const userCartRef = database.ref(`users/${currentUser.uid}/carrinho`);
-        const snapshot = await userCartRef.once('value');
-        const carrinho = snapshot.val() || {};
+        const User = Parse.Object.extend("_User");
+        const query = new Parse.Query(User);
+        const parseUser = await query.get(currentUser.uid); // Busca usuário pelo objectId (igual ao UID do Firebase)
 
+        let carrinho = parseUser.get("carrinho") || {};
+        
         if (carrinho[productId]) {
           carrinho[productId].quantidade += 1;
         } else {
@@ -245,19 +247,23 @@
           };
         }
 
-        await userCartRef.set(carrinho);
+        parseUser.set("carrinho", carrinho);
+        await parseUser.save();
         await loadCart();
       } catch (error) {
         console.error("Erro ao atualizar carrinho:", error);
       }
     }
 
-    async function loadCart() {
+  async function loadCart() {
       if (!currentUser) return;
 
       try {
-        const snapshot = await database.ref(`users/${currentUser.uid}/carrinho`).once('value');
-        const carrinho = snapshot.val() || {};
+        const User = Parse.Object.extend("_User");
+        const query = new Parse.Query(User);
+        const parseUser = await query.get(currentUser.uid);
+        const carrinho = parseUser.get("carrinho") || {};
+        
         const produtos = await getProdutosCarrinho(carrinho);
         
         let total = 0;
@@ -282,6 +288,7 @@
       }
     }
 
+
     async function getProdutosCarrinho(carrinho) {
       const Produto = Parse.Object.extend("Produto");
       const query = new Parse.Query(Produto);
@@ -289,44 +296,45 @@
       return await query.find();
     }
 
-    async function finalizarCompra() {
+   async function finalizarCompra() {
       if (!currentUser) {
         alert("Faça login para finalizar a compra!");
         return;
       }
 
       try {
-        const snapshot = await database.ref(`users/${currentUser.uid}/carrinho`).once('value');
-        const carrinho = snapshot.val() || {};
+        const User = Parse.Object.extend("_User");
+        const query = new Parse.Query(User);
+        const parseUser = await query.get(currentUser.uid);
+        const carrinho = parseUser.get("carrinho") || {};
         
         if (Object.keys(carrinho).length === 0) {
           alert("Seu carrinho está vazio!");
           return;
         }
 
-        // Calcular total corretamente
+        // Registrar pedido e limpar carrinho
         const total = await calcularTotalCarrinho(carrinho);
-
-        // Registrar pedido no Parse
+        
         const Pedido = Parse.Object.extend("Pedido");
         const pedido = new Pedido();
-        
         pedido.set("clienteId", currentUser.uid);
         pedido.set("produtos", carrinho);
         pedido.set("status", "pendente");
-        pedido.set("total", total); // Número garantido
-        
+        pedido.set("total", total);
         await pedido.save();
+
+        parseUser.set("carrinho", {}); // Limpa carrinho
+        await parseUser.save();
         
-        // Limpar carrinho
-        await database.ref(`users/${currentUser.uid}/carrinho`).remove();
         alert("Compra finalizada com sucesso!");
         loadCart();
       } catch (error) {
         console.error("Erro ao finalizar compra:", error);
-        alert("Erro ao processar pedido! Verifique o console.");
+        alert("Erro ao processar pedido!");
       }
     }
+
 
     // Função de cálculo do total corrigida
     async function calcularTotalCarrinho(carrinho) {
