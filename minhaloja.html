@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Minha Loja</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>Minha Loja</title>
   <style>
     /* Reset básico e fontes */
     body {
@@ -43,11 +43,13 @@
     .profile-info h1 {
         font-size: 1.4rem;
         color: #1c1e21;
+        word-break: break-word; /* Quebra nomes longos */
     }
 
      .profile-info p {
         font-size: 0.9rem;
         color: #606770;
+        word-break: break-all; /* Quebra emails longos */
     }
 
     /* Cabeçalho da Loja */
@@ -78,6 +80,7 @@
       padding: 2rem;
       border-radius: 12px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      overflow-x: auto; /* Adiciona rolagem horizontal se necessário */
     }
 
      .admin-panel h2 {
@@ -91,6 +94,7 @@
     /* Tabela de Produtos */
     table {
       width: 100%;
+      min-width: 600px; /* Largura mínima para evitar espremer demais */
       border-collapse: collapse;
       margin: 2rem 0;
       table-layout: fixed;
@@ -100,17 +104,18 @@
       padding: 1rem 0.8rem;
       text-align: left;
       border-bottom: 1px solid #e0e0e0;
-      vertical-align: middle; /* Alterado para middle para alinhar melhor com botões */
-      /* white-space: nowrap; */ /* Removido para permitir quebra de linha */
-      overflow: hidden; /* Mantido para caso de texto muito longo */
-      text-overflow: ellipsis; /* Mantido */
+      vertical-align: middle;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      /* white-space: nowrap; */ /* Removido para permitir quebra de linha nos TDs */
     }
 
      /* Célula de Produto/Preço */
      td.product-details-cell {
         white-space: normal; /* Permite quebra de linha */
-        line-height: 1.4; /* Ajusta espaçamento entre nome e preço */
+        line-height: 1.4;
         vertical-align: top; /* Alinha conteúdo no topo */
+        word-wrap: break-word; /* Garante quebra de palavras longas */
      }
 
     th {
@@ -124,18 +129,18 @@
       background-color: #f1f1f1;
     }
 
-    /* Larguras das colunas - AJUSTADAS */
-    .image-cell { width: 40%; }
-    .product-details-cell { width: 25%; } /* Coluna combinada Produto/Preço */
-    .order-cell { width: 10%; text-align: center; }
-    .actions-cell { width: 15%; text-align: center;} /* Total: 90% */
+    /* Larguras das colunas */
+    .image-cell { width: 75%; }
+    .product-details-cell { width: 10%; }
+    .order-cell { width: 5%; text-align: center; }
+    .actions-cell { width: 10%; text-align: center;}
 
     /* Estilo para o preço abaixo do nome */
     .product-price-inline {
-        display: block; /* Faz o preço ir para a linha de baixo */
-        font-size: 0.9em; /* Fonte um pouco menor */
-        color: #555; /* Cor cinza escuro */
-        margin-top: 4px; /* Pequeno espaço acima do preço */
+        display: block;
+        font-size: 0.9em;
+        color: #555;
+        margin-top: 4px;
     }
 
 
@@ -149,6 +154,7 @@
       border: 1px solid #ddd;
       margin-right: 5px;
       vertical-align: middle;
+      background-color: #eee; /* Cor de fundo para placeholder */
     }
 
     /* Contêiner de Imagens com Rolagem */
@@ -181,15 +187,9 @@
 
     /* Botões de Ordenação */
     .btn-order {
-      background-color: #6c757d;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      padding: 4px 8px;
-      cursor: pointer;
-      font-size: 0.8rem;
-      line-height: 1;
-      transition: background-color 0.2s ease;
+      background-color: #6c757d; color: white; border: none;
+      border-radius: 4px; padding: 4px 8px; cursor: pointer;
+      font-size: 0.8rem; line-height: 1; transition: background-color 0.2s ease;
     }
     .btn-order:hover:not(:disabled) { background-color: #5a6268; }
     .btn-order:disabled { background-color: #adb5bd; cursor: not-allowed; opacity: 0.7; }
@@ -198,22 +198,14 @@
     /* Formulário */
     #productForm {
         display: flex;
-        flex-wrap: wrap;
-        gap: 1rem;
-        align-items: flex-end;
-        margin-bottom: 2rem;
-        padding: 1.5rem;
-        background-color: #f8f9fa;
+        flex-wrap: wrap; gap: 1rem; align-items: flex-end;
+        margin-bottom: 2rem; padding: 1.5rem; background-color: #f8f9fa;
         border-radius: 8px;
     }
 
     input[type="text"], input[type="number"] {
-      padding: 10px 12px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 0.95rem;
-      flex-grow: 1;
-      min-width: 150px;
+      padding: 10px 12px; border: 1px solid #ccc; border-radius: 6px;
+      font-size: 0.95rem; flex-grow: 1; min-width: 150px;
     }
 
     /* Upload de Imagem */
@@ -247,18 +239,29 @@
 
     /* Responsividade */
     @media (max-width: 768px) {
-        .profile-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
-        #productForm { flex-direction: column; align-items: stretch; }
+        body { padding: 10px; } /* Menos padding em telas pequenas */
+        .profile-header { flex-direction: column; align-items: flex-start; gap: 1rem; padding: 1rem; }
+        .admin-panel { padding: 1rem; }
+        #productForm { flex-direction: column; align-items: stretch; padding: 1rem; }
         input[type="text"], input[type="number"], .image-upload, .btn { width: 100%; box-sizing: border-box; }
-        .actions-cell, .order-cell { text-align: left; }
-        .actions-container, .order-container { flex-direction: row; flex-wrap: wrap; justify-content: flex-start; }
-        th, td { /* white-space: normal; */ overflow: visible; text-overflow: clip; } /* Mantém nowrap no TH, normal no TD */
-        td.product-details-cell { white-space: normal; } /* Garante quebra de linha nesta célula */
+        .actions-cell, .order-cell { text-align: center; } /* Centraliza botões */
+        .actions-container, .order-container { flex-direction: row; flex-wrap: wrap; justify-content: center; } /* Lado a lado, centralizado */
+
+        th, td { padding: 0.8rem 0.5rem; } /* Menos padding nas células */
+        td.product-details-cell { vertical-align: middle; } /* Alinha melhor com botões */
         .image-cell, .product-details-cell, .actions-cell, .order-cell { width: auto; } /* Largura automática */
+        table { min-width: 0; } /* Remove largura mínima */
 
         .order-container .btn-order { padding: 6px 10px; font-size: 0.9rem; }
         .actions-container .btn { padding: 8px 12px; }
     }
+     @media (max-width: 480px) {
+         .profile-info h1 { font-size: 1.2rem; }
+         .store-header h1 { font-size: 1.5rem; }
+         .btn { font-size: 0.8rem; padding: 8px 10px; } /* Botões menores */
+         .upload-label { padding: 8px 12px; font-size: 0.8rem; }
+         .actions-container, .order-container { gap: 5px; } /* Menos espaço entre botões */
+     }
 
   </style>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -267,10 +270,8 @@
 </head>
 <body>
   <div class="profile-header">
-    <div style="display: flex; align-items: center;">
-      <img id="profilePhoto" class="profile-photo" src="avatar-padrao.jpeg" alt="Foto de Perfil">
-      <div class="profile-info">
-        <h1 id="userName">Carregando...</h1>
+    <div style="display: flex; align-items: center; min-width: 0;"> <img id="profilePhoto" class="profile-photo" src="avatar-padrao.jpeg" alt="Foto de Perfil" onerror="this.src='https://placehold.co/60x60/007BFF/FFF?text=:)'; this.onerror=null;">
+      <div class="profile-info" style="min-width: 0;"> <h1 id="userName">Carregando...</h1>
         <p id="userEmail"></p>
       </div>
     </div>
@@ -298,344 +299,609 @@
       <button type="submit" class="btn btn-edit">➕ Adicionar Produto</button>
     </form>
 
-    <table id="productsTable">
-      <thead>
-        <tr>
-          <th class="image-cell">Imagens</th>
-          <th class="product-details-cell">Produto</th> <th class="order-cell">Ordem</th>
-          <th class="actions-cell">Ações</th>
-        </tr>
-      </thead>
-      <tbody>
-        </tbody>
-    </table>
+    <div style="overflow-x: auto;"> <table id="productsTable">
+          <thead>
+            <tr>
+              <th class="image-cell">Imagens</th>
+              <th class="product-details-cell">Produto</th>
+              <th class="order-cell">Ordem</th>
+              <th class="actions-cell">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="4" style="text-align:center; padding: 20px;">Carregando produtos...</td></tr>
+          </tbody>
+        </table>
+    </div>
   </div>
 
   <script>
     // --- Configurações ---
+    // ATENÇÃO: Mova estas chaves para um local seguro (variáveis de ambiente ou Cloud Code)
     const firebaseConfig = {
-      apiKey: "AIzaSyDlUQbbTP29VqBVmzOGHhfc67R1DTRPwxg", // ATENÇÃO: Mover para variáveis de ambiente
+      apiKey: "AIzaSyDlUQbbTP29VqBVmzOGHhfc67R1DTRPwxg",
       authDomain: "gitautenticatio.firebaseapp.com",
       projectId: "gitautenticatio",
       storageBucket: "gitautenticatio.appspot.com",
       messagingSenderId: "21514234895",
       appId: "1:21514234895:web:d34dc4c44baf586d2cc77a"
     };
-    Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I"); // ATENÇÃO: Mover para variáveis de ambiente
+    Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
     Parse.serverURL = "https://parseapi.back4app.com/";
 
+    // Definição das Classes Parse
     const Produto = Parse.Object.extend("Produto");
     const Loja = Parse.Object.extend("Loja");
 
     // --- Inicialização ---
     const app = firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
-    let currentLoja = null;
-    let isLoadingProducts = false;
+    let currentLoja = null; // Armazena o objeto Loja do usuário atual
+    let isLoadingProducts = false; // Flag para controle de carregamento
 
-    // --- Lógica Principal (Autenticação, Criação/Verificação de Loja) ---
-    // (Mantida igual à versão anterior)
-     auth.onAuthStateChanged(async (user) => {
+    // --- Funções Principais ---
+
+    /**
+     * Monitora o estado de autenticação do Firebase.
+     * Se logado, sincroniza/loga no Parse, verifica/cria a loja e carrega os produtos.
+     * Se deslogado, redireciona para a página de login.
+     */
+    auth.onAuthStateChanged(async (user) => {
       if (user) {
-        console.log("Usuário autenticado:", user.uid);
+        console.log("Firebase: Usuário autenticado:", user.uid);
         try {
+          // Garante que o usuário está logado no Parse
           if (!Parse.User.current()) {
-             console.log("Tentando login no Parse...");
+             console.log("Parse: Tentando login...");
             try {
+                // Tenta logar com UID do Firebase (assume que senha é igual ao UID)
                 await Parse.User.logIn(user.uid, user.uid);
-                console.log("Login no Parse bem-sucedido.");
+                console.log("Parse: Login bem-sucedido.");
             } catch (loginError) {
+                // Se não encontrar, tenta cadastrar um novo usuário no Parse
                 if (loginError.code === Parse.Error.OBJECT_NOT_FOUND) {
-                    console.log("Usuário não encontrado no Parse. Tentando cadastrar...");
+                    console.log("Parse: Usuário não encontrado. Tentando cadastrar...");
                     const newUser = new Parse.User();
-                    newUser.set("username", user.uid); newUser.set("password", user.uid);
-                    newUser.set("email", user.email); newUser.set("firebaseUID", user.uid);
+                    newUser.set("username", user.uid);
+                    newUser.set("password", user.uid); // Senha inicial = UID (considere mais seguro)
+                    newUser.set("email", user.email); // Salva email
+                    newUser.set("firebaseUID", user.uid); // Link explícito
                     try {
                         await newUser.signUp();
-                        console.log("Novo usuário cadastrado e logado no Parse.");
+                        console.log("Parse: Novo usuário cadastrado e logado.");
                     } catch (signUpError) {
-                        console.error("Erro ao cadastrar usuário no Parse:", signUpError);
-                        alert("Erro crítico ao sincronizar contas.");
-                        await auth.signOut(); return;
+                        console.error("Parse: Erro ao cadastrar usuário:", signUpError);
+                        alert("Erro crítico ao sincronizar contas. Tente recarregar.");
+                        await auth.signOut(); // Desloga do Firebase se falhar
+                        return;
                     }
                 } else {
-                    console.error("Erro ao fazer login no Parse:", loginError);
-                    alert("Erro ao acessar sua conta no sistema.");
-                     await auth.signOut(); return;
+                    // Outro erro de login no Parse
+                    console.error("Parse: Erro ao fazer login:", loginError);
+                    alert("Erro ao acessar sua conta no sistema. Tente recarregar.");
+                     await auth.signOut(); // Desloga do Firebase
+                    return;
                 }
             }
           } else {
-            console.log("Sessão Parse já existente.");
+            console.log("Parse: Sessão já existente.");
           }
-          await checkOrCreateLoja();
-          updateHeader(user);
-          if (currentLoja) { loadProducts(); }
+
+          // Funções a serem executadas após garantir login no Firebase e Parse
+          await checkOrCreateLoja(); // Verifica ou cria a loja associada ao usuário
+          updateHeader(user); // Atualiza informações do usuário no cabeçalho
+          if (currentLoja) {
+             loadProducts(); // Carrega os produtos da loja encontrada/criada
+          }
+
         } catch (error) {
-          console.error("Erro durante a inicialização:", error);
+          console.error("Erro na inicialização pós-login:", error);
           alert("Ocorreu um erro ao carregar seus dados: " + error.message);
-          window.location.href = 'index.html';
+          window.location.href = 'index.html'; // Redireciona em caso de erro grave
         }
       } else {
-        console.log("Usuário não autenticado. Redirecionando...");
+        // Usuário não está logado no Firebase
+        console.log("Firebase: Usuário não autenticado. Redirecionando para login.");
         window.location.href = 'index.html';
       }
     });
 
-     const checkOrCreateLoja = async () => {
+    /**
+     * Verifica se o usuário Parse logado possui uma loja.
+     * Se não possuir, solicita um nome e cria uma nova loja.
+     * Garante que o campo 'produtos' seja um array.
+     * Atualiza as informações da loja na interface.
+     */
+    const checkOrCreateLoja = async () => {
       const currentUser = Parse.User.current();
-      if (!currentUser) { console.error("Usuário Parse não logado."); alert("Erro: Usuário não sincronizado."); return; }
+      if (!currentUser) {
+          console.error("checkOrCreateLoja: Usuário Parse não logado.");
+          alert("Erro: Usuário não sincronizado. Recarregue a página."); return;
+      }
       const query = new Parse.Query(Loja);
-      query.equalTo("dono", currentUser);
+      query.equalTo("dono", currentUser); // Busca loja cujo dono é o usuário atual
       try {
-          currentLoja = await query.first();
+          currentLoja = await query.first(); // Tenta encontrar a loja
+
+          // Se não encontrou loja, cria uma nova
           if (!currentLoja) {
-            console.log("Nenhuma loja encontrada. Solicitando criação.");
-            const nomeLoja = prompt("📢 Bem-vindo! Digite um nome para sua nova loja:");
+            console.log("Nenhuma loja encontrada para o usuário. Solicitando criação.");
+            const nomeLoja = prompt("📢 Bem-vindo! Parece que você ainda não tem uma loja.\nDigite um nome para sua nova loja:");
             if (!nomeLoja || nomeLoja.trim() === "") {
-                alert("❌ Nome inválido."); document.getElementById('nomeLoja').textContent = "Crie uma loja!";
+                alert("❌ Nome da loja inválido. A criação foi cancelada.");
+                document.getElementById('nomeLoja').textContent = "Crie uma loja para começar!";
                 document.getElementById('reputacaoLoja').textContent = ""; return;
             }
-            console.log("Criando loja:", nomeLoja);
+            console.log("Criando nova loja:", nomeLoja);
             currentLoja = new Loja();
-            currentLoja.set("nome", nomeLoja.trim()); currentLoja.set("dono", currentUser);
-            currentLoja.set("produtos", []); currentLoja.set("reputacao", 0);
+            currentLoja.set("nome", nomeLoja.trim());
+            currentLoja.set("dono", currentUser); // Associa ao usuário Parse
+            currentLoja.set("produtos", []); // Inicializa array de produtos VAZIO
+            currentLoja.set("reputacao", 0);
             await currentLoja.save();
-            console.log("Loja criada:", currentLoja.id); alert(`🎉 Loja "${nomeLoja}" criada!`);
+            console.log("Loja criada com sucesso:", currentLoja.id);
+            alert(`🎉 Loja "${nomeLoja}" criada com sucesso!`);
           } else {
               console.log("Loja encontrada:", currentLoja.id, "Nome:", currentLoja.get("nome"));
+              // Garante que 'produtos' é um array (importante para consistência)
               if (!Array.isArray(currentLoja.get("produtos"))) {
-                  console.warn("Campo 'produtos' não é array. Inicializando.");
-                  currentLoja.set("produtos", []); await currentLoja.save();
+                  console.warn("Campo 'produtos' da loja não era um array. Corrigindo para array vazio.");
+                  currentLoja.set("produtos", []);
+                  await currentLoja.save(); // Salva a correção
               }
           }
+          // Atualiza nome e reputação na interface
           document.getElementById('nomeLoja').textContent = currentLoja.get("nome");
           document.getElementById('reputacaoLoja').textContent = "Reputação: " + currentLoja.get("reputacao");
       } catch (error) {
-          console.error("Erro ao verificar/criar loja:", error);
-          alert("Erro ao carregar/criar loja: " + error.message);
+          console.error("Erro ao verificar ou criar loja:", error);
+          alert("Erro ao carregar ou criar sua loja: " + error.message);
       }
     };
 
-    // Carrega os produtos BASEADO NA ORDEM DO ARRAY 'produtos' da loja
+    /**
+     * Carrega os produtos da loja atual, respeitando a ordem dos IDs
+     * armazenados no array 'produtos' do objeto Loja.
+     */
     const loadProducts = async () => {
-       if (!currentLoja || isLoadingProducts) { console.warn("Carregamento pulado."); return; }
-       isLoadingProducts = true; console.log("Iniciando carregamento...");
-       setTableLoading(true);
-
-       const productIds = currentLoja.get("produtos") || [];
-       if (productIds.length === 0) {
-          console.log("Nenhum ID na loja."); updateTable([]);
-          isLoadingProducts = false; setTableLoading(false); return;
+       // Evita carregamento se não houver loja ou se já estiver carregando
+       if (!currentLoja || isLoadingProducts) {
+           if (!currentLoja) console.warn("loadProducts: Loja atual não definida.");
+           if (isLoadingProducts) console.warn("loadProducts: Carregamento já em andamento.");
+           return;
        }
-       console.log("Carregando IDs (na ordem):", productIds);
+       isLoadingProducts = true; // Sinaliza início do carregamento
+       console.log("Iniciando carregamento de produtos...");
+       setTableLoading(true); // Desabilita botões da tabela
+
+       // Obtém o array de IDs da loja atual
+       const productIds = currentLoja.get("produtos") || [];
+
+       // Se não houver IDs, mostra tabela vazia
+       if (productIds.length === 0) {
+          console.log("Nenhum produto associado à loja.");
+          updateTable([]); // Chama updateTable com array vazio
+          isLoadingProducts = false; // Finaliza carregamento
+          setTableLoading(false); // Habilita botões
+          return;
+       }
+
+       console.log("Carregando produtos com IDs (na ordem do array):", productIds);
+
+       // Busca os produtos cujos IDs estão no array
        const query = new Parse.Query(Produto);
        query.containedIn("objectId", productIds);
+       // Importante: NÃO adicionar ordenação aqui (ex: query.ascending)
+       // A ordem deve vir do array 'productIds'
 
        try {
-         const results = await query.find(); console.log("Produtos encontrados:", results.length);
-         const orderedResults = productIds.map(id => results.find(p => p.id === id)).filter(p => p);
-         if (orderedResults.length !== results.length) { console.warn("Alguns produtos não encontrados."); }
-         console.log("Produtos reordenados:", orderedResults.map(p => p.id));
-         updateTable(orderedResults); // Atualiza a tabela com a ordem correta
+         const results = await query.find(); // Busca os objetos Produto
+         console.log("Produtos encontrados no Parse:", results.length);
+
+         // Reordena os resultados para GARANTIR que sigam a ordem do array 'productIds'
+         // Isso é crucial porque a ordem de 'containedIn' não é 100% garantida.
+         const orderedResults = productIds
+            .map(id => results.find(p => p.id === id)) // Mapeia cada ID para o objeto Produto correspondente
+            .filter(p => p); // Remove quaisquer resultados nulos (IDs no array que não existem mais como Produto)
+
+         // Log de verificação (opcional)
+         if (orderedResults.length !== productIds.length) {
+             console.warn(`Discrepância: ${productIds.length} IDs no array, ${orderedResults.length} produtos encontrados/reordenados.`);
+             // Poderia implementar uma limpeza de IDs órfãos aqui se desejado
+         }
+
+         console.log("Produtos reordenados para exibição:", orderedResults.map(p => p.id));
+         updateTable(orderedResults); // Atualiza a tabela com os produtos na ordem correta
+
        } catch (error) {
-         console.error("Erro ao carregar produtos:", error);
-         alert("Erro ao carregar produtos: " + error.message);
-         document.querySelector('#productsTable tbody').innerHTML = `<tr><td colspan='4'>Erro: ${error.message}</td></tr>`; // Colspan 4
+         console.error("Erro ao carregar objetos Produto:", error);
+         alert("Erro ao carregar produtos da loja: " + error.message);
+         // Mostra erro na tabela (colspan 4 agora)
+         document.querySelector('#productsTable tbody').innerHTML = `<tr><td colspan='4' style='text-align:center; color: red; padding: 20px;'>Erro ao carregar produtos: ${error.message}</td></tr>`;
        } finally {
-           isLoadingProducts = false; setTableLoading(false);
+           isLoadingProducts = false; // Sinaliza fim do carregamento
+           setTableLoading(false); // Reabilita botões da tabela
        }
     };
 
-    // Atualiza a tabela HTML com a lista de produtos
+    /**
+     * Atualiza o conteúdo da tabela HTML com os produtos fornecidos.
+     * @param {Parse.Object[]} produtos Array de objetos Parse.Object (Produto) na ordem correta.
+     */
     const updateTable = (produtos) => {
       const tbody = document.querySelector('#productsTable tbody');
-      tbody.innerHTML = "";
+      tbody.innerHTML = ""; // Limpa conteúdo anterior
 
-      const currentProductIds = currentLoja.get("produtos") || [];
-
+      // Se não houver produtos, exibe mensagem (colspan 4)
       if (!produtos || produtos.length === 0) {
-          // Atualiza colspan para 4 colunas
-          tbody.innerHTML = "<tr><td colspan='4' style='text-align:center; padding: 20px;'>🛒 Sua loja ainda não tem produtos.</td></tr>";
+          tbody.innerHTML = "<tr><td colspan='4' style='text-align:center; padding: 20px;'>🛒 Sua loja ainda não tem produtos cadastrados.</td></tr>";
           return;
       }
 
-      produtos.forEach((produto, index) => {
+      // Itera sobre os produtos (já na ordem correta) para criar as linhas
+      produtos.forEach((produto, index) => { // 'index' aqui reflete a ordem atual
         const tr = document.createElement('tr');
-        tr.dataset.productId = produto.id;
+        tr.dataset.productId = produto.id; // Armazena ID no elemento TR
 
-        // Imagens
+        // --- Célula de Imagens ---
         const imagens = produto.get("imagens") || [];
         const imagensHtml = imagens.length > 0
-            ? imagens.map(url => `<img src="${url}" class="product-image" alt="Imagem" onerror="this.src='placeholder.png';">`).join('')
-            : '<span>Sem imagem</span>';
+            ? imagens.map(url => `<img src="${url}" class="product-image" alt="Imagem do produto ${produto.get('nome')}" onerror="this.style.display='none';">`).join('') // Esconde imagem se falhar
+            : '<span style="font-size: 0.8em; color: #888;">Sem imagem</span>';
 
         // --- Célula Combinada: Produto e Preço ---
         const productDetailsHtml = `
-            ${produto.get("nome") || 'Sem nome'}
+            <span style="font-weight: 500;">${produto.get("nome") || 'Produto sem nome'}</span>
             <span class="product-price-inline">R$ ${(produto.get("preco") || 0).toFixed(2)}</span>
         `;
 
-        // Botões de Ordem
-        const isFirst = index === 0;
-        const isLast = index === produtos.length - 1;
+        // --- Célula de Botões de Ordem ---
+        const isFirst = index === 0; // É o primeiro item da lista?
+        const isLast = index === produtos.length - 1; // É o último item da lista?
         const orderButtonsHtml = `
           <div class="order-container">
-            <button class="btn-order btn-move-up" onclick="moveProduct('${produto.id}', 'up')" ${isFirst ? 'disabled' : ''}>▲</button>
-            <button class="btn-order btn-move-down" onclick="moveProduct('${produto.id}', 'down')" ${isLast ? 'disabled' : ''}>▼</button>
+            <button class="btn-order btn-move-up" title="Mover para cima" onclick="moveProduct('${produto.id}', 'up')" ${isFirst ? 'disabled' : ''}>▲</button>
+            <button class="btn-order btn-move-down" title="Mover para baixo" onclick="moveProduct('${produto.id}', 'down')" ${isLast ? 'disabled' : ''}>▼</button>
           </div>
         `;
 
-        // Botões de Ações
+        // --- Célula de Botões de Ações ---
         const actionButtonsHtml = `
           <div class="actions-container">
-            <button class="btn btn-edit" onclick="editProduct('${produto.id}')">✏️ Editar</button>
-            <button class="btn btn-delete" onclick="deleteProduct('${produto.id}')">🗑️ Excluir</button>
+            <button class="btn btn-edit" title="Editar produto" onclick="editProduct('${produto.id}')">✏️ Editar</button>
+            <button class="btn btn-delete" title="Excluir produto" onclick="deleteProduct('${produto.id}')">🗑️ Excluir</button>
           </div>
         `;
 
-        // Monta a linha da tabela (4 células agora)
+        // --- Monta a linha (TR) com as 4 células (TD) ---
         tr.innerHTML = `
           <td class="image-cell"><div class="image-container">${imagensHtml}</div></td>
-          <td class="product-details-cell">${productDetailsHtml}</td> <td class="order-cell">${orderButtonsHtml}</td>
+          <td class="product-details-cell">${productDetailsHtml}</td>
+          <td class="order-cell">${orderButtonsHtml}</td>
           <td class="actions-cell">${actionButtonsHtml}</td>
         `;
-        tbody.appendChild(tr);
+        tbody.appendChild(tr); // Adiciona a linha à tabela
       });
 
-      enableDragToScroll();
+      enableDragToScroll(); // Reativa funcionalidade de arrastar imagens
     };
 
-    // Função para MOVER um produto na ordem
-    // (Mantida igual à versão anterior)
+    /**
+     * Move um produto para cima ou para baixo na lista de produtos da loja.
+     * Atualiza o array 'produtos' no objeto Loja e salva no Parse.
+     * Recarrega a tabela para refletir a nova ordem.
+     * @param {string} productId ID do produto a ser movido.
+     * @param {'up' | 'down'} direction Direção do movimento.
+     */
     window.moveProduct = async (productId, direction) => {
-        if (!currentLoja || isLoadingProducts) return;
-        console.log(`Movendo ${productId} ${direction}`);
-        setOrderButtonsLoading(true);
-        let productIds = currentLoja.get("produtos") || [];
-        const currentIndex = productIds.indexOf(productId);
-        if (currentIndex === -1) { console.error("ID não encontrado."); setOrderButtonsLoading(false); return; }
-        let newIndex;
-        if (direction === 'up' && currentIndex > 0) { newIndex = currentIndex - 1; }
-        else if (direction === 'down' && currentIndex < productIds.length - 1) { newIndex = currentIndex + 1; }
-        else { console.log("Movimento inválido."); setOrderButtonsLoading(false); return; }
-        const newProductIds = [...productIds];
-        [newProductIds[currentIndex], newProductIds[newIndex]] = [newProductIds[newIndex], newProductIds[currentIndex]];
-        console.log("Nova ordem:", newProductIds);
-        currentLoja.set("produtos", newProductIds);
-        try {
-            await currentLoja.save(); console.log("Ordem salva.");
-            await loadProducts(); // Recarrega para refletir
-        } catch (error) {
-            console.error("Erro ao salvar ordem:", error); alert("Erro ao salvar ordem: " + error.message);
-            await loadProducts(); // Recarrega mesmo com erro
+        // Impede execução se não houver loja ou se já estiver carregando/salvando
+        if (!currentLoja || isLoadingProducts) {
+            console.warn("moveProduct: Ação ignorada (sem loja ou operação em andamento).");
+            return;
         }
+
+        console.log(`Tentando mover produto ${productId} para ${direction}`);
+        setOrderButtonsLoading(true); // Desabilita botões de ordem visualmente
+
+        let productIds = currentLoja.get("produtos") || []; // Pega array atual
+        const currentIndex = productIds.indexOf(productId); // Encontra índice do produto
+
+        // Verifica se o produto existe no array
+        if (currentIndex === -1) {
+            console.error("moveProduct: ID do produto não encontrado no array da loja. Recarregando para sincronizar.");
+            alert("Ocorreu um erro de sincronia. A lista será recarregada.");
+            setOrderButtonsLoading(false); // Reabilita botões antes de recarregar
+            loadProducts(); // Recarrega para tentar corrigir
+            return;
+        }
+
+        // Calcula o novo índice baseado na direção
+        let newIndex;
+        if (direction === 'up' && currentIndex > 0) { // Move para cima
+            newIndex = currentIndex - 1;
+        } else if (direction === 'down' && currentIndex < productIds.length - 1) { // Move para baixo
+            newIndex = currentIndex + 1;
+        } else {
+            // Movimento inválido (já está no topo ou na base)
+            console.log("Movimento inválido (limite atingido).");
+            setOrderButtonsLoading(false); // Reabilita botões
+            return;
+        }
+
+        // Cria um novo array com a ordem trocada (swap)
+        const newProductIds = [...productIds]; // Cria uma cópia do array
+        // Troca os elementos nas posições currentIndex e newIndex
+        [newProductIds[currentIndex], newProductIds[newIndex]] = [newProductIds[newIndex], newProductIds[currentIndex]];
+
+        console.log("Nova ordem de IDs a ser salva:", newProductIds);
+
+        // Atualiza o array 'produtos' no objeto Loja localmente
+        currentLoja.set("produtos", newProductIds);
+
+        // Salva a alteração no Back4App/Parse
+        try {
+            await currentLoja.save();
+            console.log("Nova ordem salva com sucesso no Parse.");
+            // Recarrega a lista de produtos para refletir a nova ordem salva
+            // O próprio loadProducts reabilitará os botões ao final
+            await loadProducts();
+        } catch (error) {
+            console.error("Erro ao salvar nova ordem no Parse:", error);
+            alert("Erro ao salvar a nova ordem: " + error.message + "\nA lista será recarregada.");
+            // Mesmo em caso de erro, recarrega para tentar mostrar o estado atual do servidor
+            await loadProducts();
+        }
+        // 'finally' não é estritamente necessário aqui, pois loadProducts() cuida de reabilitar os botões.
     };
 
 
-    // Função para deletar um produto
-    // (Mantida igual, mas loadProducts no final atualizará corretamente)
+    /**
+     * Deleta um produto: remove seu ID do array na Loja, salva a Loja,
+     * e então deleta o objeto Produto do Parse. Recarrega a tabela.
+     * @param {string} id ID do produto a ser deletado.
+     */
     window.deleteProduct = async (id) => {
-      if (!confirm("❓ Excluir este produto?")) return;
+      if (!confirm("❓ Tem certeza que deseja excluir este produto permanentemente?")) return;
       if (!currentLoja) { alert("❌ Erro: Loja não encontrada."); return; }
-      console.log("Excluindo produto:", id);
-      setTableLoading(true);
+      console.log("Iniciando exclusão do produto:", id);
+      setTableLoading(true); // Desabilita todos os botões da tabela
+
       try {
-        currentLoja.remove("produtos", id); await currentLoja.save(); console.log("ID removido.");
-        const query = new Parse.Query(Produto); const produto = await query.get(id);
-        await produto.destroy(); console.log("Objeto destruído:", id);
-        alert("✅ Produto excluído!");
-        await loadProducts(); // Recarrega
+        // 1. Remove o ID do produto do array 'produtos' na Loja
+        currentLoja.remove("produtos", id); // Método 'remove' para arrays
+        await currentLoja.save(); // Salva a loja com o array atualizado
+        console.log("ID do produto removido do array da loja.");
+
+        // 2. Encontra e deleta o objeto Produto correspondente
+        const query = new Parse.Query(Produto);
+        const produto = await query.get(id); // Busca o produto pelo ID
+        await produto.destroy(); // Deleta o objeto Produto do Parse
+        console.log("Objeto Produto destruído:", id);
+
+        alert("✅ Produto excluído com sucesso!");
+        // 3. Recarrega a lista de produtos para atualizar a interface
+        await loadProducts(); // loadProducts já reabilita os botões
+
       } catch (error) {
-        console.error("Erro na exclusão:", error); alert("❌ Erro ao excluir: " + error.message);
-        setTableLoading(false); // Reabilita em caso de erro aqui
+        console.error("Erro na exclusão do produto:", error);
+        alert("❌ Erro ao excluir o produto: " + error.message);
+        // Reabilita botões se a exclusão falhou antes de recarregar
+        setTableLoading(false);
+        // Tenta recarregar mesmo assim para sincronizar
+        await loadProducts();
       }
     };
 
-    // Função para redirecionar para edição
-    window.editProduct = (id) => { console.log("Editando:", id); window.location.href = `editar.html?id=${id}`; }
+    /**
+     * Redireciona para a página de edição do produto.
+     * @param {string} id ID do produto a ser editado.
+     */
+    window.editProduct = (id) => {
+        console.log("Redirecionando para editar produto:", id);
+        window.location.href = `editar.html?id=${id}`; // Passa ID via query string
+    }
 
-    // --- Event Listeners (Formulário, Logout, Preview) ---
-    // (Mantidos iguais à versão anterior)
-     document.getElementById('productForm').addEventListener('submit', async (e) => {
-      e.preventDefault(); if (!currentLoja) { alert("⚠️ Crie uma loja!"); return; }
-      const nomeInput = document.getElementById('productName'); const precoInput = document.getElementById('productPrice');
-      const imagemInput = document.getElementById('productImage'); const submitButton = e.target.querySelector('button[type="submit"]');
-      const productData = { nome: nomeInput.value.trim(), preco: parseFloat(precoInput.value), imagemFile: imagemInput.files[0] };
-      if (!productData.nome || isNaN(productData.preco) || productData.preco <= 0 || !productData.imagemFile) { alert("❌ Preencha tudo."); return; }
-      console.log("Adicionando:", productData.nome); submitButton.disabled = true; submitButton.textContent = 'Enviando...';
+    // --- Event Listeners ---
+
+    /**
+     * Listener para o formulário de adicionar novo produto.
+     * Faz upload da imagem, cria o objeto Produto, adiciona o ID ao
+     * INÍCIO do array 'produtos' da Loja e recarrega a tabela.
+     */
+    document.getElementById('productForm').addEventListener('submit', async (e) => {
+      e.preventDefault(); // Previne envio padrão
+      if (!currentLoja) { alert("⚠️ Você precisa ter uma loja para adicionar produtos!"); return; }
+
+      // Pega os elementos do formulário
+      const nomeInput = document.getElementById('productName');
+      const precoInput = document.getElementById('productPrice');
+      const imagemInput = document.getElementById('productImage');
+      const submitButton = e.target.querySelector('button[type="submit"]');
+
+      // Pega os dados e o arquivo
+      const productData = {
+        nome: nomeInput.value.trim(),
+        preco: parseFloat(precoInput.value),
+        imagemFile: imagemInput.files[0]
+      };
+
+      // Validações básicas
+      if (!productData.nome || isNaN(productData.preco) || productData.preco <= 0 || !productData.imagemFile) {
+          alert("❌ Por favor, preencha todos os campos corretamente (nome, preço válido e imagem).");
+          return;
+      }
+
+      console.log("Adicionando novo produto:", productData.nome);
+      submitButton.disabled = true; // Desabilita botão durante envio
+      submitButton.textContent = 'Enviando...'; // Feedback visual
+
       try {
-        console.log("Upload..."); const parseFile = new Parse.File(productData.imagemFile.name, productData.imagemFile);
-        await parseFile.save(); const imageUrl = parseFile.url(); console.log("Upload ok:", imageUrl);
+        // 1. Upload da imagem para o Parse
+        console.log("Fazendo upload da imagem...");
+        const parseFile = new Parse.File(productData.imagemFile.name, productData.imagemFile);
+        await parseFile.save();
+        const imageUrl = parseFile.url(); // URL da imagem salva
+        console.log("Upload da imagem concluído:", imageUrl);
+
+        // 2. Cria o novo objeto Produto no Parse
         const novoProduto = new Produto();
-        novoProduto.set("nome", productData.nome); novoProduto.set("preco", productData.preco);
-        novoProduto.set("imagens", [imageUrl]); novoProduto.set("dono", Parse.User.current());
-        await novoProduto.save(); console.log("Produto salvo:", novoProduto.id);
+        novoProduto.set("nome", productData.nome);
+        novoProduto.set("preco", productData.preco);
+        novoProduto.set("imagens", [imageUrl]); // Salva URL em um array
+        novoProduto.set("dono", Parse.User.current()); // Associa ao usuário (opcional)
+        await novoProduto.save(); // Salva o produto
+        console.log("Novo produto salvo no Parse:", novoProduto.id);
+
+        // 3. Adiciona o ID do novo produto ao INÍCIO do array 'produtos' na Loja
         let currentIds = currentLoja.get("produtos") || [];
-        currentIds = currentIds.filter(id => id !== novoProduto.id); currentIds.unshift(novoProduto.id);
-        currentLoja.set("produtos", currentIds); await currentLoja.save(); console.log("ID adicionado ao início.");
-        document.getElementById('productForm').reset(); document.getElementById('imagePreview').style.display = 'none';
-        document.getElementById('imagePreview').src = ''; alert(`✅ Produto "${productData.nome}" adicionado!`);
-        await loadProducts(); // Recarrega
+        // Remove o ID caso já exista (segurança extra)
+        currentIds = currentIds.filter(id => id !== novoProduto.id);
+        // Adiciona o novo ID no início do array
+        currentIds.unshift(novoProduto.id);
+        // Define o novo array na loja
+        currentLoja.set("produtos", currentIds);
+        await currentLoja.save(); // Salva a loja com o array atualizado
+        console.log("ID do produto adicionado ao início do array da loja.");
+
+        // 4. Limpa o formulário e recarrega a lista
+        document.getElementById('productForm').reset();
+        document.getElementById('imagePreview').style.display = 'none';
+        document.getElementById('imagePreview').src = '';
+        alert(`✅ Produto "${productData.nome}" adicionado com sucesso!`);
+        await loadProducts(); // Recarrega a tabela para mostrar o novo produto no topo
+
       } catch (error) {
-        console.error("Erro ao adicionar:", error); alert("❌ Erro ao adicionar: " + error.message);
-      } finally { submitButton.disabled = false; submitButton.innerHTML = '➕ Adicionar Produto'; }
+        console.error("Erro ao adicionar produto:", error);
+        alert("❌ Erro ao adicionar produto: " + error.message);
+      } finally {
+          // Reabilita o botão e restaura o texto, independentemente de sucesso ou falha
+          submitButton.disabled = false;
+          submitButton.innerHTML = '➕ Adicionar Produto';
+      }
     });
 
+    /**
+     * Listener para o botão de logout.
+     * Desloga do Firebase e do Parse, depois redireciona para index.html.
+     */
     document.getElementById('logoutBtn').addEventListener('click', async () => {
-      console.log("Logout...");
+      console.log("Iniciando processo de logout...");
       try {
-        await auth.signOut(); console.log("Logout Firebase ok.");
-        await Parse.User.logOut(); console.log("Logout Parse ok.");
-        window.location.href = 'index.html';
-      } catch (error) { console.error('Erro logout:', error); alert('❌ Erro ao sair: ' + error.message); }
+        await auth.signOut(); // Logout Firebase
+        console.log("Logout do Firebase concluído.");
+        await Parse.User.logOut(); // Logout Parse
+        console.log("Logout do Parse concluído.");
+        window.location.href = 'index.html'; // Redireciona
+      } catch (error) {
+        console.error('Erro no logout:', error);
+        alert('❌ Erro ao tentar sair: ' + error.message);
+      }
     });
 
+    /**
+     * Listener para o input de imagem, mostra preview.
+     */
     document.getElementById('productImage').addEventListener('change', function(event) {
-      const file = event.target.files[0]; const preview = document.getElementById('imagePreview');
+      const file = event.target.files[0];
+      const preview = document.getElementById('imagePreview');
       if (file) {
         const reader = new FileReader();
-        reader.onload = function(e) { preview.src = e.target.result; preview.style.display = 'block'; };
-        reader.readAsDataURL(file);
-      } else { preview.style.display = 'none'; preview.src = ''; }
+        reader.onload = function(e) {
+          preview.src = e.target.result;
+          preview.style.display = 'block'; // Mostra preview
+        };
+        reader.onerror = function() { // Adiciona tratamento de erro
+            console.error("Erro ao ler o arquivo de imagem.");
+            preview.style.display = 'none';
+            preview.src = '';
+        }
+        reader.readAsDataURL(file); // Lê como Data URL
+      } else {
+          // Se nenhum arquivo for selecionado
+          preview.style.display = 'none';
+          preview.src = '';
+      }
     });
 
-    // --- Funções Auxiliares (updateHeader, setTableLoading, enableDragToScroll) ---
-    // (Mantidas iguais à versão anterior)
+    // --- Funções Auxiliares ---
+
+    /**
+     * Atualiza o cabeçalho da página com informações do usuário Firebase.
+     * @param {firebase.User} user Objeto do usuário Firebase.
+     */
     function updateHeader(user) {
       if (!user) return;
-      document.getElementById('profilePhoto').src = user.photoURL || 'avatar-padrao.jpeg';
-      document.getElementById('userName').textContent = user.displayName || user.email || 'Usuário';
-      document.getElementById('userEmail').textContent = user.email || '';
+      const photoURL = user.photoURL || 'https://placehold.co/60x60/007BFF/FFF?text=:)'; // Placeholder
+      const displayName = user.displayName || user.email || 'Usuário Anônimo';
+      const email = user.email || 'Email não disponível';
+
+      document.getElementById('profilePhoto').src = photoURL;
+      document.getElementById('userName').textContent = displayName;
+      document.getElementById('userEmail').textContent = email;
     }
 
-     function setTableLoading(isLoading) {
+    /**
+     * Habilita/desabilita os botões da tabela (Edição, Exclusão, Ordem)
+     * para dar feedback visual durante operações assíncronas.
+     * @param {boolean} isLoading True para desabilitar, false para habilitar.
+     */
+    function setTableLoading(isLoading) {
         const buttons = document.querySelectorAll('#productsTable .btn, #productsTable .btn-order');
         buttons.forEach(btn => btn.disabled = isLoading);
-        console.log(`Table buttons ${isLoading ? 'disabled' : 'enabled'}`);
-        setOrderButtonsLoading(isLoading); // Controla especificamente botões de ordem
+        // console.log(`Table buttons ${isLoading ? 'disabled' : 'enabled'}`);
+        // A habilitação/desabilitação específica dos botões de ordem (considerando limites)
+        // é feita principalmente dentro de updateTable e moveProduct.
+        // Aqui apenas desabilitamos tudo se isLoading for true.
+        if (!isLoading) {
+            // Se isLoading é false, a lógica em updateTable reabilitará corretamente
+            // os botões de ordem considerando isFirst/isLast.
+        }
     }
 
+    /**
+     * Habilita/desabilita APENAS os botões de ordem (▲/▼).
+     * Usado especificamente durante a operação de mover.
+     * @param {boolean} isLoading True para desabilitar, false para habilitar.
+     */
     function setOrderButtonsLoading(isLoading) {
         const orderButtons = document.querySelectorAll('#productsTable .btn-order');
         orderButtons.forEach(btn => {
-            // Se não estiver carregando, a re-habilitação será feita pelo updateTable
-            // que verifica isFirst/isLast. Aqui só desabilitamos se isLoading=true.
-             if (isLoading) {
-                 btn.disabled = true;
-             }
-             // A re-habilitação correta (considerando isFirst/isLast) ocorrerá no updateTable
+             btn.disabled = isLoading;
         });
-         // console.log(`Order buttons ${isLoading ? 'disabled' : 'enabled (conditionally)'}`); // Log mais preciso
+         // console.log(`Order buttons ${isLoading ? 'disabled' : 'enabled (temporarily)'}`);
     }
 
-    function enableDragToScroll() { document.querySelectorAll('.image-container').forEach(enableDragToScrollForElement); }
-    function enableDragToScrollForElement(container) {
-      if (!container) return; let isDown = false, startX, scrollLeft;
-      container.addEventListener('mousedown', (e) => { isDown = true; container.style.cursor = 'grabbing'; startX = e.pageX - container.offsetLeft; scrollLeft = container.scrollLeft; });
-      container.addEventListener('mouseleave', () => { if (!isDown) return; isDown = false; container.style.cursor = 'grab'; });
-      container.addEventListener('mouseup', () => { if (!isDown) return; isDown = false; container.style.cursor = 'grab'; });
-      container.addEventListener('mousemove', (e) => { if (!isDown) return; e.preventDefault(); const x = e.pageX - container.offsetLeft; const walk = (x - startX) * 1.5; container.scrollLeft = scrollLeft - walk; });
+
+    /**
+     * Habilita a funcionalidade de arrastar para rolar horizontalmente
+     * nos containers de imagem da tabela.
+     */
+    function enableDragToScroll() {
+        document.querySelectorAll('.image-container').forEach(enableDragToScrollForElement);
     }
+    function enableDragToScrollForElement(container) {
+        if (!container) return;
+        let isDown = false, startX, scrollLeft;
+        // Remove listeners antigos para evitar duplicação se chamado múltiplas vezes
+        container.onmousedown = null;
+        container.onmouseleave = null;
+        container.onmouseup = null;
+        container.onmousemove = null;
+
+        container.onmousedown = (e) => {
+            isDown = true; container.style.cursor = 'grabbing';
+            startX = e.pageX - container.offsetLeft; scrollLeft = container.scrollLeft;
+        };
+        container.onmouseleave = () => { if (!isDown) return; isDown = false; container.style.cursor = 'grab'; };
+        container.onmouseup = () => { if (!isDown) return; isDown = false; container.style.cursor = 'grab'; };
+        container.onmousemove = (e) => {
+            if (!isDown) return; e.preventDefault(); // Previne seleção de texto
+            const x = e.pageX - container.offsetLeft; const walk = (x - startX) * 1.5; // Sensibilidade
+            container.scrollLeft = scrollLeft - walk;
+        };
+    }
+
+    // Inicializa a funcionalidade de arrastar ao carregar a página
     enableDragToScroll();
 
   </script>
