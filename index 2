@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Minha Loja Virtual</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f4f4f4;
+    }
+    header {
+      background: #007BFF;
+      color: white;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header .logo h2 {
+      margin: 0;
+    }
+    .auth-area {
+      display: flex;
+      align-items: center;
+    }
+    .login-form, .user-info {
+      display: flex;
+      align-items: center;
+    }
+    .login-form p {
+      margin-right: 10px;
+      font-weight: bold;
+    }
+    .login-form button,
+    .user-info button {
+      padding: 5px 10px;
+      border: 2px solid transparent;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: background-color 0.3s, border-color 0.3s;
+    }
+    .login-form button {
+      background: #28a745;
+      color: white;
+    }
+    .login-form button:hover {
+      background: #218838;
+      border-color: #1e7e34;
+    }
+    .login-form a {
+      margin-left: 10px;
+      color: white;
+      text-decoration: none;
+      padding: 5px 10px;
+      border: 2px solid transparent;
+      border-radius: 3px;
+      transition: background-color 0.3s, border-color 0.3s;
+    }
+    .login-form a:hover {
+      background-color: rgba(255,255,255,0.2);
+      border-color: #fff;
+    }
+    .user-info a {
+      margin-left: 10px;
+      color: white;
+      text-decoration: none;
+      padding: 5px 10px;
+      border: 2px solid transparent;
+      border-radius: 3px;
+      transition: background-color 0.3s, border-color 0.3s;
+    }
+    .user-info a:hover {
+      background-color: rgba(255,255,255,0.2);
+      border-color: #fff;
+    }
+    .user-info button {
+      margin-left: 10px;
+      background: #dc3545;
+      color: white;
+    }
+    .user-info button:hover {
+      background: #c82333;
+      border-color: #bd2130;
+    }
+    .user-info img {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      margin-left: 8px;
+    }
+    .admin-panel {
+      display: none;
+      justify-content: center;
+      margin: 10px 0;
+      padding: 10px;
+      background: rgba(0,123,255,0.1);
+    }
+    .admin-panel-btn {
+      padding: 8px 15px;
+      background: #007BFF;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      border: 2px solid transparent;
+      transition: all 0.3s ease;
+      font-weight: bold;
+    }
+    .admin-panel-btn:hover {
+      background: #0056b3;
+      border-color: #004085;
+      transform: translateY(-2px);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    .google-btn {
+      background: white;
+      color: #757575;
+      border: 2px solid #ddd;
+      padding: 5px 10px;
+      border-radius: 3px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      transition: all 0.3s ease;
+      margin-left: 10px;
+    }
+    .google-btn:hover {
+      background: #f8f8f8;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .google-icon {
+      width: 16px;
+      height: 16px;
+      margin-right: 8px;
+    }
+    iframe {
+      width: 100%;
+      height: calc(100vh - 120px);
+      border: none;
+    }
+    .user-info a.minha-loja-btn {
+      margin-left: 10px;
+      color: white;
+      text-decoration: none;
+      padding: 5px 10px;
+      border: 2px solid transparent;
+      border-radius: 3px;
+      transition: background-color 0.3s, border-color 0.3s;
+      background: #ffc107;
+    }
+    .user-info a.minha-loja-btn:hover {
+      background-color: #e0a800;
+      border-color: #d39e00;
+    }
+  </style>
+  <!-- Adicionar SDK do Parse -->
+  <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <h2>Minha Loja🎁</h2>
+    </div>
+    <div class="auth-area">
+      <div id="loginArea" class="login-form">
+        <p>Só aceitamos login por rede social</p>
+        <button id="googleLoginBtn" class="google-btn">
+          <svg class="google-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+            <!-- Ícone do Google (manter original) -->
+          </svg>
+          Entrar com Google
+        </button>
+      </div>
+      <div id="userArea" class="user-info" style="display:none;">
+        <span id="welcomeUser"></span>
+        <a href="minhaconta.html" id="minhaContaLink" rel="noopener noreferrer">Minha Conta 🛒</a>
+        <a href="minhaloja.html" id="minhaLojaBtn" rel="noopener noreferrer" class="minha-loja-btn">🏪 Minha Loja</a>
+        <button id="logoutBtn">Sair 🚘</button>
+      </div>
+    </div>
+  </header>
+
+  <div id="adminPanel" class="admin-panel">
+    <a href="painelcompleto.html" class="admin-panel-btn" rel="noopener noreferrer">Painel de Controle 👑</a>
+  </div>
+
+  <iframe id="mainContent" src="produtosoff.html"></iframe>
+
+  <script>
+    // Configuração do Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDlUQbbTP29VqBVmzOGHhfc67R1DTRPwxg",
+      authDomain: "gitautenticatio.firebaseapp.com",
+      projectId: "gitautenticatio",
+      storageBucket: "gitautenticatio.appspot.com",
+      messagingSenderId: "21514234895",
+      appId: "1:21514234895:web:d34dc4c44baf586d2cc77a",
+      databaseURL: "https://gitautenticatio-default-rtdb.firebaseio.com"
+    };
+
+    // Inicializar Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const database = firebase.database();
+    const googleProvider = new firebase.auth.GoogleAuthProvider();
+
+    // Configurações do Parse/Back4App
+    Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
+    Parse.serverURL = "https://parseapi.back4app.com/";
+
+    // Sincronizar usuário Firebase com Parse
+    async function syncParseUser(user) {
+      try {
+        await Parse.User.logIn(user.uid, user.uid);
+      } catch (error) {
+        const parseUser = new Parse.User();
+        parseUser.set('username', user.uid);
+        parseUser.set('password', user.uid);
+        parseUser.set('email', user.email);
+        await parseUser.signUp();
+      }
+    }
+
+    // Monitorar estado de autenticação
+    auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        await syncParseUser(user); // Sincronização Firebase -> Parse
+        checkAdminStatus(user.uid);
+      }
+      updateAuthUI(user);
+      updateIframeContent(user);
+    });
+
+    // Login com Google
+    document.getElementById('googleLoginBtn').addEventListener('click', async () => {
+      try {
+        const result = await auth.signInWithPopup(googleProvider);
+        alert(`Bem-vindo ${result.user.displayName}!`);
+      } catch (error) {
+        alert('Erro no login com Google: ' + error.message);
+      }
+    });
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      try {
+        await auth.signOut();
+        await Parse.User.logOut();
+        alert('Logout realizado com sucesso!');
+      } catch (error) {
+        alert('Erro ao sair: ' + error.message);
+      }
+    });
+
+    // Verificar status de administrador
+    async function checkAdminStatus(uid) {
+      try {
+        const snapshot = await database.ref('admins/' + uid).once('value');
+        document.getElementById('adminPanel').style.display = snapshot.exists() ? 'flex' : 'none';
+      } catch (error) {
+        console.error('Erro ao verificar admin:', error);
+      }
+    }
+
+    // Atualizar interface do usuário
+    function updateAuthUI(user) {
+      const loginArea = document.getElementById('loginArea');
+      const userArea = document.getElementById('userArea');
+      const welcomeUser = document.getElementById('welcomeUser');
+
+      if (user) {
+        loginArea.style.display = 'none';
+        userArea.style.display = 'flex';
+        welcomeUser.innerHTML = `Bem-vindo, ${user.displayName || user.email.split('@')[0]}!`;
+        if (user.photoURL) {
+          welcomeUser.innerHTML += `<img src="${user.photoURL}" alt="Foto">`;
+        }
+      } else {
+        loginArea.style.display = 'flex';
+        userArea.style.display = 'none';
+        document.getElementById('adminPanel').style.display = 'none';
+      }
+    }
+
+    // Atualizar conteúdo do iframe
+    function updateIframeContent(user) {
+      const iframe = document.getElementById('mainContent');
+      iframe.src = user ? 'produtos.html' : 'produtosoff.html';
+    }
+  </script>
+</body>
+</html>
