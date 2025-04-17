@@ -225,8 +225,8 @@
         try {
             // Usa unshift para adicionar o ID ao array 'carrinho' no inicio
           
-            parseUser.unshift('carrinho', produtoId);
-             await parseUser.save(); // Salva a alteração no usuáriopaarce
+            currentUser.unshift('carrinho', produtoId);
+             await currentUser.save(); // Salva a alteração no usuáriopaarce
 
             // Atualiza a contagem e envia para o pai (index.html)
             const updatedCart = currentUser.get('carrinho') || [];
