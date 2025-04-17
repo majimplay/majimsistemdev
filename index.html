@@ -268,7 +268,7 @@ let currentCliente = null;
             currentCliente.set("usuario", currentUser); // Associa ao usuário Parse
             currentCliente.set("carrinhoclient", []); // Inicializa array de produtos VAZIO
             await currentCliente.save();
-            console.log("[Cliente Check] Cliente criado com sucesso:", currentCliente.id);
+            console.log("[Cliente Check] Parse ClienteClass criado com sucesso:", currentCliente.id);
             alert(`🎉 Cliente  criado com sucesso!`);
             
           } catch (signUpError) {
