@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <title>Minha Loja Virtual</title>
   <style>
-    /* Estilos permanecem os mesmos */
     body {
       font-family: sans-serif;
       margin: 0;
@@ -155,6 +154,16 @@
       background-color: #e0a800;
       border-color: #d39e00;
     }
+     .cart-button {
+        transition: background-color 0.3s, border-color 0.3s;
+    }
+    .cart-button:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+        border-color: #fff;
+    }
+    #clearCartBtn:hover {
+        opacity: 0.8;
+    }
   </style>
   <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -176,8 +185,12 @@
       </div>
       <div id="userArea" class="user-info" style="display:none;">
         <span id="welcomeUser"></span>
-        <a href="minhaconta.html" id="minhaContaLink" rel="noopener noreferrer">Minha Conta 🛒</a>
+        <a href="minhaconta.html" id="minhaContaLink" rel="noopener noreferrer">Minha Conta  ♥🧑 </a>
         <a href="minhaloja.html" id="minhaLojaBtn" rel="noopener noreferrer" class="minha-loja-btn">🏪 Minha Loja</a>
+        <a href="carrinhodecompra.html" id="meuCarrinhoBtn" class="cart-button" style="margin-left: 10px; color: white; text-decoration: none; padding: 5px 10px; border: 1px solid white; border-radius: 3px; display: inline-flex; align-items: center;" rel="noopener noreferrer">
+    Meu Carrinho 🛒 (<span id="cart-count">0</span>)
+</a>
+<button id="clearCartBtn" title="Limpar Carrinho" style="background: none; border: none; color: white; font-size: 1.2em; cursor: pointer; margin-left: 5px; padding: 0 5px;">🗑️</button>
         <button id="logoutBtn">Sair 🚘</button>
       </div>
     </div>
@@ -265,15 +278,16 @@
      * Quando o usuário faz login, sincroniza com o Parse.
      * Atualiza a UI e o conteúdo do iframe.
      */
-    auth.onAuthStateChanged(async (user) => {
+   auth.onAuthStateChanged(async (user) => {
       console.log("[Auth State] Mudança detectada. Usuário:", user ? user.uid : "Nenhum");
       if (user) {
-        // **PONTO PRINCIPAL: Sincroniza com Parse AQUI**
         await syncFirebaseUserToParse(user);
-        // Verifica se é admin (se necessário)
+        // **NOVO: Carrega contagem inicial do carrinho após sincronizar/logar Parse**
+        await loadInitialCartCount();
         checkAdminStatus(user.uid);
       } else {
-         // Se o usuário deslogou do Firebase, desloga do Parse também
+         // Se deslogou, zera a contagem do carrinho na UI
+         updateCartCount(0);
          if (Parse.User.current()) {
             console.log("[Auth State] Deslogando usuário Parse...");
             try {
@@ -284,11 +298,52 @@
             }
          }
       }
-      // Atualiza a interface de login/usuário
       updateAuthUI(user);
-      // Atualiza o conteúdo do iframe (produtos logado vs offline)
       updateIframeContent(user);
     });
+
+    function updateAuthUI(user) {
+      const loginArea = document.getElementById('loginArea');
+      const userArea = document.getElementById('userArea');
+      const welcomeUser = document.getElementById('welcomeUser');
+      const adminPanel = document.getElementById('adminPanel');
+      // **NOVO: Seleciona os elementos do carrinho**
+      const cartButton = document.getElementById('meuCarrinhoBtn');
+      const clearCartButton = document.getElementById('clearCartBtn');
+
+
+      if (user) {
+        // ... (código existente para mostrar userArea)
+        // **NOVO: Mostra botões do carrinho**
+        if(cartButton) cartButton.style.display = 'inline-flex';
+        if(clearCartButton) clearCartButton.style.display = 'inline-block'; // ou 'inline-flex'
+
+      } else {
+        // ... (código existente para mostrar loginArea)
+         // **NOVO: Esconde botões do carrinho**
+        if(cartButton) cartButton.style.display = 'none';
+        if(clearCartButton) clearCartButton.style.display = 'none';
+        // ... (código existente para esconder adminPanel)
+      }
+       console.log("[UI Update] Interface de autenticação atualizada. Logado:", !!user);
+    }
+
+    // **NOVO: Listener para limpar carrinho**
+    const clearCartButton = document.getElementById('clearCartBtn');
+    if (clearCartButton) {
+        clearCartButton.addEventListener('click', clearCart);
+    }
+
+     // **NOVO: Listener para mensagens do iframe (atualização de contagem)**
+     window.addEventListener('message', (event) => {
+         // IMPORTANTE: Verifique a origem em produção!
+         // if (event.origin !== 'URL_ESPERADA_DO_IFRAME') return;
+
+         if (event.data && event.data.type === 'cartUpdate') {
+             console.log("[Message Listener] Recebido 'cartUpdate' do iframe. Nova contagem:", event.data.count);
+             updateCartCount(event.data.count);
+         }
+     });
 
     /**
      * Manipula o clique no botão de login com Google.
@@ -389,6 +444,66 @@
       iframe.src = targetSrc;
       console.log(`[Iframe Update] Iframe atualizado para: ${targetSrc}`);
     }
+
+
+
+    /**
+     * Atualiza o contador de itens no botão do carrinho.
+     * @param {number} count - O número de itens no carrinho.
+     */
+    function updateCartCount(count) {
+        const cartCountSpan = document.getElementById('cart-count');
+        if (cartCountSpan) {
+            cartCountSpan.textContent = count;
+            console.log(`[Cart Count] Atualizado para: ${count}`);
+        }
+    }
+
+    /**
+     * Carrega a contagem inicial do carrinho do usuário Parse logado.
+     */
+    async function loadInitialCartCount() {
+        const parseUser = Parse.User.current();
+        if (parseUser) {
+            const cart = parseUser.get('carrinho') || [];
+            updateCartCount(cart.length);
+        } else {
+            updateCartCount(0); // Zera se não houver usuário Parse
+        }
+    }
+
+    /**
+     * Limpa o carrinho do usuário Parse logado.
+     */
+    async function clearCart() {
+        const parseUser = Parse.User.current();
+        if (!parseUser) {
+            alert("Você precisa estar logado para limpar o carrinho.");
+            return;
+        }
+        if (!confirm("Tem certeza que deseja esvaziar seu carrinho?")) {
+            return;
+        }
+
+        console.log("[Cart Clear] Tentando limpar carrinho...");
+        parseUser.set('carrinho', []); // Define como array vazio
+        try {
+            await parseUser.save();
+            updateCartCount(0); // Atualiza a contagem na UI
+            alert("Carrinho esvaziado com sucesso!");
+            console.log("[Cart Clear] Carrinho limpo no Parse.");
+            // Opcional: Enviar mensagem para o iframe atualizar, se necessário
+            const iframe = document.getElementById('mainContent');
+             if (iframe && iframe.contentWindow) {
+                 iframe.contentWindow.postMessage({ type: 'cartCleared' }, '*'); // Use origem específica em prod
+             }
+
+        } catch (error) {
+            console.error("[Cart Clear] Erro ao limpar carrinho:", error);
+            alert("Erro ao limpar o carrinho: " + error.message);
+        }
+    }
+
 
   </script>
 </body>
