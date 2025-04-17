@@ -223,9 +223,10 @@
         console.log(`[Add Cart] Adicionando produto ${produtoId} ao carrinho do usuário ${currentUser.id}`);
 
         try {
-            // Usa addUnique para adicionar o ID ao array 'carrinho' apenas se não existir
-            currentUser.addUnique('carrinho', produtoId);
-            await currentUser.save(); // Salva a alteração no usuário
+            // Usa unshift para adicionar o ID ao array 'carrinho' no inicio
+          
+            parseUser.unshift('carrinho', produtoId);
+             await parseUser.save(); // Salva a alteração no usuáriopaarce
 
             // Atualiza a contagem e envia para o pai (index.html)
             const updatedCart = currentUser.get('carrinho') || [];
