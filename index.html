@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>Minha Loja Virtual</title>
   <style>
+    /* Estilos permanecem os mesmos */
     body {
       font-family: sans-serif;
       margin: 0;
@@ -89,6 +90,7 @@
       height: 30px;
       border-radius: 50%;
       margin-left: 8px;
+      vertical-align: middle; /* Alinha a imagem verticalmente */
     }
     .admin-panel {
       display: none;
@@ -136,7 +138,7 @@
     }
     iframe {
       width: 100%;
-      height: calc(100vh - 120px);
+      height: calc(100vh - 120px); /* Ajustar altura conforme necessário */
       border: none;
     }
     .user-info a.minha-loja-btn {
@@ -147,14 +149,13 @@
       border: 2px solid transparent;
       border-radius: 3px;
       transition: background-color 0.3s, border-color 0.3s;
-      background: #ffc107;
+      background: #ffc107; /* Cor amarela para destaque */
     }
     .user-info a.minha-loja-btn:hover {
       background-color: #e0a800;
       border-color: #d39e00;
     }
   </style>
-  <!-- Adicionar SDK do Parse -->
   <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
@@ -169,9 +170,7 @@
       <div id="loginArea" class="login-form">
         <p>Só aceitamos login por rede social</p>
         <button id="googleLoginBtn" class="google-btn">
-          <svg class="google-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
-            <!-- Ícone do Google (manter original) -->
-          </svg>
+          <svg class="google-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="18px" height="18px"><path fill="#EA4335" d="M24 9.5c3.46 0 6.3 1.18 8.4 3.19l6.4-6.4C34.8 2.5 30 .5 24 .5 14.9.5 7.2 5.8 4 13.6l7.2 5.6C12.8 13.4 18 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.8c0-1.6-.14-3.2-.4-4.8H24v9.1h12.8c-.6 3-2.2 5.5-4.6 7.2l7.2 5.6c4.2-3.8 6.7-9.4 6.7-16.1z"/><path fill="#FBBC05" d="M11.2 19.2c-.4 1.2-.6 2.5-.6 3.8s.2 2.6.6 3.8l-7.2 5.6C2.5 30.2.5 27.2.5 24s2-6.2 4.5-8.4l7.2 5.6z"/><path fill="#34A853" d="M24 47.5c5.9 0 10.9-1.9 14.6-5.2l-7.2-5.6c-2 1.3-4.5 2.1-7.4 2.1-6 0-11.2-3.9-13-9.2L4 32.8C7.2 40.6 14.9 47.5 24 47.5z"/><path fill="none" d="M.5.5h47v47H.5z"/></svg>
           Entrar com Google
         </button>
       </div>
@@ -191,106 +190,206 @@
   <iframe id="mainContent" src="produtosoff.html"></iframe>
 
   <script>
-    // Configuração do Firebase
+    // --- Configuração Firebase ---
     const firebaseConfig = {
-      apiKey: "AIzaSyDlUQbbTP29VqBVmzOGHhfc67R1DTRPwxg",
+      apiKey: "AIzaSyDlUQbbTP29VqBVmzOGHhfc67R1DTRPwxg", // Substitua pela sua chave real
       authDomain: "gitautenticatio.firebaseapp.com",
       projectId: "gitautenticatio",
       storageBucket: "gitautenticatio.appspot.com",
       messagingSenderId: "21514234895",
       appId: "1:21514234895:web:d34dc4c44baf586d2cc77a",
-      databaseURL: "https://gitautenticatio-default-rtdb.firebaseio.com"
+      databaseURL: "https://gitautenticatio-default-rtdb.firebaseio.com" // Adicione se usar Realtime DB
     };
 
-    // Inicializar Firebase
+    // --- Inicialização Firebase ---
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
-    const database = firebase.database();
+    const database = firebase.database(); // Inicializa Realtime Database se necessário
     const googleProvider = new firebase.auth.GoogleAuthProvider();
 
-    // Configurações do Parse/Back4App
-    Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
+    // --- Configuração Parse/Back4App ---
+    Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I"); // Substitua pelas suas chaves
     Parse.serverURL = "https://parseapi.back4app.com/";
 
-    // Sincronizar usuário Firebase com Parse
-    async function syncParseUser(user) {
+    // --- Funções ---
+
+    /**
+     * Sincroniza o usuário Firebase com o Parse.
+     * Tenta logar no Parse com o UID do Firebase. Se não existir,
+     * cria um novo usuário Parse com o UID como username e senha,
+     * e o email do Firebase.
+     * @param {firebase.User} user - O objeto de usuário do Firebase.
+     */
+    async function syncFirebaseUserToParse(user) {
+      if (!user) return; // Sai se não houver usuário Firebase
+
+      const firebaseUID = user.uid;
+      const firebaseEmail = user.email;
+
+      console.log(`[Parse Sync] Iniciando para Firebase UID: ${firebaseUID}`);
+
       try {
-        await Parse.User.logIn(user.uid, user.uid);
+        // Tenta fazer login no Parse usando o UID do Firebase como username e senha
+        await Parse.User.logIn(firebaseUID, firebaseUID);
+        console.log(`[Parse Sync] Usuário ${firebaseUID} logado com sucesso no Parse.`);
       } catch (error) {
-        const parseUser = new Parse.User();
-        parseUser.set('username', user.uid);
-        parseUser.set('password', user.uid);
-        parseUser.set('email', user.email);
-        await parseUser.signUp();
+        // Se o erro for "objeto não encontrado" (usuário não existe no Parse)
+        if (error.code === Parse.Error.OBJECT_NOT_FOUND) {
+          console.log(`[Parse Sync] Usuário ${firebaseUID} não encontrado no Parse. Criando...`);
+          const parseUser = new Parse.User();
+          parseUser.set("username", firebaseUID); // Define username como UID
+          parseUser.set("password", firebaseUID); // Define senha como UID (IMPORTANTE: considere uma estratégia mais segura)
+          parseUser.set("email", firebaseEmail);    // Define o email
+          parseUser.set("firebaseUID", firebaseUID); // Link explícito (opcional, mas útil)
+
+          try {
+            // Tenta registrar o novo usuário no Parse
+            await parseUser.signUp();
+            console.log(`[Parse Sync] Novo usuário ${firebaseUID} criado e logado no Parse.`);
+          } catch (signUpError) {
+            console.error(`[Parse Sync] Erro ao criar usuário ${firebaseUID} no Parse:`, signUpError);
+            // Considerar o que fazer em caso de falha no signUp (ex: alertar usuário, tentar novamente?)
+            alert(`Erro ao sincronizar sua conta (${signUpError.code}). Tente recarregar a página.`);
+          }
+        } else {
+          // Outro erro durante o login no Parse
+          console.error(`[Parse Sync] Erro ao logar usuário ${firebaseUID} no Parse:`, error);
+          // Considerar o que fazer aqui (ex: alertar usuário)
+           alert(`Erro ao acessar sua conta (${error.code}). Tente recarregar a página.`);
+        }
       }
     }
 
-    // Monitorar estado de autenticação
+    /**
+     * Monitora o estado de autenticação do Firebase.
+     * Quando o usuário faz login, sincroniza com o Parse.
+     * Atualiza a UI e o conteúdo do iframe.
+     */
     auth.onAuthStateChanged(async (user) => {
+      console.log("[Auth State] Mudança detectada. Usuário:", user ? user.uid : "Nenhum");
       if (user) {
-        await syncParseUser(user); // Sincronização Firebase -> Parse
+        // **PONTO PRINCIPAL: Sincroniza com Parse AQUI**
+        await syncFirebaseUserToParse(user);
+        // Verifica se é admin (se necessário)
         checkAdminStatus(user.uid);
+      } else {
+         // Se o usuário deslogou do Firebase, desloga do Parse também
+         if (Parse.User.current()) {
+            console.log("[Auth State] Deslogando usuário Parse...");
+            try {
+                await Parse.User.logOut();
+                console.log("[Auth State] Usuário Parse deslogado.");
+            } catch (parseLogoutError) {
+                console.error("[Auth State] Erro ao deslogar do Parse:", parseLogoutError);
+            }
+         }
       }
+      // Atualiza a interface de login/usuário
       updateAuthUI(user);
+      // Atualiza o conteúdo do iframe (produtos logado vs offline)
       updateIframeContent(user);
     });
 
-    // Login com Google
+    /**
+     * Manipula o clique no botão de login com Google.
+     */
     document.getElementById('googleLoginBtn').addEventListener('click', async () => {
+      console.log("[Login] Botão Google clicado.");
       try {
         const result = await auth.signInWithPopup(googleProvider);
-        alert(`Bem-vindo ${result.user.displayName}!`);
+        // O onAuthStateChanged será disparado automaticamente após o sucesso,
+        // então a sincronização com o Parse ocorrerá lá.
+        console.log(`[Login] Sucesso! Usuário: ${result.user.displayName}`);
+        // alert(`Bem-vindo ${result.user.displayName}!`); // Opcional: pode remover se a UI já atualiza
       } catch (error) {
+        console.error('[Login] Erro no login com Google:', error);
         alert('Erro no login com Google: ' + error.message);
       }
     });
 
-    // Logout
+    /**
+     * Manipula o clique no botão de logout.
+     */
     document.getElementById('logoutBtn').addEventListener('click', async () => {
+      console.log("[Logout] Botão Sair clicado.");
       try {
-        await auth.signOut();
-        await Parse.User.logOut();
-        alert('Logout realizado com sucesso!');
+        await auth.signOut(); // Desloga do Firebase
+        // O onAuthStateChanged cuidará do logout do Parse.
+        console.log('[Logout] Firebase signOut concluído.');
+        // alert('Logout realizado com sucesso!'); // Opcional: pode remover se a UI já atualiza
       } catch (error) {
+        console.error('[Logout] Erro ao sair:', error);
         alert('Erro ao sair: ' + error.message);
       }
     });
 
-    // Verificar status de administrador
+    /**
+     * Verifica se o UID do usuário existe no nó 'admins' do Firebase Realtime DB.
+     * Mostra ou esconde o painel de administração baseado no resultado.
+     * @param {string} uid - O UID do usuário Firebase.
+     */
     async function checkAdminStatus(uid) {
+      if (!uid) return; // Sai se não houver UID
+      console.log(`[Admin Check] Verificando status para UID: ${uid}`);
       try {
         const snapshot = await database.ref('admins/' + uid).once('value');
-        document.getElementById('adminPanel').style.display = snapshot.exists() ? 'flex' : 'none';
+        const isAdmin = snapshot.exists();
+        console.log(`[Admin Check] UID ${uid} é admin? ${isAdmin}`);
+        document.getElementById('adminPanel').style.display = isAdmin ? 'flex' : 'none';
       } catch (error) {
-        console.error('Erro ao verificar admin:', error);
-      }
-    }
-
-    // Atualizar interface do usuário
-    function updateAuthUI(user) {
-      const loginArea = document.getElementById('loginArea');
-      const userArea = document.getElementById('userArea');
-      const welcomeUser = document.getElementById('welcomeUser');
-
-      if (user) {
-        loginArea.style.display = 'none';
-        userArea.style.display = 'flex';
-        welcomeUser.innerHTML = `Bem-vindo, ${user.displayName || user.email.split('@')[0]}!`;
-        if (user.photoURL) {
-          welcomeUser.innerHTML += `<img src="${user.photoURL}" alt="Foto">`;
-        }
-      } else {
-        loginArea.style.display = 'flex';
-        userArea.style.display = 'none';
+        console.error('[Admin Check] Erro ao verificar admin:', error);
+        // Esconder o painel por segurança em caso de erro
         document.getElementById('adminPanel').style.display = 'none';
       }
     }
 
-    // Atualizar conteúdo do iframe
+    /**
+     * Atualiza a interface do cabeçalho (área de login vs área do usuário).
+     * @param {firebase.User | null} user - O objeto de usuário do Firebase ou null.
+     */
+    function updateAuthUI(user) {
+      const loginArea = document.getElementById('loginArea');
+      const userArea = document.getElementById('userArea');
+      const welcomeUser = document.getElementById('welcomeUser');
+      const adminPanel = document.getElementById('adminPanel');
+
+      if (user) {
+        // Usuário logado
+        loginArea.style.display = 'none';
+        userArea.style.display = 'flex';
+        let welcomeMessage = `Bem-vindo, ${user.displayName || user.email.split('@')[0]}!`;
+        if (user.photoURL) {
+          // Adiciona a imagem APÓS o texto, garantindo que o texto sempre apareça
+           welcomeMessage += ` <img src="${user.photoURL}" alt="Foto" style="width: 30px; height: 30px; border-radius: 50%; margin-left: 8px; vertical-align: middle;">`;
+        }
+         welcomeUser.innerHTML = welcomeMessage;
+
+      } else {
+        // Usuário deslogado
+        loginArea.style.display = 'flex';
+        userArea.style.display = 'none';
+        welcomeUser.innerHTML = ''; // Limpa a mensagem de boas-vindas
+        adminPanel.style.display = 'none'; // Esconde painel admin ao deslogar
+      }
+       console.log("[UI Update] Interface de autenticação atualizada. Logado:", !!user);
+    }
+
+    /**
+     * Atualiza o atributo 'src' do iframe principal.
+     * Carrega 'produtos.html' se logado, 'produtosoff.html' caso contrário.
+     * @param {firebase.User | null} user - O objeto de usuário do Firebase ou null.
+     */
     function updateIframeContent(user) {
       const iframe = document.getElementById('mainContent');
-      iframe.src = user ? 'produtos.html' : 'produtosoff.html';
+      const targetSrc = user ? 'produtos.html' : 'produtosoff.html';
+       if (iframe.src.endsWith(targetSrc)) {
+           console.log(`[Iframe Update] Iframe já está em ${targetSrc}. Nenhuma alteração.`);
+           return; // Evita recarregamento desnecessário
+       }
+      iframe.src = targetSrc;
+      console.log(`[Iframe Update] Iframe atualizado para: ${targetSrc}`);
     }
+
   </script>
 </body>
 </html>
