@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Produtos - Loja</title>
     <style>
+        /* Estilos existentes (manter) */
         body {
             font-family: sans-serif;
             margin: 0;
@@ -11,50 +12,112 @@
             background: #f4f4f4;
         }
         .container {
-            max-width: 700px;
+            max-width: 90%; /* Aumentar largura para melhor visualização */
             margin: 0 auto;
             padding: 20px;
         }
-        h1 {
+        h1.page-title { /* Renomear h1 principal */
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
+            color: #333;
         }
+        /* NOVO: Estilo para o cabeçalho da loja */
+        .store-header {
+            background-color: #e9ecef;
+            padding: 10px 15px;
+            margin-top: 25px; /* Espaço acima de cada loja */
+            margin-bottom: 15px; /* Espaço abaixo do cabeçalho da loja */
+            border-radius: 5px;
+            border-left: 5px solid #007BFF; /* Destaque visual */
+        }
+        .store-header h2 {
+            margin: 0;
+            font-size: 1.4em;
+            color: #0056b3;
+        }
+         .store-header p {
+             margin: 5px 0 0 0;
+             font-size: 0.9em;
+             color: #555;
+         }
+
         .product-grid {
-            display: flex;
-            flex-direction: column;
+            display: grid; /* Mudar para grid para melhor layout */
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Layout responsivo */
             gap: 20px;
+            padding: 0; /* Remover padding se houver */
         }
         .product-card {
             background: white;
-            padding: 15px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 0; /* Remover padding para controlar imagem */
+            border-radius: 8px; /* Bordas mais suaves */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Sombra mais pronunciada */
             text-align: center;
+            display: flex; /* Usar flex para organizar conteúdo interno */
+            flex-direction: column;
+            overflow: hidden; /* Garante que conteúdo não vaze */
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
+         .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+         }
+
+         .product-card .product-content {
+             padding: 15px; /* Padding para o conteúdo abaixo da imagem */
+             flex-grow: 1; /* Faz o conteúdo crescer */
+             display: flex;
+             flex-direction: column;
+             justify-content: space-between; /* Empurra botão para baixo */
+         }
+
         .product-card h3 {
             margin: 10px 0;
+            font-size: 1.1em;
+            color: #333;
         }
-        .product-card p {
+         .product-card .product-description { /* Estilo para descrição */
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 10px;
+            min-height: 3em; /* Reserva espaço p/ descrição */
+            line-height: 1.4;
+        }
+        .product-card .product-price { /* Estilo específico para preço */
             font-weight: bold;
+            color: #007BFF; /* Cor de destaque */
+            font-size: 1.2em;
+            margin-bottom: 15px; /* Espaço antes do botão */
         }
-        .product-card button {
-            margin-top: 10px;
-            padding: 8px 12px;
+        .product-card button.add-to-cart-btn { /* Estilo botão */
+            margin-top: auto; /* Empurra o botão para baixo */
+            padding: 10px 15px;
             background: #28a745;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            transition: background-color 0.2s ease;
+            width: 100%; /* Ocupa largura */
+            box-sizing: border-box; /* Inclui padding na largura */
+            font-size: 0.95em;
         }
-        .product-card button:hover {
+        .product-card button.add-to-cart-btn:hover:not(:disabled) {
             background: #218838;
         }
+         .product-card button.add-to-cart-btn:disabled {
+            background: #aaa;
+            cursor: not-allowed;
+         }
+
+        /* Estilos Carrossel (Ajustados) */
         .carousel-container {
             position: relative;
             overflow: hidden;
             width: 100%;
-            height: 180px;
-            margin-bottom: 10px;
+            height: 250px; /* Aumentar altura */
+            /* margin-bottom: 0; Remover margem inferior */
+            background-color: #f0f0f0; /* Fundo enquanto carrega */
         }
         .carousel-track {
             display: flex;
@@ -67,164 +130,339 @@
             justify-content: center;
             align-items: center;
             box-sizing: border-box;
+            height: 100%;
         }
         .carousel-item img {
-            width: 150px;
-            height: 150px;
-            object-fit: cover;
-            border-radius: 5px;
-            transition: transform 0.3s ease;
-        }
-        .carousel-item img:hover {
-            transform: scale(1.5);
+            max-width: 100%; /* Imagem não ultrapassa container */
+            max-height: 100%; /* Imagem não ultrapassa container */
+            width: auto; /* Mantém proporção */
+            height: auto; /* Mantém proporção */
+            object-fit: contain; /* Mostra imagem inteira, pode deixar barras */
+            /* object-fit: cover; */ /* Cobre, pode cortar */
+            border-radius: 0; /* Sem borda no topo */
+            display: block; /* Remove espaço extra abaixo */
         }
         .carousel-button {
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.4); /* Fundo mais suave */
             border: none;
             color: white;
-            padding: 8px;
+            padding: 10px; /* Aumentar padding */
             cursor: pointer;
             border-radius: 50%;
             z-index: 1;
+            opacity: 0.7;
+             transition: opacity 0.2s ease;
         }
-        .carousel-button.prev {
-            left: 5px;
+         .carousel-button:hover {
+            opacity: 1;
+         }
+        .carousel-button.prev { left: 10px; }
+        .carousel-button.next { right: 10px; }
+
+        /* Estilo de carregamento */
+        #loadingIndicator {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2em;
+            color: #555;
         }
-        .carousel-button.next {
-            right: 5px;
-        }
-       
+
     </style>
     <script src="https://unpkg.com/parse@3.5.0/dist/parse.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
-</head>
+    </head>
 <body>
 <div class="container">
-    <h1>Produtos à Venda</h1>
-    <div id="productGrid" class="product-grid"></div>
+    <h1 class="page-title">Produtos à Venda</h1>
+
+    <div id="loadingIndicator">Carregando produtos...</div>
+
+    <div id="storeProductGrid"></div>
 </div>
 
-
-
 <script>
-    // Configuração do Parse
+    // --- Configurações ---
     Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
     Parse.serverURL = "https://parseapi.back4app.com";
 
-
-    // Configuração do Firebase
     const firebaseConfig = {
-        apiKey: "AIzaSyDlUQbbTP29VqBVmzOGHhfc67R1DTRPwxg",
+        apiKey: "AIzaSyDlUQbbTP29VqBVmzOGHhfc67R1DTRPwxg", // Substitua pela sua chave
         authDomain: "gitautenticatio.firebaseapp.com",
-        databaseURL: "https://gitautenticatio-default-rtdb.firebaseio.com",
         projectId: "gitautenticatio",
-        storageBucket: "gitautenticatio.firebasestorage.app",
+        storageBucket: "gitautenticatio.appspot.com",
         messagingSenderId: "21514234895",
         appId: "1:21514234895:web:d34dc4c44baf586d2cc77a"
     };
-
-    // Inicializar Firebase
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
-    const database = firebase.database();
 
+    // --- Variáveis Globais ---
+    const carouselIndexes = {}; // Mantém o índice atual de cada carrossel
+    let currentUser = Parse.User.current(); // Pega o usuário Parse atual (se logado)
 
+    // --- Funções ---
 
-    let currentUser = null;
-  
-    const carouselIndexes = {};
-
-    // Monitorar estado de autenticação
-    auth.onAuthStateChanged(user => {
-        currentUser = user;
-        if (user) {
-            loadCart();
-        } else {
-            document.getElementById('cartItems').innerHTML = 'Faça login para acessar o carrinho';
-            document.getElementById('cartTotal').textContent = '0.00';
+    /**
+     * Adiciona um produto ao carrinho do usuário logado no Parse.
+     * @param {string} produtoId - O objectId do produto a ser adicionado.
+     * @param {HTMLElement} buttonElement - O botão que foi clicado.
+     */
+    async function addToCart(produtoId, buttonElement) {
+        currentUser = Parse.User.current(); // Garante que temos a versão mais recente
+        if (!currentUser) {
+            alert("⚠️ Você precisa estar logado para adicionar itens ao carrinho.\nFaça login na página principal.");
+            return;
         }
-    });
 
-    // Carregar produtos
-    async function loadProducts() {
-        const Produto = Parse.Object.extend("Produto");
-        const query = new Parse.Query(Produto);
+        buttonElement.disabled = true; // Desabilita o botão
+        buttonElement.textContent = 'Adicionando...';
+        console.log(`[Add Cart] Adicionando produto ${produtoId} ao carrinho do usuário ${currentUser.id}`);
 
         try {
-            const results = await query.find();
-            const grid = document.getElementById("productGrid");
-            grid.innerHTML = "";
+            // Usa addUnique para adicionar o ID ao array 'carrinho' apenas se não existir
+            currentUser.addUnique('carrinho', produtoId);
+            await currentUser.save(); // Salva a alteração no usuário
 
-            results.forEach(produto => {
-                const produtoId = produto.id;
-                const imagens = produto.get("imagens") || [];
-                const nome = produto.get("nome");
-                const preco = produto.get("preco");
-                const descricao = produto.get("descricao");
+            // Atualiza a contagem e envia para o pai (index.html)
+            const updatedCart = currentUser.get('carrinho') || [];
+            const newCount = updatedCart.length;
+            console.log(`[Add Cart] Produto ${produtoId} adicionado. Novo total: ${newCount}`);
+            window.parent.postMessage({ type: 'cartUpdate', count: newCount }, '*'); // Use origem específica!
 
-                const card = document.createElement("div");
-                card.className = "product-card";
+            // Feedback visual
+            buttonElement.textContent = 'Adicionado ✔️';
+             // Poderia reabilitar após um tempo ou mudar permanentemente
+             // setTimeout(() => {
+             //    buttonElement.disabled = false;
+             //    buttonElement.textContent = 'Adicionar ao Carrinho';
+             // }, 2000);
 
-                // Carrossel
-                let carouselItemsHTML = '';
-                if (imagens.length === 0) {
-                    carouselItemsHTML = `
-              <div class="carousel-item">
-                <img src="https://via.placeholder.com/150?text=Sem+Imagem" alt="Sem Imagem">
-              </div>`;
-                } else {
-                    carouselItemsHTML = imagens.map(url => `
-              <div class="carousel-item">
-                <a href="${url}" target="_blank"> <img src="${url}" alt="${nome}"> </a>
-              </div>`).join("");
-                }
-
-                const carouselHTML = `
-            <div class="carousel-container">
-              <button class="carousel-button prev" onclick="moveCarousel('${produtoId}', -1)">&#10094;</button>
-              <div class="carousel-track" id="track-${produtoId}">
-                ${carouselItemsHTML}
-              </div>
-              <button class="carousel-button next" onclick="moveCarousel('${produtoId}', 1)">&#10095;</button>
-            </div>`;
-
-                card.innerHTML = `
-            ${carouselHTML}
-            <h3>${nome}</h3>
-            ${descricao ? `<p>${descricao}</p>` : ""}
-            <p>R$ ${preco.toFixed(2)}</p>
-            <button onclick="addToCart('${produtoId}')">Adicionar ao Carrinho</button>`;
-
-                carouselIndexes[produtoId] = 0;
-                grid.appendChild(card);
-            });
 
         } catch (error) {
-            console.error("Erro ao carregar produtos: ", error);
+            console.error(`[Add Cart] Erro ao adicionar produto ${produtoId}:`, error);
+            alert("❌ Erro ao adicionar o produto ao carrinho: " + error.message);
+            buttonElement.disabled = false; // Reabilita em caso de erro
+            buttonElement.textContent = 'Adicionar ao Carrinho';
         }
     }
-    
-    // Funções do Carrossel
-    function moveCarousel(produtoId, direction) {
+
+
+    /**
+     * Carrega Lojas ordenadas por reputação e seus respectivos produtos
+     * na ordem definida dentro de cada loja.
+     */
+    async function loadSortedProducts() {
+        const gridContainer = document.getElementById("storeProductGrid");
+        const loadingIndicator = document.getElementById("loadingIndicator");
+        gridContainer.innerHTML = ""; // Limpa o conteúdo anterior
+        loadingIndicator.style.display = 'block'; // Mostra carregando
+
+        const Loja = Parse.Object.extend("Loja");
+        const Produto = Parse.Object.extend("Produto");
+        const queryLoja = new Parse.Query(Loja);
+
+        queryLoja.descending("reputacao"); // Ordena Lojas por reputação (maior primeiro)
+        // queryLoja.include("dono"); // Opcional: se precisar mostrar info do dono da loja
+        queryLoja.select("nome", "reputacao", "produtos"); // Seleciona apenas campos necessários da Loja
+
+        try {
+            const lojas = await queryLoja.find();
+            console.log(`[Load Sorted] Lojas encontradas e ordenadas por reputação: ${lojas.length}`);
+
+            if (lojas.length === 0) {
+                 gridContainer.innerHTML = "<p>Nenhuma loja encontrada.</p>";
+                 loadingIndicator.style.display = 'none';
+                 return;
+            }
+
+            // Itera sobre cada loja ordenada
+            for (const loja of lojas) {
+                const nomeLoja = loja.get("nome") || "Loja Sem Nome";
+                const reputacaoLoja = loja.get("reputacao") || 0;
+                const productIdsInOrder = loja.get("produtos") || []; // Array de IDs na ordem definida pelo dono
+
+                console.log(`[Load Sorted] Processando Loja: ${nomeLoja} (Rep: ${reputacaoLoja}), Produtos: ${productIdsInOrder.length}`);
+
+                // Cria o cabeçalho da loja
+                const storeHeader = document.createElement('div');
+                storeHeader.className = 'store-header';
+                storeHeader.innerHTML = `<h2>${nomeLoja}</h2><p>Reputação: ${reputacaoLoja}</p>`;
+                gridContainer.appendChild(storeHeader);
+
+                // Cria um container grid para os produtos desta loja
+                const productGridForStore = document.createElement('div');
+                productGridForStore.className = 'product-grid'; // Aplica o estilo de grid
+                gridContainer.appendChild(productGridForStore);
+
+
+                if (productIdsInOrder.length > 0) {
+                    // Busca os produtos desta loja específicos
+                    const queryProduto = new Parse.Query(Produto);
+                    queryProduto.containedIn("objectId", productIdsInOrder); // Busca SÓ os produtos desta loja
+                    // queryProduto.include("loja"); // Se precisar referenciar a loja no produto
+                    queryProduto.select("nome", "preco", "imagens", "descricao"); // Campos necessários do Produto
+
+                    const produtosDestaLoja = await queryProduto.find();
+                    console.log(`[Load Sorted] Produtos encontrados para ${nomeLoja}: ${produtosDestaLoja.length}`);
+
+                    // **Reordena os produtos encontrados para garantir a ordem do array 'productIdsInOrder'**
+                    const produtosOrdenados = productIdsInOrder
+                        .map(id => produtosDestaLoja.find(p => p.id === id))
+                        .filter(p => p); // Remove nulos se algum ID não for encontrado
+
+                    if (produtosOrdenados.length !== productIdsInOrder.length) {
+                         console.warn(`[Load Sorted] Discrepância de IDs para loja ${nomeLoja}. IDs na loja: ${productIdsInOrder.length}, Produtos encontrados/ordenados: ${produtosOrdenados.length}`);
+                    }
+
+                    // Renderiza os produtos ordenados para esta loja
+                     if (produtosOrdenados.length > 0) {
+                        produtosOrdenados.forEach(produto => {
+                             renderProductCard(produto, productGridForStore); // Passa o grid da loja atual
+                        });
+                     } else {
+                         productGridForStore.innerHTML = "<p style='grid-column: 1 / -1; text-align: center; color: #888;'>Nenhum produto encontrado para esta loja (IDs podem estar inválidos).</p>";
+                     }
+
+                } else {
+                    productGridForStore.innerHTML = "<p style='grid-column: 1 / -1; text-align: center; color: #888;'>Esta loja ainda não possui produtos cadastrados.</p>"; // Mensagem se a loja não tem produtos
+                }
+            } // Fim do loop por lojas
+
+            loadingIndicator.style.display = 'none'; // Esconde carregando
+
+        } catch (error) {
+            console.error("[Load Sorted] Erro ao carregar lojas e produtos:", error);
+            loadingIndicator.style.display = 'none';
+            gridContainer.innerHTML = `<p style="color: red; text-align: center;">Erro ao carregar produtos: ${error.message}</p>`;
+        }
+    }
+
+    /**
+     * Renderiza um card de produto e o adiciona a um container.
+     * @param {Parse.Object} produto - O objeto Parse.Object do produto.
+     * @param {HTMLElement} container - O elemento HTML onde o card será adicionado.
+     */
+    function renderProductCard(produto, container) {
+        const produtoId = produto.id;
+        const imagens = produto.get("imagens") || [];
+        const nome = produto.get("nome") || "Produto sem nome";
+        const preco = produto.get("preco") || 0;
+        const descricao = produto.get("descricao") || ""; // Descrição pode ser vazia
+
+        const card = document.createElement("div");
+        card.className = "product-card";
+
+        // --- Carrossel ---
+        let carouselItemsHTML = '';
+        if (imagens.length === 0) {
+            carouselItemsHTML = `<div class="carousel-item"><img src="https://placehold.co/300x250/eee/ccc?text=Sem+Imagem" alt="Sem Imagem"></div>`;
+        } else {
+            carouselItemsHTML = imagens.map(url => `
+                <div class="carousel-item">
+                    <img src="${url}" alt="${nome}" loading="lazy">
+                </div>`).join(""); // Adiciona loading="lazy"
+        }
+        const carouselHTML = `
+            <div class="carousel-container">
+                ${imagens.length > 1 ? `<button class="carousel-button prev" onclick="moveCarousel(event, '${produtoId}', -1)">&#10094;</button>` : ''}
+                <div class="carousel-track" id="track-${produtoId}">
+                    ${carouselItemsHTML}
+                </div>
+                ${imagens.length > 1 ? `<button class="carousel-button next" onclick="moveCarousel(event, '${produtoId}', 1)">&#10095;</button>` : ''}
+            </div>`;
+
+        // --- Conteúdo do Card ---
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'product-content';
+        contentDiv.innerHTML = `
+            <div> <h3>${nome}</h3>
+                <p class="product-description">${descricao || '&nbsp;'}</p> <p class="product-price">R$ ${preco.toFixed(2)}</p>
+            </div>
+            <button class="add-to-cart-btn" onclick="addToCart('${produtoId}', this)">Adicionar ao Carrinho</button>
+        `;
+
+        card.innerHTML = carouselHTML; // Adiciona carrossel
+        card.appendChild(contentDiv); // Adiciona conteúdo
+
+        carouselIndexes[produtoId] = 0; // Inicializa índice do carrossel
+        container.appendChild(card); // Adiciona o card ao grid da loja específica
+    }
+
+    /**
+     * Move o carrossel de um produto específico.
+     * @param {Event} event - O evento do clique (para parar propagação).
+     * @param {string} produtoId - O ID do produto do carrossel.
+     * @param {number} direction - -1 para anterior, 1 para próximo.
+     */
+    function moveCarousel(event, produtoId, direction) {
+        event.stopPropagation(); // Impede que o clique no botão acione outros eventos no card
+
         const track = document.getElementById(`track-${produtoId}`);
+        if (!track) return;
         const items = track.querySelectorAll(".carousel-item");
         const totalItems = items.length;
 
-        carouselIndexes[produtoId] += direction;
-        if (carouselIndexes[produtoId] < 0) carouselIndexes[produtoId] = 0;
-        if (carouselIndexes[produtoId] >= totalItems) carouselIndexes[produtoId] = totalItems - 1;
+        if (totalItems <= 1) return; // Não faz nada se só tiver 1 ou 0 imagens
 
-        track.style.transform = `translateX(${-carouselIndexes[produtoId] * 100}%)`;
+        let currentIndex = carouselIndexes[produtoId] || 0;
+        currentIndex += direction;
+
+        // Loop (volta pro início/fim)
+        if (currentIndex < 0) {
+             currentIndex = totalItems - 1;
+        } else if (currentIndex >= totalItems) {
+             currentIndex = 0;
+        }
+
+        // // Sem Loop (para no início/fim)
+        // if (currentIndex < 0) currentIndex = 0;
+        // if (currentIndex >= totalItems) currentIndex = totalItems - 1;
+
+
+        carouselIndexes[produtoId] = currentIndex;
+        track.style.transform = `translateX(${-currentIndex * 100}%)`;
     }
 
-    // Inicialização
-    loadProducts();
+    // --- Inicialização ---
+    // Monitora autenticação para pegar currentUser (se já logado)
+     auth.onAuthStateChanged(user => {
+         if (user) {
+             // Usuário Firebase logado, verifica se Parse está logado
+             currentUser = Parse.User.current();
+             if (!currentUser) {
+                 console.warn("[Produtos Init] Usuário Firebase logado, mas Parse não. Tentando buscar novamente...");
+                 // Tenta buscar de novo pode não funcionar se a sessão expirou.
+                 // Idealmente, index.html garante a sessão Parse.
+                 // Poderia forçar um refresh ou mostrar mensagem para relogar.
+                 currentUser = Parse.User.current(); // Tenta de novo
+             }
+             console.log("[Produtos Init] Usuário atual (Parse):", currentUser ? currentUser.id : "Nenhum");
+         } else {
+             currentUser = null;
+             console.log("[Produtos Init] Nenhum usuário logado.");
+         }
+         // Carrega os produtos independentemente do login (mas addToCart verificará)
+         loadSortedProducts();
+     });
+
+    // Listener para caso o carrinho seja limpo externamente (pela index.html)
+    window.addEventListener('message', (event) => {
+         // IMPORTANTE: Verifique a origem!
+        if (event.data && event.data.type === 'cartCleared') {
+             console.log("[Message Listener] Recebido 'cartCleared'. Reabilitando botões 'Adicionar'...");
+             // Reabilita todos os botões que possam ter ficado como "Adicionado ✔️"
+             const addedButtons = document.querySelectorAll('button.add-to-cart-btn:disabled');
+             addedButtons.forEach(btn => {
+                 btn.disabled = false;
+                 btn.textContent = 'Adicionar ao Carrinho';
+             });
+         }
+     });
+
 </script>
 </body>
 </html>
