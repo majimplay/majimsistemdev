@@ -122,6 +122,7 @@
     <h3>Seu Carrinho 🛒</h3>
     <div id="cartItems"></div>
     <p>Total: R$ <span id="cartTotal">0.00</span></p>
+    <button onclick="salvarCarrinho()">Salvar Carrinho</button>
     <button onclick="finalizarCompra()">Finalizar Compra</button>
 </div>
 
@@ -150,6 +151,7 @@
 
 
     let currentUser = null;
+    let carrinho = []; // Carrinho simplificado: array de IDs de produtos
     const carouselIndexes = {};
 
     // Monitorar estado de autenticação
@@ -223,43 +225,15 @@
     }
 
     // Funções do Carrinho
-    async function addToCart(productId) {
+    function addToCart(productId) {
         if (!currentUser) {
             alert("Faça login para adicionar produtos ao carrinho!");
             return;
         }
 
-        try {
-            const user = await Parse.User.currentAsync();
-            if (!user) {
-                alert("Usuário não autenticado no Parse.");
-                return;
-            }
-
-            // Recuperar o carrinho do usuário do Parse
-            let carrinho = user.get('carrinho');
-            if (!carrinho) {
-                carrinho = [];
-            }
-
-            // Verificar se o produto já está no carrinho
-            const produtoExistente = carrinho.find(item => item.produtoId === productId);
-            if (produtoExistente) {
-                produtoExistente.quantidade += 1;
-            } else {
-                carrinho.push({
-                    produtoId: productId,
-                    quantidade: 1,
-                    adicionadoEm: Date.now()
-                });
-            }
-            user.set('carrinho', carrinho);
-            await user.save();
-
-            await loadCart(); // Recarregar o carrinho após a atualização
-        } catch (error) {
-            console.error("Erro ao adicionar ao carrinho:", error);
-        }
+        carrinho.push(productId);
+        console.log("Produto adicionado ao carrinho:", productId, "Carrinho atual:", carrinho); // Adicionado console.log
+        loadCart();
     }
 
     async function loadCart() {
@@ -272,26 +246,22 @@
                 return;
             }
 
-            const carrinho = user.get('carrinho') || [];
-            const produtos = await getProdutosCarrinho(carrinho);
+            carrinho = user.get('carrinho') || [];
+            console.log("Carrinho carregado do Parse:", carrinho); // Adicionado console.log
 
+            const produtos = await getProdutosCarrinho(carrinho);
             let total = 0;
             let cartHTML = '';
 
             if (produtos && produtos.length > 0) {
                 produtos.forEach(produto => {
-                    const carrinhoItem = carrinho.find(item => item.produtoId === produto.id);
-                    if (carrinhoItem) {
-                        const quantidade = carrinhoItem.quantidade;
-                        const preco = produto.get("preco");
-                        total += preco * quantidade;
-
-                        cartHTML += `
+                    const preco = produto.get("preco");
+                    total += preco;  // Simplificado o cálculo do total
+                    cartHTML += `
               <div class="cart-item">
-                <p>${produto.get("nome")} x${quantidade}</p>
-                <p>R$ ${(preco * quantidade).toFixed(2)}</p>
+                <p>${produto.get("nome")}</p>
+                <p>R$ ${preco.toFixed(2)}</p>
               </div>`;
-                    }
                 });
             } else {
                 cartHTML = '<p>Carrinho vazio</p>';
@@ -305,14 +275,13 @@
     }
 
 
-    async function getProdutosCarrinho(carrinho) {
-        if (!carrinho || carrinho.length === 0) return [];
+    async function getProdutosCarrinho(carrinhoIds) {
+      if (!carrinhoIds || carrinhoIds.length === 0) return [];
 
-        const Produto = Parse.Object.extend("Produto");
-        const query = new Parse.Query(Produto);
-        const productIds = carrinho.map(item => item.produtoId);
-        query.containedIn("objectId", productIds);
-        return await query.find();
+      const Produto = Parse.Object.extend("Produto");
+      const query = new Parse.Query(Produto);
+      query.containedIn("objectId", carrinhoIds);
+      return await query.find();
     }
 
     async function finalizarCompra() {
@@ -323,34 +292,38 @@
 
         try {
             const user = await Parse.User.currentAsync();
-            const carrinho = user.get('carrinho') || [];
+            if (!user) {
+                console.error("Usuário não autenticado no Parse.");
+                return;
+            }
 
-            if (carrinho.length === 0) {
+            if (!carrinho || carrinho.length === 0) {
                 alert("Seu carrinho está vazio!");
                 return;
             }
 
             const produtos = await getProdutosCarrinho(carrinho);
-            const total = produtos.reduce((acc, produto) => {
-                const carrinhoItem = carrinho.find(item => item.produtoId === produto.id);
-                if (carrinhoItem) {
-                    return acc + (produto.get('preco') * carrinhoItem.quantidade);
-                }
-                return acc;
+             const total = produtos.reduce((acc, produto) => {
+                const preco = produto.get("preco");
+                return acc + preco;
             }, 0);
 
             // Criar Pedido no Parse
             const Pedido = Parse.Object.extend("Pedido");
             const pedido = new Pedido();
             pedido.set("cliente", user);
-            pedido.set("produtos", carrinho); // Salvar o array do carrinho
+            pedido.set("produtos", carrinho); // Salvar o array de IDs dos produtos
             pedido.set("total", total);
             pedido.set("status", "pendente");
             await pedido.save();
 
+            console.log("Pedido salvo com sucesso!", pedido); // Adicionado console.log
+
             // Limpar o carrinho do usuário no Parse
             user.set('carrinho', []);
             await user.save();
+
+            console.log("Carrinho do usuário limpo no Parse."); // Adicionado console.log
 
             alert("Compra finalizada com sucesso!");
             loadCart();
@@ -358,6 +331,28 @@
         } catch (error) {
             console.error("Erro ao finalizar compra:", error);
             alert("Erro ao processar pedido! Verifique o console.");
+        }
+    }
+
+    async function salvarCarrinho() {
+        if (!currentUser) {
+            alert("Faça login para salvar o carrinho!");
+            return;
+        }
+
+        try {
+            const user = await Parse.User.currentAsync();
+            if (!user) {
+                console.error("Usuário não autenticado no Parse.");
+                return;
+            }
+            user.set('carrinho', carrinho);
+            await user.save();
+            console.log("Carrinho salvo manualmente:", carrinho);
+            alert("Carrinho salvo com sucesso!");
+        } catch (error) {
+            console.error("Erro ao salvar carrinho:", error);
+            alert("Erro ao salvar carrinho! Verifique o console.");
         }
     }
 
