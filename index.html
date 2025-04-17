@@ -265,7 +265,7 @@ let currentCliente = null;
             console.log(`[Parse Sync] Novo usuário ${firebaseUID} criado e logado no Parse.`);
            
             currentCliente = new Cliente();
-            currentCliente.set("usuario", currentUser); // Associa ao usuário Parse
+            currentCliente.set("usuario", parseUser); // Associa ao usuário Parse
             currentCliente.set("carrinhoclient", []); // Inicializa array de produtos VAZIO
             await currentCliente.save();
             console.log("[Cliente Check] Parse ClienteClass criado com sucesso:", currentCliente.id);
