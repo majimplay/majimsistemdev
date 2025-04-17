@@ -51,6 +51,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+     <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
 </head>
 <body>
     <div class="profile-header">
@@ -79,19 +80,21 @@
     <script>
  // Configurações Firebase
         const firebaseConfig = {
-            apiKey: "AIzaSyDlUQbbTP29VqBVmzOGHhfc67R1DTRPwxg",
-            authDomain: "gitautenticatio.firebaseapp.com",
-            databaseURL: "https://gitautenticatio-default-rtdb.firebaseio.com",
-            projectId: "gitautenticatio",
-            storageBucket: "gitautenticatio.appspot.com",
-            messagingSenderId: "21514234895",
-            appId: "1:21514234895:web:d34dc4c44baf586d2cc77a"
-        };
-
+      apiKey: "AIzaSyDlUQbbTP29VqBVmzOGHhfc67R1DTRPwxg",
+      authDomain: "gitautenticatio.firebaseapp.com",
+      projectId: "gitautenticatio",
+      storageBucket: "gitautenticatio.appspot.com",
+      messagingSenderId: "21514234895",
+      appId: "1:21514234895:web:d34dc4c44baf586d2cc77a"
+    };
+    Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
+    Parse.serverURL = "https://parseapi.back4app.com/";
+        
         // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const database = firebase.database();
+          const app = firebase.initializeApp(firebaseConfig);
+         const auth = firebase.auth();
+         const database = firebase.database();
 
 
              // Monitorar estado de autenticação
