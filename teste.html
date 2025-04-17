@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Teste - Login</title>
+    <title>Login Header</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -10,19 +10,11 @@
             padding: 0;
             background: #f5f5f5;
         }
-        .container {
-            max-width: 800px;
-            margin: 2rem auto;
-            padding: 2rem;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
-        }
         .profile-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 2rem;
+            margin: 2rem;
             padding-bottom: 2rem;
             border-bottom: 2px solid #eee;
         }
@@ -42,49 +34,50 @@
             color: #666;
             margin: 0.5rem 0;
         }
-        .teste {
-            margin-top: 2rem;
-            padding: 1rem;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            background: #fafafa;
-        }
-        .teste label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-        }
-        .teste input[type="text"] {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 1rem;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 16px;
-        }
-        .teste button {
+        .btn {
             padding: 0.8rem 1.5rem;
             border: none;
             border-radius: 6px;
             cursor: pointer;
             font-weight: 600;
-            background-color: #007BFF;
-            color: #fff;
+            transition: all 0.3s ease;
+        }
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
         }
     </style>
     <!-- Firebase SDK -->
-    <script src="https://unpkg.com/parse@3.5.0/dist/parse.min.js"></script>
-   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <!-- Parse SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+</head>
+<body>
+    <div class="profile-header">
+        <div style="display: flex; align-items: center;">
+            <img id="profilePhoto" class="profile-photo" src="avatar-padrao.jpeg" alt="Foto do Perfil">
+            <div class="profile-info">
+                <h1 id="userName">📱 Carregando...</h1>
+                <p id="userEmail"></p>
+                <p id="loginMethod"></p>
+            </div>
+        </div>
+        <button id="logoutBtn" class="btn btn-secondary">🚪 Sair</button>
+    </div>
 
+    <!-- Resto da página em branco -->
+
+  <!-- Conteúdo do Teste -->
+        <div class="teste">
+            <p>ID do usuário: <span id="userId">Carregando...</span></p>
+            <label for="campo1">Campo1:</label>
+            <input type="text" id="campo1" placeholder="Digite o valor para campo1">
+            <button onclick="registrarDados()">Registrar</button>
+        </div>
+
+    
     <script>
-      // Configuração do Parse para registrar os dados na classe "teste"
-        Parse.serverURL = 'https://parseapi.back4app.com';
-        Parse.initialize('TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY', 'n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I', 'SS3NreF2Z8KSmHNnCMGUMUKJt3pTJeJdVoOMyU5l');
-       
-        // Configurações Firebase
+ // Configurações Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyDlUQbbTP29VqBVmzOGHhfc67R1DTRPwxg",
             authDomain: "gitautenticatio.firebaseapp.com",
@@ -98,61 +91,48 @@
         // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
+        const database = firebase.database();
 
-        // Monitorar estado de autenticação
+
+             // Monitorar estado de autenticação
         auth.onAuthStateChanged(user => {
             if (user) {
-                document.getElementById('userId').textContent = user.uid;
-                document.getElementById('userName').textContent = '👤 ' + (user.displayName || 'Usuário');
-                document.getElementById('userEmail').textContent = '📧 ' + user.email;
-                document.getElementById('profilePhoto').src = user.photoURL || 'avatar-padrao.jpeg';
+                currentUser = user;
+                atualizarCabecalho();
+                carregarTotal();
             } else {
                 window.location.href = 'index.html';
             }
         });
 
+          // Atualizar cabeçalho
+        function atualizarCabecalho() {
+            document.getElementById('profilePhoto').src = currentUser.photoURL || 'imagens/avatar-padrao.jpg';
+            document.getElementById('userName').textContent = '👤 ' + (currentUser.displayName || 'Usuário');
+            document.getElementById('userEmail').textContent = '📧 ' + currentUser.email;
+        }
 
-
-        // Função para registrar os dados
-//  async function registrarDados()  {
-  (async function registrarDados () => {
-  const myNewObject = new Parse.Object('Teste');
-  myNewObject.set('userId', 'fwuws');
-  myNewObject.set('campo1', 'tjyuyk');
-  try {
-    const result = await myNewObject.save();
-    // Access the Parse Object attributes using the .GET method
-    console.log('Teste created', result);
-  } catch (error) {
-    console.error('Error while creating Teste: ', error);
-  }
-})();
-;
-
-      
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            auth.signOut().then(() => {
+                window.location.href = 'index.html';
+            }).catch(err => {
+                alert('Erro ao fazer logout: ' + err.message);
+            });
+        });
     </script>
-</head>
-<body>
-    <div class="container">
-        <!-- Cabeçalho de Login -->
-        <div class="profile-header">
-            <div style="display: flex; align-items: center;">
-                <img id="profilePhoto" class="profile-photo" src="avatar-padrao.jpeg" alt="Foto do Perfil">
-                <div class="profile-info">
-                    <h1 id="userName">📱 Carregando...</h1>
-                    <p id="userEmail"></p>
-                </div>
-            </div>
-            <button id="logoutBtn" class="btn" onclick="firebase.auth().signOut()">🚪 Sair</button>
-        </div>
-
-        <!-- Conteúdo do Teste -->
-        <div class="teste">
-            <p>ID do usuário: <span id="userId">Carregando...</span></p>
-            <label for="campo1">Campo1:</label>
-            <input type="text" id="campo1" placeholder="Digite o valor para campo1">
-            <button onclick="registrarDados()">Registrar</button>
-        </div>
-    </div>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
