@@ -224,6 +224,7 @@
     Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I"); // Substitua pelas suas chaves
     Parse.serverURL = "https://parseapi.back4app.com/";
 
+    
     // --- Funções ---
 
     /**
@@ -238,7 +239,9 @@
 
       const firebaseUID = user.uid;
       const firebaseEmail = user.email;
-
+const Cliente = Parse.Object.extend("Cliente");
+let currentCliente = null;
+      
       console.log(`[Parse Sync] Iniciando para Firebase UID: ${firebaseUID}`);
 
       try {
@@ -260,6 +263,14 @@
             // Tenta registrar o novo usuário no Parse
             await parseUser.signUp();
             console.log(`[Parse Sync] Novo usuário ${firebaseUID} criado e logado no Parse.`);
+           
+            currentCliente = new Cliente();
+            currentCliente.set("usuario", currentUser); // Associa ao usuário Parse
+            currentCliente.set("carrinhoclient", []); // Inicializa array de produtos VAZIO
+            await currentCliente.save();
+            console.log("[Cliente Check] Cliente criado com sucesso:", currentCliente.id);
+            alert(`🎉 Cliente  criado com sucesso!`);
+            
           } catch (signUpError) {
             console.error(`[Parse Sync] Erro ao criar usuário ${firebaseUID} no Parse:`, signUpError);
             // Considerar o que fazer em caso de falha no signUp (ex: alertar usuário, tentar novamente?)
