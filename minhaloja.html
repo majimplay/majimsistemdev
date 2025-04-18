@@ -727,19 +727,15 @@
       const precoInput = document.getElementById('productPrice');
       const imagemInput = document.getElementById('productImage');
       const submitButton = e.target.querySelector('button[type="submit"]');
-
-
-
-      const productData = {
-        nome: nomeInput.value.trim(),
-        preco: parseFloat(precoInput.value),
-        imagemFile: imagemInput.files[0]
-
-        altura: parseFloat(document.getElementById('productHeight').value),
-        largura: parseFloat(document.getElementById('productWidth').value),
-        comprimento: parseFloat(document.getElementById('productLength').value),
-        peso: parseFloat(document.getElementById('productWeight').value)
-      };
+const productData = {
+  nome: nomeInput.value.trim(),
+  preco: parseFloat(precoInput.value),
+  imagemFile: imagemInput.files[0], // VÍRGULA ADICIONADA
+  altura: parseFloat(document.getElementById('productHeight').value),
+  largura: parseFloat(document.getElementById('productWidth').value),
+  comprimento: parseFloat(document.getElementById('productLength').value),
+  peso: parseFloat(document.getElementById('productWeight').value)
+};
 	  
 if (!productData.nome || 
     isNaN(productData.preco) || productData.preco <= 0 ||
