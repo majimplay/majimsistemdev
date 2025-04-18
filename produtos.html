@@ -222,12 +222,26 @@
         buttonElement.textContent = 'Adicionando...';
         console.log(`[Add Cart] Adicionando produto ${produtoId} ao carrinho do usuário ${currentUser.id}`);
 
-        try {
-            // Usa unshift para adicionar o ID ao array 'carrinho' no inicio
-         
-            currentUser.addUnique('carrinho', produtoId);
-             await currentUser.save(); // Salva a alteração no usuáriopaarce
+       
 
+        try {
+             // 1. Busca o Cliente associado ao usuário
+        const Cliente = Parse.Object.extend("Cliente");
+        const query = new Parse.Query(Cliente);
+        query.equalTo("usuario", currentUser);
+        let cliente = await query.first();
+         // 2. Se não existir, cria um novo (proteção extra)
+        if (!cliente) {
+            console.warn("[Carrinho] Cliente não encontrado, criando novo...");
+            cliente = new Cliente();
+            cliente.set("usuario", currentUser);
+            cliente.set("carrinhoclient", []);
+        }
+           
+            // 3. Adiciona o produto ao carrinho do Cliente
+        cliente.addUnique("carrinhoclient", produtoId);
+        await cliente.save();
+            
             // Atualiza a contagem e envia para o pai (index.html)
             const updatedCart = currentUser.get('carrinho') || [];
             const newCount = updatedCart.length;
