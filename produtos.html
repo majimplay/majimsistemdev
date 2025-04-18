@@ -241,12 +241,12 @@
             // 3. Adiciona o produto ao carrinho do Cliente
         cliente.addUnique("carrinhoclient", produtoId);
         await cliente.save();
-            
+                console.log(`adicionando cliente.get("carrinhoclient", [])`);
             // Atualiza a contagem e envia para o pai (index.html)
-            const updatedCart = currentUser.get('carrinho') || [];
-            const newCount = updatedCart.length;
+         //   const updatedCart = currentUser.get('carrinho') || [];
+         //   const newCount = updatedCart.length;
             console.log(`[Add Cart] Produto ${produtoId} adicionado. Novo total: ${newCount}`);
-            window.parent.postMessage({ type: 'cartUpdate', count: newCount }, '*'); // Use origem específica!
+          //  window.parent.postMessage({ type: 'cartUpdate', count: newCount }, '*'); // Use origem específica!
 
             // Feedback visual
             buttonElement.textContent = 'Adicionado ✔️';
