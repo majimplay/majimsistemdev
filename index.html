@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>Minha Loja Virtual</title>
   <style>
+    /* Estilos CSS permanecem os mesmos */
     body {
       font-family: sans-serif;
       margin: 0;
@@ -161,6 +162,16 @@
         background-color: rgba(255, 255, 255, 0.2);
         border-color: #fff;
     }
+    #clearCartBtn {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 1.2em;
+        cursor: pointer;
+        margin-left: 5px;
+        padding: 0 5px;
+        transition: opacity 0.3s;
+    }
     #clearCartBtn:hover {
         opacity: 0.8;
     }
@@ -188,9 +199,9 @@
         <a href="minhaconta.html" id="minhaContaLink" rel="noopener noreferrer">Minha Conta  ♥🧑 </a>
         <a href="minhaloja.html" id="minhaLojaBtn" rel="noopener noreferrer" class="minha-loja-btn">🏪 Minha Loja</a>
         <a href="carrinhodecompra.html" id="meuCarrinhoBtn" class="cart-button" style="margin-left: 10px; color: white; text-decoration: none; padding: 5px 10px; border: 1px solid white; border-radius: 3px; display: inline-flex; align-items: center;" rel="noopener noreferrer">
-    Meu Carrinho 🛒 (<span id="cart-count">0</span>)
-</a>
-<button id="clearCartBtn" title="Limpar Carrinho" style="background: none; border: none; color: white; font-size: 1.2em; cursor: pointer; margin-left: 5px; padding: 0 5px;">🗑️</button>
+          Meu Carrinho 🛒 (<span id="cart-count">0</span>)
+        </a>
+        <button id="clearCartBtn" title="Limpar Carrinho" >🗑️</button>
         <button id="logoutBtn">Sair 🚘</button>
       </div>
     </div>
@@ -224,62 +235,83 @@
     Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I"); // Substitua pelas suas chaves
     Parse.serverURL = "https://parseapi.back4app.com/";
 
-    
+
     // --- Funções ---
 
     /**
      * Sincroniza o usuário Firebase com o Parse.
      * Tenta logar no Parse com o UID do Firebase. Se não existir,
      * cria um novo usuário Parse com o UID como username e senha,
-     * e o email do Firebase.
+     * e o email do Firebase. Cria também um objeto Cliente associado.
      * @param {firebase.User} user - O objeto de usuário do Firebase.
      */
     async function syncFirebaseUserToParse(user) {
-      if (!user) return; // Sai se não houver usuário Firebase
+      if (!user) return;
 
       const firebaseUID = user.uid;
       const firebaseEmail = user.email;
-const Cliente = Parse.Object.extend("Cliente");
-let currentCliente = null;
-      
+      const Cliente = Parse.Object.extend("Cliente"); // Define a classe Cliente aqui
+
       console.log(`[Parse Sync] Iniciando para Firebase UID: ${firebaseUID}`);
 
       try {
         // Tenta fazer login no Parse usando o UID do Firebase como username e senha
         await Parse.User.logIn(firebaseUID, firebaseUID);
         console.log(`[Parse Sync] Usuário ${firebaseUID} logado com sucesso no Parse.`);
+
+        // **Verifica se o Cliente existe após o login bem-sucedido**
+        const currentUser = Parse.User.current();
+        const queryCliente = new Parse.Query(Cliente);
+        queryCliente.equalTo("usuario", currentUser);
+        let currentCliente = await queryCliente.first();
+
+        if (!currentCliente) {
+            console.warn(`[Parse Sync] Usuário ${firebaseUID} logado, mas objeto Cliente não encontrado. Criando...`);
+            currentCliente = new Cliente();
+            currentCliente.set("usuario", currentUser);
+            currentCliente.set("carrinhoclient", []); // Inicializa array de produtos VAZIO
+            try {
+                await currentCliente.save();
+                console.log("[Cliente Check] Parse ClienteClass criado com sucesso após login:", currentCliente.id);
+            } catch (saveError) {
+                 console.error("[Cliente Check] Erro ao criar Cliente após login:", saveError);
+                 alert(`Erro ao inicializar sua conta de cliente (${saveError.code}). Tente recarregar.`);
+            }
+        } else {
+            console.log("[Cliente Check] Objeto Cliente encontrado para o usuário:", currentCliente.id);
+        }
+
       } catch (error) {
         // Se o erro for "objeto não encontrado" (usuário não existe no Parse)
         if (error.code === Parse.Error.OBJECT_NOT_FOUND) {
           console.log(`[Parse Sync] Usuário ${firebaseUID} não encontrado no Parse. Criando...`);
           const parseUser = new Parse.User();
-          parseUser.set("username", firebaseUID); // Define username como UID
-          parseUser.set("password", firebaseUID); // Define senha como UID (IMPORTANTE: considere uma estratégia mais segura)
-          parseUser.set("email", firebaseEmail);    // Define o email
-           parseUser.set("carrinho", []); // carrinho vasiu)
-          parseUser.set("firebaseUID", firebaseUID); // Link explícito (opcional, mas útil)
+          parseUser.set("username", firebaseUID);
+          parseUser.set("password", firebaseUID); // IMPORTANTE: considere uma estratégia mais segura
+          parseUser.set("email", firebaseEmail);
+          // parseUser.set("carrinho", []); // **REMOVIDO: Não vamos mais usar o carrinho no _User**
+          parseUser.set("firebaseUID", firebaseUID);
 
           try {
             // Tenta registrar o novo usuário no Parse
-            await parseUser.signUp();
+            const newUser = await parseUser.signUp();
             console.log(`[Parse Sync] Novo usuário ${firebaseUID} criado e logado no Parse.`);
-           
-            currentCliente = new Cliente();
-            currentCliente.set("usuario", parseUser); // Associa ao usuário Parse
-            currentCliente.set("carrinhoclient", []); // Inicializa array de produtos VAZIO
-            await currentCliente.save();
-            console.log("[Cliente Check] Parse ClienteClass criado com sucesso:", currentCliente.id);
-            alert(`🎉 Cliente  criado com sucesso!`);
-            
+
+            // Cria o objeto Cliente associado ao novo usuário
+            const newCliente = new Cliente();
+            newCliente.set("usuario", newUser); // Associa ao usuário Parse recém-criado
+            newCliente.set("carrinhoclient", []); // Inicializa array de produtos VAZIO
+            await newCliente.save();
+            console.log("[Cliente Check] Parse ClienteClass criado com sucesso para novo usuário:", newCliente.id);
+            // alert(`🎉 Conta e Cliente criados com sucesso!`); // Opcional
+
           } catch (signUpError) {
             console.error(`[Parse Sync] Erro ao criar usuário ${firebaseUID} no Parse:`, signUpError);
-            // Considerar o que fazer em caso de falha no signUp (ex: alertar usuário, tentar novamente?)
             alert(`Erro ao sincronizar sua conta (${signUpError.code}). Tente recarregar a página.`);
           }
         } else {
           // Outro erro durante o login no Parse
           console.error(`[Parse Sync] Erro ao logar usuário ${firebaseUID} no Parse:`, error);
-          // Considerar o que fazer aqui (ex: alertar usuário)
            alert(`Erro ao acessar sua conta (${error.code}). Tente recarregar a página.`);
         }
       }
@@ -287,16 +319,15 @@ let currentCliente = null;
 
     /**
      * Monitora o estado de autenticação do Firebase.
-     * Quando o usuário faz login, sincroniza com o Parse.
+     * Quando o usuário faz login, sincroniza com o Parse e carrega o carrinho do Cliente.
      * Atualiza a UI e o conteúdo do iframe.
      */
    auth.onAuthStateChanged(async (user) => {
       console.log("[Auth State] Mudança detectada. Usuário:", user ? user.uid : "Nenhum");
       if (user) {
-        await syncFirebaseUserToParse(user);
-        // **NOVO: Carrega contagem inicial do carrinho após sincronizar/logar Parse**
-        await loadInitialCartCount();
-        checkAdminStatus(user.uid);
+        await syncFirebaseUserToParse(user); // Sincroniza/Cria User e Cliente
+        await loadInitialCartCount(); // Carrega contagem do Cliente associado
+        checkAdminStatus(user.uid); // Verifica admin
       } else {
          // Se deslogou, zera a contagem do carrinho na UI
          updateCartCount(0);
@@ -310,50 +341,65 @@ let currentCliente = null;
             }
          }
       }
-      updateAuthUI(user);
-      updateIframeContent(user);
+      updateAuthUI(user); // Atualiza botões de login/logout, etc.
+      updateIframeContent(user); // Atualiza o iframe (produtos.html ou produtosoff.html)
     });
 
+    /**
+     * Atualiza a interface de autenticação (mostra/esconde áreas de login/usuário)
+     * e os botões relacionados ao carrinho.
+     * @param {firebase.User | null} user - O objeto de usuário do Firebase ou null.
+     */
     function updateAuthUI(user) {
       const loginArea = document.getElementById('loginArea');
       const userArea = document.getElementById('userArea');
       const welcomeUser = document.getElementById('welcomeUser');
       const adminPanel = document.getElementById('adminPanel');
-      // **NOVO: Seleciona os elementos do carrinho**
       const cartButton = document.getElementById('meuCarrinhoBtn');
       const clearCartButton = document.getElementById('clearCartBtn');
 
-
       if (user) {
-        // ... (código existente para mostrar userArea)
-        // **NOVO: Mostra botões do carrinho**
+        // Usuário logado
+        loginArea.style.display = 'none';
+        userArea.style.display = 'flex';
+        let welcomeMessage = `Bem-vindo, ${user.displayName || user.email.split('@')[0]}!`;
+        if (user.photoURL) {
+          welcomeMessage += ` <img src="${user.photoURL}" alt="Foto" style="width: 30px; height: 30px; border-radius: 50%; margin-left: 8px; vertical-align: middle;">`;
+        }
+        welcomeUser.innerHTML = welcomeMessage;
+
+        // Mostra botões do carrinho
         if(cartButton) cartButton.style.display = 'inline-flex';
         if(clearCartButton) clearCartButton.style.display = 'inline-block'; // ou 'inline-flex'
 
       } else {
-        // ... (código existente para mostrar loginArea)
-         // **NOVO: Esconde botões do carrinho**
+        // Usuário deslogado
+        loginArea.style.display = 'flex';
+        userArea.style.display = 'none';
+        welcomeUser.innerHTML = '';
+        adminPanel.style.display = 'none';
+
+        // Esconde botões do carrinho
         if(cartButton) cartButton.style.display = 'none';
         if(clearCartButton) clearCartButton.style.display = 'none';
-        // ... (código existente para esconder adminPanel)
       }
-       console.log("[UI Update] Interface de autenticação atualizada. Logado:", !!user);
+      console.log("[UI Update] Interface de autenticação atualizada. Logado:", !!user);
     }
 
-    // **NOVO: Listener para limpar carrinho**
+    // Listener para limpar carrinho
     const clearCartButton = document.getElementById('clearCartBtn');
     if (clearCartButton) {
-        clearCartButton.addEventListener('click', clearCart);
+        clearCartButton.addEventListener('click', clearCart); // Chama a função clearCart corrigida
     }
 
-     // **NOVO: Listener para mensagens do iframe (atualização de contagem)**
+     // Listener para mensagens do iframe (atualização de contagem vinda de produtos.html)
      window.addEventListener('message', (event) => {
          // IMPORTANTE: Verifique a origem em produção!
-         // if (event.origin !== 'URL_ESPERADA_DO_IFRAME') return;
+         // Ex: if (event.origin !== 'https://sua-pagina-principal.com') return;
 
          if (event.data && event.data.type === 'cartUpdate') {
              console.log("[Message Listener] Recebido 'cartUpdate' do iframe. Nova contagem:", event.data.count);
-             updateCartCount(event.data.count);
+             updateCartCount(event.data.count); // Atualiza o número no botão
          }
      });
 
@@ -364,10 +410,8 @@ let currentCliente = null;
       console.log("[Login] Botão Google clicado.");
       try {
         const result = await auth.signInWithPopup(googleProvider);
-        // O onAuthStateChanged será disparado automaticamente após o sucesso,
-        // então a sincronização com o Parse ocorrerá lá.
+        // O onAuthStateChanged será disparado, cuidando da sincronização e UI.
         console.log(`[Login] Sucesso! Usuário: ${result.user.displayName}`);
-        // alert(`Bem-vindo ${result.user.displayName}!`); // Opcional: pode remover se a UI já atualiza
       } catch (error) {
         console.error('[Login] Erro no login com Google:', error);
         alert('Erro no login com Google: ' + error.message);
@@ -381,9 +425,8 @@ let currentCliente = null;
       console.log("[Logout] Botão Sair clicado.");
       try {
         await auth.signOut(); // Desloga do Firebase
-        // O onAuthStateChanged cuidará do logout do Parse.
+        // O onAuthStateChanged cuidará do logout do Parse e da UI.
         console.log('[Logout] Firebase signOut concluído.');
-        // alert('Logout realizado com sucesso!'); // Opcional: pode remover se a UI já atualiza
       } catch (error) {
         console.error('[Logout] Erro ao sair:', error);
         alert('Erro ao sair: ' + error.message);
@@ -396,7 +439,7 @@ let currentCliente = null;
      * @param {string} uid - O UID do usuário Firebase.
      */
     async function checkAdminStatus(uid) {
-      if (!uid) return; // Sai se não houver UID
+      if (!uid) return;
       console.log(`[Admin Check] Verificando status para UID: ${uid}`);
       try {
         const snapshot = await database.ref('admins/' + uid).once('value');
@@ -405,40 +448,8 @@ let currentCliente = null;
         document.getElementById('adminPanel').style.display = isAdmin ? 'flex' : 'none';
       } catch (error) {
         console.error('[Admin Check] Erro ao verificar admin:', error);
-        // Esconder o painel por segurança em caso de erro
         document.getElementById('adminPanel').style.display = 'none';
       }
-    }
-
-    /**
-     * Atualiza a interface do cabeçalho (área de login vs área do usuário).
-     * @param {firebase.User | null} user - O objeto de usuário do Firebase ou null.
-     */
-    function updateAuthUI(user) {
-      const loginArea = document.getElementById('loginArea');
-      const userArea = document.getElementById('userArea');
-      const welcomeUser = document.getElementById('welcomeUser');
-      const adminPanel = document.getElementById('adminPanel');
-
-      if (user) {
-        // Usuário logado
-        loginArea.style.display = 'none';
-        userArea.style.display = 'flex';
-        let welcomeMessage = `Bem-vindo, ${user.displayName || user.email.split('@')[0]}!`;
-        if (user.photoURL) {
-          // Adiciona a imagem APÓS o texto, garantindo que o texto sempre apareça
-           welcomeMessage += ` <img src="${user.photoURL}" alt="Foto" style="width: 30px; height: 30px; border-radius: 50%; margin-left: 8px; vertical-align: middle;">`;
-        }
-         welcomeUser.innerHTML = welcomeMessage;
-
-      } else {
-        // Usuário deslogado
-        loginArea.style.display = 'flex';
-        userArea.style.display = 'none';
-        welcomeUser.innerHTML = ''; // Limpa a mensagem de boas-vindas
-        adminPanel.style.display = 'none'; // Esconde painel admin ao deslogar
-      }
-       console.log("[UI Update] Interface de autenticação atualizada. Logado:", !!user);
     }
 
     /**
@@ -449,7 +460,7 @@ let currentCliente = null;
     function updateIframeContent(user) {
       const iframe = document.getElementById('mainContent');
       const targetSrc = user ? 'produtos.html' : 'produtosoff.html';
-       if (iframe.src.endsWith(targetSrc)) {
+       if (iframe.src.includes(targetSrc)) { // Verifica se já contém o src correto
            console.log(`[Iframe Update] Iframe já está em ${targetSrc}. Nenhuma alteração.`);
            return; // Evita recarregamento desnecessário
        }
@@ -457,35 +468,53 @@ let currentCliente = null;
       console.log(`[Iframe Update] Iframe atualizado para: ${targetSrc}`);
     }
 
-
-
     /**
-     * Atualiza o contador de itens no botão do carrinho.
+     * Atualiza o contador de itens no botão do carrinho na UI.
      * @param {number} count - O número de itens no carrinho.
      */
     function updateCartCount(count) {
         const cartCountSpan = document.getElementById('cart-count');
         if (cartCountSpan) {
             cartCountSpan.textContent = count;
-            console.log(`[Cart Count] Atualizado para: ${count}`);
+            console.log(`[Cart Count UI] Atualizado para: ${count}`);
         }
     }
 
     /**
-     * Carrega a contagem inicial do carrinho do usuário Parse logado.
+     * **CORRIGIDO:** Carrega a contagem inicial do carrinho buscando o objeto Cliente
+     * associado ao usuário Parse logado.
      */
     async function loadInitialCartCount() {
         const parseUser = Parse.User.current();
         if (parseUser) {
-            const cart = parseUser.get('carrinho') || [];
-            updateCartCount(cart.length);
+            console.log("[Load Cart Count] Usuário Parse logado:", parseUser.id);
+            const Cliente = Parse.Object.extend("Cliente");
+            const query = new Parse.Query(Cliente);
+            query.equalTo("usuario", parseUser); // Busca o Cliente ligado a este usuário
+            try {
+                const cliente = await query.first(); // Pega o primeiro (e único) Cliente
+                if (cliente) {
+                    const cart = cliente.get('carrinhoclient') || []; // Pega o array do Cliente
+                    console.log("[Load Cart Count] Cliente encontrado. Itens no carrinho:", cart.length);
+                    updateCartCount(cart.length); // Atualiza a UI com a contagem correta
+                } else {
+                    console.warn("[Load Cart Count] Usuário logado, mas nenhum objeto Cliente encontrado. Contagem zerada.");
+                    updateCartCount(0); // Cliente não encontrado (pode acontecer brevemente antes da criação)
+                    // Considerar criar o Cliente aqui se realmente necessário, mas syncFirebaseUserToParse já faz isso.
+                }
+            } catch (error) {
+                console.error("[Load Cart Count] Erro ao buscar Cliente:", error);
+                updateCartCount(0); // Zera em caso de erro
+            }
         } else {
+            console.log("[Load Cart Count] Nenhum usuário Parse logado. Contagem zerada.");
             updateCartCount(0); // Zera se não houver usuário Parse
         }
     }
 
     /**
-     * Limpa o carrinho do usuário Parse logado.
+     * **CORRIGIDO:** Limpa o carrinho buscando o objeto Cliente associado
+     * ao usuário Parse logado e zerando o array 'carrinhoclient'.
      */
     async function clearCart() {
         const parseUser = Parse.User.current();
@@ -497,25 +526,38 @@ let currentCliente = null;
             return;
         }
 
-        console.log("[Cart Clear] Tentando limpar carrinho...");
-        parseUser.set('carrinho', []); // Define como array vazio
+        console.log("[Cart Clear] Tentando limpar carrinho do Cliente...");
+        const Cliente = Parse.Object.extend("Cliente");
+        const query = new Parse.Query(Cliente);
+        query.equalTo("usuario", parseUser); // Busca o Cliente do usuário atual
+
         try {
-            await parseUser.save();
-            updateCartCount(0); // Atualiza a contagem na UI
-            alert("Carrinho esvaziado com sucesso!");
-            console.log("[Cart Clear] Carrinho limpo no Parse.");
-            // Opcional: Enviar mensagem para o iframe atualizar, se necessário
-            const iframe = document.getElementById('mainContent');
-             if (iframe && iframe.contentWindow) {
-                 iframe.contentWindow.postMessage({ type: 'cartCleared' }, '*'); // Use origem específica em prod
-             }
+            const cliente = await query.first();
+            if (cliente) {
+                cliente.set('carrinhoclient', []); // Zera o array no Cliente
+                await cliente.save(); // Salva a alteração no Parse
+                updateCartCount(0); // Atualiza a contagem na UI
+                alert("Carrinho esvaziado com sucesso!");
+                console.log("[Cart Clear] Carrinho do Cliente limpo no Parse.");
+
+                // Envia mensagem para o iframe (produtos.html) saber que o carrinho foi limpo
+                const iframe = document.getElementById('mainContent');
+                if (iframe && iframe.contentWindow) {
+                    iframe.contentWindow.postMessage({ type: 'cartCleared' }, '*'); // Use origem específica em prod
+                    console.log("[Cart Clear] Mensagem 'cartCleared' enviada para o iframe.");
+                }
+            } else {
+                 console.warn("[Cart Clear] Cliente não encontrado para o usuário. Não foi possível limpar.");
+                 alert("Erro: Não foi possível encontrar os dados do seu carrinho.");
+                 // Mesmo que não encontre o cliente, zera a UI para consistência visual
+                 updateCartCount(0);
+            }
 
         } catch (error) {
-            console.error("[Cart Clear] Erro ao limpar carrinho:", error);
+            console.error("[Cart Clear] Erro ao limpar carrinho do Cliente:", error);
             alert("Erro ao limpar o carrinho: " + error.message);
         }
     }
-
 
   </script>
 </body>
