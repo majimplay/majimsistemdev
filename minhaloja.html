@@ -302,6 +302,11 @@
     <form id="productForm">
       <input type="text" id="productName" placeholder="Nome do Produto" required>
       <input type="number" id="productPrice" step="0.01" placeholder="Preço (R$)" required>
+	    <!-- dimencoes  e peso do produto  -->
+            <input type="number" id="productHeight" step="0.1" placeholder="📏 Altura (cm)" min="0.1" required>
+            <input type="number" id="productWidth" step="0.1" placeholder="📏 Largura (cm)" min="0.1" required>
+            <input type="number" id="productLength" step="0.1" placeholder="📐 Comprimento (cm)" min="0.1" required>
+            <input type="number" id="productWeight" step="0.1" placeholder="⚖️ Peso (kg)" min="0.1" required>
       <div class="image-upload">
         <img id="imagePreview" src="" alt="Miniatura">
         <label class="upload-label">
@@ -723,16 +728,30 @@
       const imagemInput = document.getElementById('productImage');
       const submitButton = e.target.querySelector('button[type="submit"]');
 
+
+
       const productData = {
         nome: nomeInput.value.trim(),
         preco: parseFloat(precoInput.value),
         imagemFile: imagemInput.files[0]
-      };
 
-      if (!productData.nome || isNaN(productData.preco) || productData.preco <= 0 || !productData.imagemFile) {
-          alert("❌ Por favor, preencha todos os campos corretamente (nome, preço válido e imagem).");
-          return;
-      }
+        altura: parseFloat(document.getElementById('productHeight').value),
+        largura: parseFloat(document.getElementById('productWidth').value),
+        comprimento: parseFloat(document.getElementById('productLength').value),
+        peso: parseFloat(document.getElementById('productWeight').value)
+      };
+	  
+if (!productData.nome || 
+    isNaN(productData.preco) || productData.preco <= 0 ||
+    isNaN(productData.altura) || productData.altura <= 0 ||
+    isNaN(productData.largura) || productData.largura <= 0 ||
+    isNaN(productData.comprimento) || productData.comprimento <= 0 ||
+    isNaN(productData.peso) || productData.peso <= 0 ||
+    !productData.imagemFile
+) {
+  alert("❌ Preencha todos os campos com valores válidos (números maiores que zero).");
+  return;
+}
 
       console.log("[Add Product] Adicionando novo produto:", productData.nome);
       submitButton.disabled = true;
@@ -753,6 +772,12 @@
         novoProduto.set("imagens", [imageUrl]); // Salva URL em um array
         novoProduto.set("dono", Parse.User.current()); // Associa ao usuário Parse atual
         novoProduto.set("loja", currentLoja); // **NOVO:** Associa diretamente à Loja
+        // Ao criar o novo produto, adicione:
+novoProduto.set("altura", productData.altura);
+novoProduto.set("largura", productData.largura);
+novoProduto.set("comprimento", productData.comprimento);
+novoProduto.set("peso", productData.peso);
+	      
         await novoProduto.save();
         console.log("[Add Product] Novo produto salvo no Parse:", novoProduto.id);
 
