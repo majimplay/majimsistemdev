@@ -241,7 +241,7 @@
             }
 
             // 2. Adiciona o produto ao carrinho do Cliente
-            cliente.addUnique("carrinhoclient", produtoId); // Usa addUnique para evitar duplicatas
+            cliente.add("carrinhoclient", produtoId); // Usa add para ppermitir duplicatas
             await cliente.save(); // Salva o objeto Cliente (novo ou atualizado)
             console.log(`[Add Cart] Produto ${produtoId} adicionado/atualizado no Cliente ${cliente.id}`);
 
@@ -258,10 +258,10 @@
             // Feedback visual
             buttonElement.textContent = 'Adicionado ✔️';
             // Não reabilitar imediatamente para evitar cliques múltiplos
-            // setTimeout(() => {
-            //    buttonElement.disabled = false;
-            //    buttonElement.textContent = 'Adicionar ao Carrinho';
-            // }, 2000);
+             setTimeout(() => {
+                buttonElement.disabled = false;
+                buttonElement.textContent = 'Adicionar ao Carrinho';
+             }, 2000);
 
         } catch (error) {
             console.error(`[Add Cart] Erro ao adicionar produto ${produtoId}:`, error);
