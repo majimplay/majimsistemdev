@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>🛒 Carrinho de Compras - Multi-Loja</title>
     <style>
-        /* Estilos CSS (mantidos, com pequenas adições/ajustes) */
+        /* Estilos CSS (mantidos) */
         body {
             font-family: 'Arial', sans-serif;
             margin: 0;
@@ -158,6 +158,7 @@
                     <input type="text" id="uf" readonly>
                 </div>
             </div>
+
             <button class="btn btn-primary" onclick="calcularFreteMultiLoja()" style="margin-top: 15px;">
                 <span class="emoji">📦</span> Calcular Frete (Todas as Lojas)
             </button>
@@ -179,7 +180,7 @@
     </div>
 
     <script>
-        // --- Configurations ---
+         // --- Configurations ---
         const firebaseConfig = {
             apiKey: "AIzaSyDlUQbbTP29VqBVmzOGHhfc67R1DTRPwxg", // Sua chave
             authDomain: "gitautenticatio.firebaseapp.com",
@@ -198,7 +199,6 @@
         // Initialize Parse
         Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I"); // Suas chaves
         Parse.serverURL = "https://parseapi.back4app.com/";
-
 
         // --- Global Variables ---
         let firebaseUser = null; // Firebase user object
@@ -340,7 +340,8 @@
                     const loja = p.get('loja'); // Get the related Loja object
                     const lojaId = loja ? loja.id : 'sem_loja'; // Use loja ID or a default key
                     const lojaNome = loja ? loja.get('nome') : 'Loja Desconhecida';
-                    const lojaCep = loja ? loja.get('cepOrigem') : null; // Assuming 'cepOrigem' field exists in Loja
+                    // *** CORRECTION: Get 'cepOrigem' from the included Loja object ***
+                    const lojaCep = loja ? loja.get('cepOrigem') : null;
 
                     const details = {
                         id: produtoId,
@@ -354,14 +355,14 @@
                         quantidade: quantidade,
                         lojaId: lojaId,
                         lojaNome: lojaNome,
-                        lojaCep: lojaCep
+                        lojaCep: lojaCep // Store the fetched CEP
                     };
 
                     // Add to the store group
                     if (!produtosPorLoja[lojaId]) {
                         produtosPorLoja[lojaId] = {
                             nome: lojaNome,
-                            cepOrigem: lojaCep,
+                            cepOrigem: lojaCep, // Use the fetched CEP here
                             produtos: []
                         };
                         fretesSelecionados[lojaId] = 0; // Initialize shipping cost for this store
@@ -428,10 +429,10 @@
                      await cliente.save();
                      console.log("Product removed. Remaining IDs:", productIds);
                      await carregarCarrinho(); // Reload cart UI
-                     alert('🗑️ One unit of the item was removed from the cart!');
+                     alert('🗑️ Uma unidade do item foi removida do carrinho!');
                  } else {
                      console.warn("Product ID not found in carrinhoclient array:", produtoId);
-                     alert("⚠️ Item not found in cart.");
+                     alert("⚠️ Item não encontrado no carrinho.");
                      await carregarCarrinho(); // Reload in case of inconsistency
                  }
 
@@ -549,20 +550,37 @@
             // Iterate through each store group
             for (const lojaId in produtosPorLoja) {
                 const lojaInfo = produtosPorLoja[lojaId];
-                const cepOrigem = lojaInfo.cepOrigem;
+                const cepOrigem = lojaInfo.cepOrigem; // Get CEP from the pre-loaded store info
 
-                if (!cepOrigem || cepOrigem.replace(/\D/g, '').length !== 8) {
-                    console.warn(`CEP de origem inválido ou ausente para a loja ${lojaInfo.nome} (${lojaId}). Pulando cálculo.`);
+                // *** CORRECTION: Check if cepOrigem is a valid string and has 8 digits after cleaning ***
+                let cepOrigemLimpo = '';
+                let skipStore = false;
+                let errorMessage = '';
+
+                if (typeof cepOrigem === 'string' && cepOrigem) {
+                    cepOrigemLimpo = cepOrigem.replace(/\D/g, '');
+                    if (cepOrigemLimpo.length !== 8) {
+                        skipStore = true;
+                        errorMessage = `CEP de origem inválido (${cepOrigem}) para a loja ${lojaInfo.nome}. Pulando cálculo.`;
+                    }
+                } else {
+                    skipStore = true;
+                    errorMessage = `CEP de origem ausente ou inválido para a loja ${lojaInfo.nome}. Pulando cálculo.`;
+                }
+
+                if (skipStore) {
+                    console.warn(errorMessage);
                     // Display error for this store in the results
                      resultDiv.innerHTML += `
                         <div class="store-shipping-group">
                             <h4><span class="emoji">🏪</span> Frete para: ${lojaInfo.nome}</h4>
-                            <p style="color: red;">❌ Não foi possível calcular o frete: CEP de origem da loja inválido ou não cadastrado.</p>
+                            <p style="color: red;">❌ Não foi possível calcular o frete: ${errorMessage.split('. Pulando')[0]}.</p>
                         </div>`;
                     lojasCalculadas++; // Increment counter even if skipped
                     if (lojasCalculadas === totalLojas) loader.style.display = 'none'; // Hide loader if all done
                     continue; // Skip to the next store
                 }
+                // *** END CORRECTION ***
 
                 // Calculate package dimensions and weight for this store's items
                 let pesoTotalLoja = 0;
@@ -577,14 +595,14 @@
                     comprimentoMax = Math.max(comprimentoMax, p.comprimento);
                 });
 
-                // Ensure minimum dimensions required by Correios/carriers if needed
-                // alturaMax = Math.max(alturaMax, 2); // Exemplo: mínimo 2cm
-                // larguraMax = Math.max(larguraMax, 11); // Exemplo: mínimo 11cm
-                // comprimentoMax = Math.max(comprimentoMax, 16); // Exemplo: mínimo 16cm
-                // pesoTotalLoja = Math.max(pesoTotalLoja, 0.1); // Exemplo: mínimo 0.1kg
+                // Ensure minimum dimensions/weight if needed by carriers
+                // alturaMax = Math.max(alturaMax, 2);
+                // larguraMax = Math.max(larguraMax, 11);
+                // comprimentoMax = Math.max(comprimentoMax, 16);
+                // pesoTotalLoja = Math.max(pesoTotalLoja, 0.1);
 
                 const params = {
-                    cepOrigem: cepOrigem.replace(/\D/g, ''),
+                    cepOrigem: cepOrigemLimpo, // Use the cleaned CEP
                     cepDestino: cepDestino,
                     package: {
                         height: alturaMax,
@@ -633,6 +651,9 @@
 
             if (!Array.isArray(servicos) || servicos.length === 0) {
                  storeHtml += '<p>Nenhuma opção de frete encontrada para este CEP.</p>';
+                 // Mark this store as handled (no valid options)
+                 fretesSelecionados[lojaId] = 0; // Set cost to 0
+                 detalhesFretesSelecionados[lojaId] = { custo: 0, metodo: "N/A", prazo: "N/A" }; // Mark as handled
             } else {
                 // Sort by price (cheapest first) - optional
                 servicos.sort((a, b) => parseFloat(a.preco) - parseFloat(b.preco));
@@ -643,6 +664,10 @@
                     const preco = parseFloat(servico.preco);
                     const precoFormatado = !isNaN(preco) ? `R$ ${preco.toFixed(2)}` : 'Preço indisponível';
 
+                    // Escape single quotes in names/prazo if they might occur
+                    const safeMetodo = nomeServico.replace(/'/g, "\\'");
+                    const safePrazo = prazo.replace(/'/g, "\\'");
+
                     return `
                         <div class="result-card" id="frete-opcao-${lojaId}-${index}">
                             <p><strong><span class="emoji">🚚</span> ${nomeServico}</strong></p>
@@ -650,7 +675,7 @@
                             <p><strong><span class="emoji">💲</span> Preço: ${precoFormatado}</strong></p>
                             ${!isNaN(preco) ?
                                 `<button class="btn-select"
-                                        onclick="selecionarFrete('${lojaId}', ${preco}, '${nomeServico}', '${prazo}', this)">
+                                        onclick="selecionarFrete('${lojaId}', ${preco}, '${safeMetodo}', '${safePrazo}', this)">
                                     <span class="emoji">✅</span> Selecionar
                                 </button>`
                                 : '<p style="color: #888;">Opção indisponível</p>'
@@ -658,9 +683,15 @@
                         </div>
                     `;
                 }).join('');
+                 // Initialize selection state for this store (needs selection)
+                 fretesSelecionados[lojaId] = undefined; // Indicate selection is needed
+                 detalhesFretesSelecionados[lojaId] = null;
             }
             storeHtml += `</div>`;
             resultDiv.innerHTML += storeHtml; // Append this store's results
+
+            // Check if checkout button should be shown after displaying results
+            checkAllSelectionsMade();
         }
 
         /**
@@ -688,22 +719,35 @@
             console.log(`Frete selecionado para Loja ${lojaId}: R$ ${preco.toFixed(2)}`);
 
             // Recalculate total shipping cost
-            totalFreteSelecionado = Object.values(fretesSelecionados).reduce((sum, cost) => sum + cost, 0);
+            totalFreteSelecionado = Object.values(fretesSelecionados)
+                                        .filter(cost => typeof cost === 'number') // Only sum valid numbers
+                                        .reduce((sum, cost) => sum + cost, 0);
             console.log("Frete total selecionado atualizado:", totalFreteSelecionado.toFixed(2));
 
             // Update the final price display
             atualizarPrecoFinal();
 
-            // Check if all stores have a selection (or calculation failed) to show checkout button
-            const allStoresHandled = Object.keys(produtosPorLoja).every(id => fretesSelecionados[id] !== undefined); // Check if entry exists
-            if (allStoresHandled) {
+            // Check if all stores have a selection to show checkout button
+            checkAllSelectionsMade();
+        }
+
+        /**
+         * Checks if a shipping option has been selected (or deemed unavailable) for all stores.
+         * Shows/hides the final price and checkout button accordingly.
+         */
+        function checkAllSelectionsMade() {
+            const allStoresHandled = Object.keys(produtosPorLoja).every(id => detalhesFretesSelecionados[id] !== null);
+            if (allStoresHandled && Object.keys(produtosPorLoja).length > 0) { // Also check if cart wasn't empty
                 document.getElementById('finalPriceContainer').style.display = 'block';
                 document.getElementById('checkoutBtn').style.display = 'block';
+                 console.log("Todas as seleções de frete foram feitas.");
             } else {
                  document.getElementById('finalPriceContainer').style.display = 'none';
                  document.getElementById('checkoutBtn').style.display = 'none';
+                 console.log("Aguardando seleção de frete para todas as lojas...");
             }
         }
+
 
         /**
          * Updates the calculation and display of the final price (Subtotal + Total Shipping).
@@ -722,9 +766,9 @@
          */
         async function prosseguirCheckout() {
             // Check if shipping has been calculated and selected for all stores
-            const allStoresSelected = Object.keys(produtosPorLoja).every(id => detalhesFretesSelecionados[id] !== null || !produtosPorLoja[id].cepOrigem); // Allow skipping if CEP was invalid
+            const allStoresSelected = Object.keys(produtosPorLoja).every(id => detalhesFretesSelecionados[id] !== null);
             if (!allStoresSelected) {
-                alert("⚠️ Por favor, calcule e selecione uma opção de frete para cada loja antes de prosseguir.");
+                alert("⚠️ Por favor, calcule e selecione uma opção de frete para cada loja (ou aguarde o cálculo) antes de prosseguir.");
                 return;
             }
             if (totalCarrinho <= 0) {
@@ -755,9 +799,9 @@
                     throw new Error("Objeto Cliente não encontrado para este usuário.");
                 }
 
-                // Prepare shipping details array
+                // Prepare shipping details array (only include valid selections)
                 const shippingDetailsArray = Object.entries(detalhesFretesSelecionados)
-                    .filter(([lojaId, details]) => details !== null) // Only include selected ones
+                    .filter(([lojaId, details]) => details !== null && details.custo !== undefined) // Filter out null/undefined details
                     .map(([lojaId, details]) => ({
                         lojaId: lojaId,
                         lojaNome: produtosPorLoja[lojaId]?.nome || 'Desconhecida', // Add store name for clarity
@@ -782,9 +826,6 @@
 
                 await cliente.save();
                 console.log("Dados do checkout salvos no objeto Cliente:", cliente.id);
-
-                // Clear localStorage if previously used (optional cleanup)
-                // localStorage.removeItem('checkoutData');
 
                 alert("✅ Dados do pedido salvos! Redirecionando para o checkout...");
                 window.location.href = 'checkout.html'; // Redirect to checkout page
