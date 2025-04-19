@@ -70,7 +70,7 @@
 
   <!-- Conteúdo do Teste -->
         <div class="teste">
-            <p>ID do usuárioParse: <span id="currentUser">Carregando...</span></p>
+            <p>ID do usuárioParse: <span id="ParseUser">Carregando...</span></p>
             <label for="campo1">Campo1:</label>
             <input type="text" id="campo1" placeholder="Digite o valor para campo1">
             <button onclick="registrarDados()">Registrar</button>
@@ -95,6 +95,7 @@
         const app = firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         let currentUser = null;
+       let ParseUser = Parse.User.current;
   // Variável para armazenar o ponteiro do objeto do usuário
     let userTesteObject = null;
 
@@ -102,10 +103,11 @@
     auth.onAuthStateChanged(async user => {
               console.log("[Auth State] Mudança detectada. Usuário:", user ? user.uid : "Nenhum");
         if (user) {
-            currentUser = Parse.User.current;
+           currentUser = user;
+            //Parse.User.current;
             atualizarCabecalho();
             document.getElementById('currentUser').textContent = user.uid;
-
+     console.log("  UsuárioParse:",  ParseUser.uid : "Nenhum");
             // Carregar objeto existente ao fazer login
             await carregarObjetoUsuario();
         } else {
