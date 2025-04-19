@@ -70,7 +70,7 @@
 
   <!-- Conteúdo do Teste -->
         <div class="teste">
-            <p>ID do usuárioParse: <span id="userId">Carregando...</span></p>
+            <p>ID do usuárioParse: <span id="currentUser">Carregando...</span></p>
             <label for="campo1">Campo1:</label>
             <input type="text" id="campo1" placeholder="Digite o valor para campo1">
             <button onclick="registrarDados()">Registrar</button>
@@ -124,10 +124,36 @@
             });
         });
 
+    async function syncFirebaseUserToParse(user) {
+      if (!user) return;
+
+      const firebaseUID = user.uid;
+      const firebaseEmail = user.email;
+     try {
+        // Tenta fazer login no Parse usando o UID do Firebase como username e senha
+        await Parse.User.logIn(firebaseUID, firebaseUID);
+        console.log(`[Parse Sync] Usuário ${firebaseUID} logado com sucesso no Parse.`);
+
+        // **Verifica se o parse user existe após o login bem-sucedido**
+        const currentUser = Parse.User.current();
+         } catch (error) {
+        // Se o erro for "objeto não encontrado" (usuário não existe no Parse)
+        if (error.code === Parse.Error.OBJECT_NOT_FOUND) {
+          console.log(`[Parse Sync] Usuário ${firebaseUID} não encontrado no Parse. erro`);
+          } catch (signUpError) {
+            console.error(`[Parse Sync] Erro usuário ${firebaseUID} nao encontrado no Parse:`, signUpError);
+            alert(`Erro ao sincronizar sua conta (${signUpError.code}). Tente recarregar a página.`);
+           }
+           } else {
+           // Outro erro durante o login no Parse
+           console.error(`[Parse Sync] Erro ao logar usuário ${firebaseUID} no Parse:`, error);
+            alert(`Erro ao acessar sua conta (${error.code}). Tente recarregar a página.`);
+         }
+       }
+   }
 
 
-
-        
+            
     </script>
 </body>
 </html>
