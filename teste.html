@@ -100,11 +100,12 @@
 
     // Monitorar estado de autenticação
     auth.onAuthStateChanged(async user => {
+              console.log("[Auth State] Mudança detectada. Usuário:", user ? user.uid : "Nenhum");
         if (user) {
-            currentUser = user;
+            currentUser = Parse.User.current;
             atualizarCabecalho();
             document.getElementById('currentUser').textContent = user.uid;
-            
+
             // Carregar objeto existente ao fazer login
             await carregarObjetoUsuario();
         } else {
@@ -112,6 +113,9 @@
         }
     });
 
+
+
+        
     // Função para carregar/verificar objeto existente
     async function carregarObjetoUsuario() {
         try {
