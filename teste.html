@@ -78,37 +78,38 @@
 
     
     <script>
- // Configurações Firebase
+    <script>
+        // Configurações Firebase
         const firebaseConfig = {
-      apiKey: "AIzaSyDlUQbbTP29VqBVmzOGHhfc67R1DTRPwxg",
-      authDomain: "gitautenticatio.firebaseapp.com",
-      projectId: "gitautenticatio",
-      storageBucket: "gitautenticatio.appspot.com",
-      messagingSenderId: "21514234895",
-      appId: "1:21514234895:web:d34dc4c44baf586d2cc77a"
-    };
-    Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
-    Parse.serverURL = "https://parseapi.back4app.com/";
-        
+            apiKey: "AIzaSyDlUQbbTP29VqBVmzOGHhfc67R1DTRPwxg",
+            authDomain: "gitautenticatio.firebaseapp.com",
+            projectId: "gitautenticatio",
+            storageBucket: "gitautenticatio.appspot.com",
+            messagingSenderId: "21514234895",
+            appId: "1:21514234895:web:d34dc4c44baf586d2cc77a"
+        };
+
+        // Configurações Parse
+        Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
+        Parse.serverURL = "https://parseapi.back4app.com/";
+
         // Inicializar Firebase
-        firebase.initializeApp(firebaseConfig);
-          const app = firebase.initializeApp(firebaseConfig);
-         const auth = firebase.auth();
-         const database = firebase.database();
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        let currentUser = null;
 
-
-             // Monitorar estado de autenticação
+        // Monitorar estado de autenticação
         auth.onAuthStateChanged(user => {
             if (user) {
                 currentUser = user;
                 atualizarCabecalho();
-                carregarTotal();
+                document.getElementById('currentUser').textContent = user.uid;
             } else {
                 window.location.href = 'index.html';
             }
         });
 
-          // Atualizar cabeçalho
+        // Atualizar cabeçalho
         function atualizarCabecalho() {
             document.getElementById('profilePhoto').src = currentUser.photoURL || 'imagens/avatar-padrao.jpg';
             document.getElementById('userName').textContent = '👤 ' + (currentUser.displayName || 'Usuário');
@@ -124,36 +125,31 @@
             });
         });
 
-    async function syncFirebaseUserToParse(user) {
-      if (!user) return;
-
-      const firebaseUID = user.uid;
-      const firebaseEmail = user.email;
-     try {
-        // Tenta fazer login no Parse usando o UID do Firebase como username e senha
-        await Parse.User.logIn(firebaseUID, firebaseUID);
-        console.log(`[Parse Sync] Usuário ${firebaseUID} logado com sucesso no Parse.`);
-
-        // **Verifica se o parse user existe após o login bem-sucedido**
-        const currentUser = Parse.User.current();
-         } catch (error) {
-        // Se o erro for "objeto não encontrado" (usuário não existe no Parse)
-        if (error.code === Parse.Error.OBJECT_NOT_FOUND) {
-          console.log(`[Parse Sync] Usuário ${firebaseUID} não encontrado no Parse. erro`);
-          } catch (signUpError) {
-            console.error(`[Parse Sync] Erro usuário ${firebaseUID} nao encontrado no Parse:`, signUpError);
-            alert(`Erro ao sincronizar sua conta (${signUpError.code}). Tente recarregar a página.`);
-           }
-           } else {
-           // Outro erro durante o login no Parse
-           console.error(`[Parse Sync] Erro ao logar usuário ${firebaseUID} no Parse:`, error);
-            alert(`Erro ao acessar sua conta (${error.code}). Tente recarregar a página.`);
-         }
-       }
-   }
-
-
+        // Registrar dados no Parse
+        async function registrarDados() {
+            const campo1 = document.getElementById('campo1').value;
             
+            if (!campo1) {
+                alert('Por favor preencha o campo!');
+                return;
+            }
+
+            try {
+                const Teste = Parse.Object.extend("Teste");
+                const novoRegistro = new Teste();
+                
+                novoRegistro.set("campo1", campo1);
+                novoRegistro.set("userUID", currentUser.uid);
+                
+                await novoRegistro.save();
+                alert('Dados registrados com sucesso!');
+                document.getElementById('campo1').value = ''; // Limpar campo
+            } catch (error) {
+                console.error('Erro ao salvar:', error);
+                alert(`Erro: ${error.message}`);
+            }
+        }
+    </script>
     </script>
 </body>
 </html>
