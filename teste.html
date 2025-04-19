@@ -2,19 +2,28 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Login Header</title>
+    <title>🛒 Base Sincronização - Multi-Loja</title>
     <style>
+        /* Estilos CSS (mantidos do original) */
         body {
             font-family: 'Arial', sans-serif;
-            margin: 0;
+            margin: 2rem; /* Added margin for better visibility */
             padding: 0;
             background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
         }
         .profile-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin: 2rem;
+            margin-bottom: 2rem;
             padding-bottom: 2rem;
             border-bottom: 2px solid #eee;
         }
@@ -26,165 +35,172 @@
             border: 3px solid #007BFF;
             margin-right: 2rem;
         }
-        .profile-info h1 {
-            margin: 0;
-            color: #333;
-        }
-        .profile-info p {
-            color: #666;
-            margin: 0.5rem 0;
-        }
+        .profile-info h1 { margin: 0; color: #333; }
+        .profile-info p { color: #666; margin: 0.5rem 0; }
+        /* Removed cart, shipping, form styles as they are not directly relevant */
         .btn {
-            padding: 0.8rem 1.5rem;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
+            padding: 0.8rem 1.5rem; border: none; border-radius: 6px; cursor: pointer;
+            font-weight: 600; transition: all 0.3s ease; white-space: nowrap;
         }
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-        }
+        .btn-secondary { background: #6c757d; color: white; }
+        .emoji { margin-right: 8px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
-    <!-- Firebase SDK -->
- <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-       <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
 </head>
 <body>
-    <div class="profile-header">
-        <div style="display: flex; align-items: center;">
-            <img id="profilePhoto" class="profile-photo" src="avatar-padrao.jpeg" alt="Foto do Perfil">
-            <div class="profile-info">
-                <h1 id="userName">📱 Carregando...</h1>
-                <p id="userEmail"></p>
-                <p id="loginMethod"></p>
+
+    <div class="container">
+        <div class="profile-header">
+            <div style="display: flex; align-items: center;">
+                <img id="profilePhoto" class="profile-photo" src="https://placehold.co/120x120/eee/ccc?text=User" alt="Foto do Perfil">
+                <div class="profile-info">
+                    <h1 id="userName"><span class="emoji">👤</span> Carregando...</h1>
+                    <p id="userEmail"></p>
+                </div>
             </div>
+            <button id="logoutBtn" class="btn btn-secondary"><span class="emoji">🚪</span> Sair</button>
         </div>
-        <button id="logoutBtn" class="btn btn-secondary">🚪 Sair</button>
-    </div>
 
-    <!-- Resto da página em branco -->
-
-  <!-- Conteúdo do Teste -->
-        <div class="teste">
-            <p>ID do usuárioParse: <span id="ParseUser">Carregando...</span></p>
-            <label for="campo1">Campo1:</label>
-            <input type="text" id="campo1" placeholder="Digite o valor para campo1">
-            <button onclick="registrarDados()">Registrar</button>
+        <h2>Informações do Usuário (Teste)</h2>
+        <p>usuario firebase nome id</p>
+        <p>usuario Parce nome id</p>
+        <p>tem loja nomedaloja ou nao tem loja .</p>
         </div>
-    
+
     <script>
-        // Configurações Firebase
+        // --- Configurations ---
         const firebaseConfig = {
-            apiKey: "AIzaSyDlUQbbTP29VqBVmzOGHhfc67R1DTRPwxg",
-            authDomain: "gitautenticatio.firebaseapp.com",
-            projectId: "gitautenticatio",
-            storageBucket: "gitautenticatio.appspot.com",
-            messagingSenderId: "21514234895",
-            appId: "1:21514234895:web:d34dc4c44baf586d2cc77a"
+            apiKey: "YOUR_API_KEY", // Substitua pela sua chave
+            authDomain: "YOUR_AUTH_DOMAIN", // Substitua pelo seu domínio
+            databaseURL: "YOUR_DATABASE_URL", // Se precisar do DB para algo relacionado ao usuário
+            projectId: "YOUR_PROJECT_ID", // Substitua pelo seu ID
+            storageBucket: "YOUR_STORAGE_BUCKET", // Substitua
+            messagingSenderId: "YOUR_SENDER_ID", // Substitua
+            appId: "YOUR_APP_ID" // Substitua
         };
 
-        // Configurações Parse
-        Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
-        Parse.serverURL = "https://parseapi.back4app.com/";
-
-        // Inicializar Firebase
-        const app = firebase.initializeApp(firebaseConfig);
+        // Initialize Firebase (Auth is essential)
+        firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
-        let currentUser = null;
-       let ParseUser = Parse.User.current;
-  // Variável para armazenar o ponteiro do objeto do usuário
-    let userTesteObject = null;
+        // const database = firebase.database(); // Uncomment if needed for user data sync
 
-    // Monitorar estado de autenticação
-    auth.onAuthStateChanged(async user => {
-              console.log("[Auth State] Mudança detectada. Usuário:", user ? user.uid : "Nenhum");
-        if (user) {
-           currentUser = user;
-            //Parse.User.current;
-            atualizarCabecalho();
-            document.getElementById('currentUser').textContent = user.uid;
-     console.log("  UsuárioParse:",  ParseUser.uid : "Nenhum");
-            // Carregar objeto existente ao fazer login
-            await carregarObjetoUsuario();
-        } else {
-            window.location.href = 'index.html';
-        }
-    });
+        // Initialize Parse
+        Parse.initialize("YOUR_PARSE_APP_ID", "YOUR_PARSE_JS_KEY"); // Substitua pelas suas chaves
+        Parse.serverURL = "YOUR_PARSE_SERVER_URL"; // Substitua pela sua URL
 
+        // --- Global Variables ---
+        let firebaseUser = null; // Firebase user object
 
+        // --- Event Listeners and Initialization ---
 
-        
-    // Função para carregar/verificar objeto existente
-    async function carregarObjetoUsuario() {
-        try {
-            const Teste = Parse.Object.extend("Teste");
-            const query = new Parse.Query(Teste);
-            query.equalTo("userUID", currentUser.uid);
-            
-            const results = await query.find();
-            
-            if (results.length > 0) {
-                userTesteObject = results[0]; // Pega o primeiro objeto
-                document.getElementById('campo1').value = userTesteObject.get("campo1") || '';
-            }
-        } catch (error) {
-            console.log('Nenhum registro encontrado para este usuário');
-        }
-    }
+        // Monitor Firebase auth state (Essential for Sync/Login)
+        auth.onAuthStateChanged(async user => {
+            if (user) {
+                firebaseUser = user;
+                console.log("Firebase user logged in:", firebaseUser.uid, firebaseUser.displayName);
+                atualizarCabecalho(); // Update UI with user info
 
-    // Função de registro modificada
-    async function registrarDados() {
-        const campo1 = document.getElementById('campo1').value;
-        
-        if (!campo1) {
-            alert('Por favor preencha o campo!');
-            return;
-        }
+                const parseUser = Parse.User.current();
+                if (parseUser) {
+                    console.log("Parse user logged in:", parseUser.id, parseUser.get("username"));
+                    // Aqui você pode adicionar lógica para verificar se o usuário Parse tem loja
+                    // Exemplo: verificar um campo 'temLoja' ou 'nomeLoja' no objeto Parse User ou Cliente
+                    verificarLojaParse(parseUser);
+                } else {
+                    console.warn("Firebase user logged in, but Parse.User.current() is null! Potential sync issue.");
+                    // Tentar logar no Parse ou associar contas se necessário
+                }
 
-        try {
-            const Teste = Parse.Object.extend("Teste");
-            
-            if (userTesteObject) {
-                // Modo edição: atualiza objeto existente
-                userTesteObject.set("campo1", campo1);
-                await userTesteObject.save();
-                alert('Dados atualizados com sucesso!');
             } else {
-                // Modo criação: novo objeto
-                userTesteObject = new Teste();
-                userTesteObject.set("campo1", campo1);
-                userTesteObject.set("userUID", currentUser.uid);
-                await userTesteObject.save();
-                alert('Dados registrados com sucesso!');
+                firebaseUser = null;
+                console.log("No Firebase user logged in. Redirecting or showing login...");
+                // Optionally redirect to login page:
+                // window.location.href = 'login.html';
+                // Ou limpar a UI
+                document.getElementById('userName').textContent = '👤 Não conectado';
+                document.getElementById('userEmail').textContent = '';
+                document.getElementById('profilePhoto').src = 'https://placehold.co/120x120/eee/ccc?text=?';
             }
-            
-            document.getElementById('campo1').value = '';
-        } catch (error) {
-            console.error('Erro ao salvar:', error);
-            alert(`Erro: ${error.message}`);
-        }
-    }
-
-     // Atualizar cabeçalho
-        function atualizarCabecalho() {
-            document.getElementById('profilePhoto').src = currentUser.photoURL || 'imagens/avatar-padrao.jpg';
-            document.getElementById('userName').textContent = '👤 ' + (currentUser.displayName || 'Usuário');
-            document.getElementById('userEmail').textContent = '📧 ' + currentUser.email;
-        }
-
-        // Logout
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-            auth.signOut().then(() => {
-                window.location.href = 'index.html';
-            }).catch(err => {
-                alert('Erro ao fazer logout: ' + err.message);
-            });
         });
-        
+
+        // Logout Button (Essential for Login Management)
+        const logoutButton = document.getElementById('logoutBtn');
+        if (logoutButton) {
+            logoutButton.addEventListener('click', async () => {
+                try {
+                    await auth.signOut(); // Logout Firebase
+                    await Parse.User.logOut(); // Logout Parse
+                    console.log("Logout successful.");
+                    // Optionally redirect after logout
+                    // window.location.href = 'login.html';
+                } catch (error) {
+                    console.error('Error during logout:', error);
+                    alert('❌ Error logging out: ' + error.message);
+                }
+            });
+        } else {
+            console.warn("Logout button not found in the simplified HTML.");
+        }
+
+
+        // --- UI and Helper Functions ---
+
+        // Update profile header (Relies on logged-in state)
+        function atualizarCabecalho() {
+            if (!firebaseUser) return;
+            const profilePhoto = document.getElementById('profilePhoto');
+            const userName = document.getElementById('userName');
+            const userEmail = document.getElementById('userEmail');
+
+            if (profilePhoto) profilePhoto.src = firebaseUser.photoURL || 'https://placehold.co/120x120/eee/ccc?text=:)';
+            if (userName) userName.textContent = '👤 ' + (firebaseUser.displayName || 'Usuário Firebase');
+            if (userEmail) userEmail.textContent = '📧 ' + firebaseUser.email;
+        }
+
+        // Função exemplo para verificar loja no Parse (Adapte conforme sua estrutura)
+        async function verificarLojaParse(parseUser) {
+            // Exemplo 1: Se a informação está no próprio Parse.User
+            const nomeLojaUser = parseUser.get("nomeLoja"); // Supondo um campo 'nomeLoja'
+            if (nomeLojaUser) {
+                 console.log(`Parse User tem loja: ${nomeLojaUser}`);
+                 // Atualizar UI se necessário
+                 return;
+            }
+
+            // Exemplo 2: Se a informação está na classe 'Cliente' associada
+            const Cliente = Parse.Object.extend("Cliente");
+            const queryCliente = new Parse.Query(Cliente);
+            queryCliente.equalTo("usuario", parseUser);
+            queryCliente.select("nomeLoja"); // Selecionar apenas o campo necessário
+            try {
+                const cliente = await queryCliente.first();
+                if (cliente) {
+                    const nomeLojaCliente = cliente.get("nomeLoja");
+                    if (nomeLojaCliente) {
+                        console.log(`Parse User (via Cliente) tem loja: ${nomeLojaCliente}`);
+                         // Atualizar UI
+                    } else {
+                        console.log("Parse User (via Cliente) não tem loja registrada.");
+                         // Atualizar UI
+                    }
+                } else {
+                    console.log("Nenhum objeto Cliente associado encontrado para o Parse User.");
+                }
+            } catch (error) {
+                 console.error("Erro ao buscar dados da loja no Cliente Parse:", error);
+            }
+        }
+
+        // --- Funções Omitidas (Carrinho, CEP, Frete, etc.) ---
+        // As funções carregarCarrinho, removerDoCarrinho, carregarCEPSalvo,
+        // buscarEndereco, calcularFreteMultiLoja, exibirFretePorLoja,
+        // selecionarFrete, checkAllSelectionsMade, atualizarPrecoFinal,
+        // prosseguirCheckout, formatarCEP, voltarParaIndex foram omitidas
+        // por não serem estritamente necessárias para a sincronização/login inicial.
+
     </script>
 </body>
 </html>
