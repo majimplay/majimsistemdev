@@ -180,7 +180,7 @@
     </div>
 
     <script>
-         // --- Configurations ---
+           // --- Configurations ---
         const firebaseConfig = {
             apiKey: "AIzaSyDlUQbbTP29VqBVmzOGHhfc67R1DTRPwxg", // Sua chave
             authDomain: "gitautenticatio.firebaseapp.com",
@@ -325,7 +325,7 @@
                 queryProduto.containedIn("objectId", uniqueProductIds);
                 queryProduto.include("loja"); // Include the Loja object data
                 queryProduto.select(
-                    "nome", "preco", "imagens", "loja",
+                    "nome", "preco", "imagens", "loja", "loja.nome", "loja.cepOrigem", // Select nested fields too
                     "altura", "largura", "comprimento", "peso" // Add dimensions and weight
                 );
                 const produtos = await queryProduto.find();
@@ -340,8 +340,8 @@
                     const loja = p.get('loja'); // Get the related Loja object
                     const lojaId = loja ? loja.id : 'sem_loja'; // Use loja ID or a default key
                     const lojaNome = loja ? loja.get('nome') : 'Loja Desconhecida';
-                    // *** CORRECTION: Get 'cepOrigem' from the included Loja object ***
-                    const lojaCep = loja ? loja.get('cepOrigem') : null;
+                    // Get 'cepOrigem' from the included Loja object
+                    const lojaCep = loja ? loja.get('cepOrigem') : null; // This might be number or string
 
                     const details = {
                         id: produtoId,
@@ -355,14 +355,14 @@
                         quantidade: quantidade,
                         lojaId: lojaId,
                         lojaNome: lojaNome,
-                        lojaCep: lojaCep // Store the fetched CEP
+                        lojaCep: lojaCep // Store the fetched CEP (could be number or string)
                     };
 
                     // Add to the store group
                     if (!produtosPorLoja[lojaId]) {
                         produtosPorLoja[lojaId] = {
                             nome: lojaNome,
-                            cepOrigem: lojaCep, // Use the fetched CEP here
+                            cepOrigem: lojaCep, // Store the original value
                             produtos: []
                         };
                         fretesSelecionados[lojaId] = 0; // Initialize shipping cost for this store
@@ -550,37 +550,46 @@
             // Iterate through each store group
             for (const lojaId in produtosPorLoja) {
                 const lojaInfo = produtosPorLoja[lojaId];
-                const cepOrigem = lojaInfo.cepOrigem; // Get CEP from the pre-loaded store info
+                let cepOrigemInput = lojaInfo.cepOrigem; // Could be number, string, null, undefined
 
-                // *** CORRECTION: Check if cepOrigem is a valid string and has 8 digits after cleaning ***
+                // *** CORRECTION: Validate and convert CEP to string ***
+                let cepOrigemString = '';
                 let cepOrigemLimpo = '';
                 let skipStore = false;
                 let errorMessage = '';
 
-                if (typeof cepOrigem === 'string' && cepOrigem) {
-                    cepOrigemLimpo = cepOrigem.replace(/\D/g, '');
+                if (cepOrigemInput !== null && cepOrigemInput !== undefined) {
+                    cepOrigemString = String(cepOrigemInput); // Convert to string
+                    cepOrigemLimpo = cepOrigemString.replace(/\D/g, ''); // Clean it
+
                     if (cepOrigemLimpo.length !== 8) {
                         skipStore = true;
-                        errorMessage = `CEP de origem inválido (${cepOrigem}) para a loja ${lojaInfo.nome}. Pulando cálculo.`;
+                        errorMessage = `CEP de origem inválido (${cepOrigemString}) para a loja ${lojaInfo.nome}. Formato esperado: 8 dígitos.`;
                     }
                 } else {
                     skipStore = true;
-                    errorMessage = `CEP de origem ausente ou inválido para a loja ${lojaInfo.nome}. Pulando cálculo.`;
+                    errorMessage = `CEP de origem ausente para a loja ${lojaInfo.nome}.`;
                 }
+                // *** END CORRECTION ***
 
                 if (skipStore) {
-                    console.warn(errorMessage);
+                    console.warn(`${errorMessage} Pulando cálculo.`);
                     // Display error for this store in the results
                      resultDiv.innerHTML += `
                         <div class="store-shipping-group">
                             <h4><span class="emoji">🏪</span> Frete para: ${lojaInfo.nome}</h4>
-                            <p style="color: red;">❌ Não foi possível calcular o frete: ${errorMessage.split('. Pulando')[0]}.</p>
+                            <p style="color: red;">❌ Não foi possível calcular o frete: ${errorMessage}</p>
                         </div>`;
                     lojasCalculadas++; // Increment counter even if skipped
-                    if (lojasCalculadas === totalLojas) loader.style.display = 'none'; // Hide loader if all done
+                    // Mark this store as handled (error) so checkout button can appear later
+                    fretesSelecionados[lojaId] = 0; // Cost is 0
+                    detalhesFretesSelecionados[lojaId] = { custo: 0, metodo: "Erro CEP", prazo: "N/A" };
+                    if (lojasCalculadas === totalLojas) {
+                        loader.style.display = 'none'; // Hide loader if all done
+                        checkAllSelectionsMade(); // Check if checkout can be shown
+                    }
                     continue; // Skip to the next store
                 }
-                // *** END CORRECTION ***
 
                 // Calculate package dimensions and weight for this store's items
                 let pesoTotalLoja = 0;
@@ -602,7 +611,7 @@
                 // pesoTotalLoja = Math.max(pesoTotalLoja, 0.1);
 
                 const params = {
-                    cepOrigem: cepOrigemLimpo, // Use the cleaned CEP
+                    cepOrigem: cepOrigemLimpo, // Use the cleaned, validated CEP
                     cepDestino: cepDestino,
                     package: {
                         height: alturaMax,
@@ -627,12 +636,16 @@
                                 <h4><span class="emoji">🏪</span> Frete para: ${lojaInfo.nome}</h4>
                                 <p style="color: red;">❌ Erro ao calcular frete: ${error.message}</p>
                             </div>`;
+                         // Mark this store as handled (error)
+                         fretesSelecionados[lojaId] = 0;
+                         detalhesFretesSelecionados[lojaId] = { custo: 0, metodo: "Erro Cálculo", prazo: "N/A" };
                     })
                     .finally(() => {
                         lojasCalculadas++;
                         if (lojasCalculadas === totalLojas) {
                             loader.style.display = 'none'; // Hide loader when all calls are finished
                             console.log("Todos os cálculos de frete concluídos.");
+                            checkAllSelectionsMade(); // Check if checkout can be shown
                         }
                     });
             } // End of loop through stores
@@ -653,7 +666,7 @@
                  storeHtml += '<p>Nenhuma opção de frete encontrada para este CEP.</p>';
                  // Mark this store as handled (no valid options)
                  fretesSelecionados[lojaId] = 0; // Set cost to 0
-                 detalhesFretesSelecionados[lojaId] = { custo: 0, metodo: "N/A", prazo: "N/A" }; // Mark as handled
+                 detalhesFretesSelecionados[lojaId] = { custo: 0, metodo: "Nenhuma Opção", prazo: "N/A" }; // Mark as handled
             } else {
                 // Sort by price (cheapest first) - optional
                 servicos.sort((a, b) => parseFloat(a.preco) - parseFloat(b.preco));
@@ -684,14 +697,17 @@
                     `;
                 }).join('');
                  // Initialize selection state for this store (needs selection)
-                 fretesSelecionados[lojaId] = undefined; // Indicate selection is needed
-                 detalhesFretesSelecionados[lojaId] = null;
+                 // Only set to undefined if not already handled by an error case
+                 if (detalhesFretesSelecionados[lojaId] === null) {
+                     fretesSelecionados[lojaId] = undefined; // Indicate selection is needed
+                     detalhesFretesSelecionados[lojaId] = null;
+                 }
             }
             storeHtml += `</div>`;
             resultDiv.innerHTML += storeHtml; // Append this store's results
 
-            // Check if checkout button should be shown after displaying results
-            checkAllSelectionsMade();
+            // Check if checkout button should be shown (might be redundant here if finally block handles it)
+            // checkAllSelectionsMade();
         }
 
         /**
@@ -732,19 +748,21 @@
         }
 
         /**
-         * Checks if a shipping option has been selected (or deemed unavailable) for all stores.
+         * Checks if a shipping option has been selected (or deemed unavailable/error) for all stores.
          * Shows/hides the final price and checkout button accordingly.
          */
         function checkAllSelectionsMade() {
+            // Check if every storeId present in produtosPorLoja has a non-null entry in detalhesFretesSelecionados
             const allStoresHandled = Object.keys(produtosPorLoja).every(id => detalhesFretesSelecionados[id] !== null);
+
             if (allStoresHandled && Object.keys(produtosPorLoja).length > 0) { // Also check if cart wasn't empty
                 document.getElementById('finalPriceContainer').style.display = 'block';
                 document.getElementById('checkoutBtn').style.display = 'block';
-                 console.log("Todas as seleções de frete foram feitas.");
+                 console.log("Todas as seleções/erros de frete foram processados.");
             } else {
                  document.getElementById('finalPriceContainer').style.display = 'none';
                  document.getElementById('checkoutBtn').style.display = 'none';
-                 console.log("Aguardando seleção de frete para todas as lojas...");
+                 console.log("Aguardando processamento do frete para todas as lojas...");
             }
         }
 
@@ -765,16 +783,28 @@
          * Proceeds to checkout: Saves selected shipping details and totals to Parse Cliente object.
          */
         async function prosseguirCheckout() {
-            // Check if shipping has been calculated and selected for all stores
-            const allStoresSelected = Object.keys(produtosPorLoja).every(id => detalhesFretesSelecionados[id] !== null);
-            if (!allStoresSelected) {
-                alert("⚠️ Por favor, calcule e selecione uma opção de frete para cada loja (ou aguarde o cálculo) antes de prosseguir.");
+            // Check if shipping has been processed for all stores
+            const allStoresHandled = Object.keys(produtosPorLoja).every(id => detalhesFretesSelecionados[id] !== null);
+            if (!allStoresHandled) {
+                alert("⚠️ Por favor, aguarde o cálculo do frete para todas as lojas ou selecione uma opção onde disponível.");
                 return;
             }
             if (totalCarrinho <= 0) {
                  alert("⚠️ Seu carrinho está vazio. Adicione produtos antes de prosseguir.");
                  return;
             }
+
+            // Additional check: Ensure at least one valid shipping option was selected if there were options
+            const hasValidSelection = Object.values(detalhesFretesSelecionados).some(d => d !== null && d.custo > 0 && d.metodo !== "Erro CEP" && d.metodo !== "Erro Cálculo" && d.metodo !== "Nenhuma Opção");
+            const hasOnlyErrorsOrNoOptions = Object.values(detalhesFretesSelecionados).every(d => d === null || d.custo === 0);
+
+            // Allow proceeding if there are only errors/no options, but maybe warn the user?
+            // Or block if NO valid shipping could be calculated at all? Let's allow for now.
+            // if (!hasValidSelection && !hasOnlyErrorsOrNoOptions) {
+            //     alert("⚠️ Parece que você não selecionou uma opção de frete válida onde disponível.");
+            //     return;
+            // }
+
 
             console.log("Prosseguindo para checkout... Salvando dados no Parse.");
             const checkoutButton = document.getElementById('checkoutBtn');
@@ -799,21 +829,21 @@
                     throw new Error("Objeto Cliente não encontrado para este usuário.");
                 }
 
-                // Prepare shipping details array (only include valid selections)
+                // Prepare shipping details array (include errors/no options for tracking)
                 const shippingDetailsArray = Object.entries(detalhesFretesSelecionados)
-                    .filter(([lojaId, details]) => details !== null && details.custo !== undefined) // Filter out null/undefined details
+                    .filter(([lojaId, details]) => details !== null) // Filter out only the truly null (shouldn't happen now)
                     .map(([lojaId, details]) => ({
                         lojaId: lojaId,
-                        lojaNome: produtosPorLoja[lojaId]?.nome || 'Desconhecida', // Add store name for clarity
+                        lojaNome: produtosPorLoja[lojaId]?.nome || 'Desconhecida',
                         custo: details.custo,
                         metodo: details.metodo,
                         prazo: details.prazo
                     }));
 
                 // Data to save
-                const finalTotal = totalCarrinho + totalFreteSelecionado;
-                cliente.set("freteDetalhes", shippingDetailsArray); // Array of selected shipping details per store
-                cliente.set("freteTotal", totalFreteSelecionado); // Total shipping cost
+                const finalTotal = totalCarrinho + totalFreteSelecionado; // totalFreteSelecionado already sums only valid costs
+                cliente.set("freteDetalhes", shippingDetailsArray); // Array of selected/error shipping details per store
+                cliente.set("freteTotal", totalFreteSelecionado); // Total valid shipping cost
                 cliente.set("subtotalProdutos", totalCarrinho); // Subtotal of products
                 cliente.set("precoFinalTotal", finalTotal); // Grand total
                 cliente.set("cepDestinoCheckout", document.getElementById('cep_destino').value); // Save destination CEP used
