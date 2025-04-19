@@ -95,8 +95,7 @@
         const app = firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         let currentUser = null;
-
-       // Variável para armazenar o ponteiro do objeto do usuário
+  // Variável para armazenar o ponteiro do objeto do usuário
     let userTesteObject = null;
 
     // Monitorar estado de autenticação
@@ -163,17 +162,23 @@
             alert(`Erro: ${error.message}`);
         }
     }
-</script>
 
+     // Atualizar cabeçalho
+        function atualizarCabecalho() {
+            document.getElementById('profilePhoto').src = currentUser.photoURL || 'imagens/avatar-padrao.jpg';
+            document.getElementById('userName').textContent = '👤 ' + (currentUser.displayName || 'Usuário');
+            document.getElementById('userEmail').textContent = '📧 ' + currentUser.email;
+        }
 
-
-
-
-
-
-
-
-
-
-
-
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            auth.signOut().then(() => {
+                window.location.href = 'index.html';
+            }).catch(err => {
+                alert('Erro ao fazer logout: ' + err.message);
+            });
+        });
+        
+    </script>
+</body>
+</html>
