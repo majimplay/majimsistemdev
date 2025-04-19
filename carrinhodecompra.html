@@ -2,9 +2,9 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>🛒 Carrinho de Compras</title>
+    <title>🛒 Carrinho de Compras - Multi-Loja</title>
     <style>
-        /* Estilos CSS permanecem os mesmos */
+        /* Estilos CSS (mantidos, com pequenas adições/ajustes) */
         body {
             font-family: 'Arial', sans-serif;
             margin: 0;
@@ -35,184 +35,85 @@
             border: 3px solid #007BFF;
             margin-right: 2rem;
         }
-        .profile-info h1 {
-            margin: 0;
-            color: #333;
-        }
-        .profile-info p {
-            color: #666;
-            margin: 0.5rem 0;
-        }
-        .carrinho {
-            margin: 40px 0;
-        }
+        .profile-info h1 { margin: 0; color: #333; }
+        .profile-info p { color: #666; margin: 0.5rem 0; }
+        .carrinho { margin: 40px 0; }
         .produto {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 15px 10px; /* Aumentar padding vertical */
+            padding: 15px 10px;
             border-bottom: 1px solid #eee;
-            gap: 15px; /* Espaço entre conteúdo e botão */
+            gap: 15px;
         }
-        .produto-info {
-             flex-grow: 1; /* Ocupa espaço disponível */
-        }
-        .produto-info h4 {
-            margin: 0 0 5px 0; /* Espaço abaixo do nome */
-            color: #333;
-        }
-        .produto-info p {
-            margin: 3px 0; /* Menos espaço entre parágrafos */
-            font-size: 0.9em;
-            color: #555;
-        }
-        .produto-info .subtotal-item {
-            font-weight: bold;
-            color: #007BFF;
-            margin-top: 8px;
-        }
-
+        .produto-info { flex-grow: 1; }
+        .produto-info h4 { margin: 0 0 5px 0; color: #333; }
+        .produto-info p { margin: 3px 0; font-size: 0.9em; color: #555; }
+        .produto-info .subtotal-item { font-weight: bold; color: #007BFF; margin-top: 8px; }
         .total {
-            margin-top: 20px;
-            font-size: 1.2em;
-            font-weight: bold;
-            text-align: right;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 4px;
+            margin-top: 20px; font-size: 1.2em; font-weight: bold;
+            text-align: right; padding: 15px; background: #f8f9fa; border-radius: 4px;
         }
         .btn {
-            padding: 0.8rem 1.5rem;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            white-space: nowrap; /* Evita quebra de linha no botão */
+            padding: 0.8rem 1.5rem; border: none; border-radius: 6px; cursor: pointer;
+            font-weight: 600; transition: all 0.3s ease; white-space: nowrap;
         }
-        .btn-primary {
-            background: #007BFF;
-            color: white;
-        }
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-        }
-        .btn-danger { /* Estilo para botão remover */
-             background: #dc3545;
-             color: white;
-             padding: 0.5rem 1rem; /* Botão menor */
-             font-size: 0.9em;
-        }
-        .btn-danger:hover {
-            background: #c82333;
-        }
-        .form-section {
-            margin: 25px 0;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 8px;
-        }
-        .form-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin: 15px 0;
-        }
-        label { /* Estilo para labels */
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 500;
-            font-size: 0.9em;
-            color: #555;
-        }
-        input, select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ccc; /* Borda mais sutil */
-            border-radius: 4px; /* Menos arredondado */
-            font-size: 1em;
-            box-sizing: border-box; /* Garante padding dentro da largura */
-        }
-        input:read-only { /* Estilo para campos somente leitura */
-            background-color: #e9ecef;
-            cursor: not-allowed;
-        }
+        .btn-primary { background: #007BFF; color: white; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-danger { background: #dc3545; color: white; padding: 0.5rem 1rem; font-size: 0.9em; }
+        .btn-danger:hover { background: #c82333; }
+        .form-section { margin: 25px 0; padding: 20px; background: #f8f9fa; border-radius: 8px; }
+        .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 15px 0; }
+        label { display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.9em; color: #555; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 1em; box-sizing: border-box; }
+        input:read-only { background-color: #e9ecef; cursor: not-allowed; }
         .result-card {
-            background: #fff; /* Fundo branco */
-            padding: 15px; /* Menos padding */
-            border-radius: 6px;
-            margin: 10px 0; /* Menos margem */
-            border: 1px solid #eee; /* Borda sutil */
-            border-left: 4px solid #17a2b8; /* Cor informativa */
-            transition: box-shadow 0.2s ease;
+            background: #fff; padding: 15px; border-radius: 6px; margin: 10px 0;
+            border: 1px solid #eee; border-left: 4px solid #17a2b8; transition: box-shadow 0.2s ease;
         }
-        .result-card:hover {
-            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
-        }
-        .result-card p {
-            margin: 5px 0;
-            font-size: 0.95em;
-        }
+        .result-card:hover { box-shadow: 0 2px 5px rgba(0,0,0,0.08); }
+        .result-card p { margin: 5px 0; font-size: 0.95em; }
         .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #3498db;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            display: none;
-            margin: 20px auto;
+            border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%;
+            width: 30px; height: 30px; animation: spin 1s linear infinite; display: none; margin: 20px auto;
         }
-        .selected-shipping {
-            background: #e3f2fd;
-            border-left-color: #2196F3;
-            box-shadow: 0 0 8px rgba(33, 150, 243, 0.3);
-        }
+        .selected-shipping { background: #e3f2fd; border-left-color: #2196F3; box-shadow: 0 0 8px rgba(33, 150, 243, 0.3); }
         .btn-select {
-            background: #28a745; /* Verde sucesso */
-            color: white;
-            padding: 8px 16px;
-            margin-top: 10px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
+            background: #28a745; color: white; padding: 8px 16px; margin-top: 10px;
+            border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.2s ease;
         }
-        .btn-select:hover {
-            background: #218838;
-        }
+        .btn-select:hover { background: #218838; }
         .final-price {
-            font-size: 1.4em;
-            color: #28a745; /* Verde sucesso */
-            margin: 20px 0;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            text-align: right;
+            font-size: 1.4em; color: #28a745; margin: 20px 0; padding: 15px;
+            background: #f8f9fa; border-radius: 8px; text-align: right;
         }
         .checkout-btn {
-            background: #28a745; /* Verde sucesso */
+            background: #28a745; margin-top: 20px; display: none; /* Começa escondido */
+            width: 100%; font-size: 1.1em; padding: 1rem;
+        }
+        .checkout-btn:hover { background: #218838; }
+        .emoji { margin-right: 8px; }
+        .store-shipping-group {
             margin-top: 20px;
-            display: none; /* Começa escondido */
-            width: 100%;
-            font-size: 1.1em;
-            padding: 1rem; /* Botão maior */
+            padding: 15px;
+            border: 1px dashed #ccc;
+            border-radius: 8px;
+            background-color: #fdfdfd;
         }
-        .checkout-btn:hover {
-            background: #218838;
+        .store-shipping-group h4 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #555;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
         }
-        .emoji {
-            margin-right: 8px;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script> <script src="https://unpkg.com/parse/dist/parse.min.js"></script> </head>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
+</head>
 <body>
     <div class="container">
         <div class="profile-header">
@@ -221,7 +122,7 @@
                 <div class="profile-info">
                     <h1 id="userName"><span class="emoji">📱</span> Carregando...</h1>
                     <p id="userEmail"></p>
-                    </div>
+                </div>
             </div>
             <button id="logoutBtn" class="btn btn-secondary"><span class="emoji">🚪</span> Sair</button>
         </div>
@@ -236,17 +137,10 @@
             <h3><span class="emoji">🚚</span> Calcular Frete</h3>
             <div class="form-row">
                 <div>
-                    <label for="cep_loja">📍 CEP da Loja (Origem)</label>
-                    <input type="text" id="cep_loja" placeholder="00000-000"
-                           oninput="formatarCEP(this)" value="01001000"> </div>
-                <div>
                     <label for="cep_destino">📮 Seu CEP (Destino)</label>
                     <input type="text" id="cep_destino" placeholder="Digite seu CEP"
                            oninput="formatarCEP(this)" onblur="buscarEndereco(this.value)">
                 </div>
-            </div>
-
-            <div class="form-row">
                 <div>
                     <label for="logradouro">🏠 Logradouro</label>
                     <input type="text" id="logradouro" readonly>
@@ -264,34 +158,15 @@
                     <input type="text" id="uf" readonly>
                 </div>
             </div>
-             <details>
-                 <summary style="cursor: pointer; color: #007BFF; margin-bottom: 10px;">📦 Detalhes do Pacote (para frete)</summary>
-                 <div class="form-row">
-                    <div>
-                        <label for="altura">📏 Altura (cm)</label>
-                        <input type="number" id="altura" value="10" min="1">
-                    </div>
-                    <div>
-                        <label for="largura">📏 Largura (cm)</label>
-                        <input type="number" id="largura" value="15" min="1">
-                    </div>
-                    <div>
-                        <label for="comprimento">📐 Comprimento (cm)</label>
-                        <input type="number" id="comprimento" value="20" min="1">
-                    </div>
-                    <div>
-                        <label for="peso">⚖️ Peso Total (kg)</label>
-                        <input type="number" id="peso" step="0.1" value="0.5" min="0.1">
-                    </div>
-                 </div>
-            </details>
-
-            <button class="btn btn-primary" onclick="calcularFrete()" style="margin-top: 15px;"><span class="emoji">📦</span> Calcular Frete</button>
+            <button class="btn btn-primary" onclick="calcularFreteMultiLoja()" style="margin-top: 15px;">
+                <span class="emoji">📦</span> Calcular Frete (Todas as Lojas)
+            </button>
             <div class="loader" id="mainLoader"></div>
-            <div id="result" style="margin-top: 15px;"></div> </div>
+            <div id="result" style="margin-top: 15px;"></div>
+        </div>
 
         <div class="final-price" id="finalPriceContainer" style="display: none;">
-            <span class="emoji">💰</span> Preço Final (Subtotal + Frete): R$ <span id="precoFinal">0.00</span>
+            <span class="emoji">💰</span> Preço Final (Subtotal + Frete Total): R$ <span id="precoFinal">0.00</span>
         </div>
 
         <button id="checkoutBtn" class="btn checkout-btn" onclick="prosseguirCheckout()">
@@ -304,7 +179,7 @@
     </div>
 
     <script>
-        // --- Configurações ---
+        // --- Configurations ---
         const firebaseConfig = {
             apiKey: "AIzaSyDlUQbbTP29VqBVmzOGHhfc67R1DTRPwxg", // Sua chave
             authDomain: "gitautenticatio.firebaseapp.com",
@@ -315,67 +190,68 @@
             appId: "1:21514234895:web:d34dc4c44baf586d2cc77a"
         };
 
-        // Inicializar Firebase (Apenas Auth e DB para CEP)
+        // Initialize Firebase (Auth and DB for user CEP)
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
-        const database = firebase.database(); // Usado para buscar/salvar CEP
+        const database = firebase.database();
 
-        // Inicializar Parse
+        // Initialize Parse
         Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I"); // Suas chaves
         Parse.serverURL = "https://parseapi.back4app.com/";
 
-        // --- Variáveis Globais ---
-        let firebaseUser = null; // Usuário do Firebase (para ID e perfil)
-        let totalCarrinho = 0; // Subtotal dos produtos
-        let freteSelecionado = 0; // Custo do frete escolhido
 
-        // --- Event Listeners e Inicialização ---
+        // --- Global Variables ---
+        let firebaseUser = null; // Firebase user object
+        let totalCarrinho = 0; // Subtotal of products
+        let produtosPorLoja = {}; // Object to group products by store { lojaId: { nome: 'Loja A', cepOrigem: '...', produtos: [...] } }
+        let fretesSelecionados = {}; // Object to store selected shipping cost per store { lojaId: 0 }
+        let totalFreteSelecionado = 0; // Total selected shipping cost
+        let detalhesFretesSelecionados = {}; // Object to store full shipping details per store { lojaId: { custo: ..., metodo: ..., prazo: ... } }
+        let lojasCalculadas = 0; // Counter for completed shipping calculations
+        let totalLojas = 0; // Total number of stores in the cart
 
-        // Monitorar estado de autenticação do Firebase
+        // --- Event Listeners and Initialization ---
+
+        // Monitor Firebase auth state
         auth.onAuthStateChanged(async user => {
             if (user) {
                 firebaseUser = user;
-                console.log("Firebase user logado:", firebaseUser.uid);
-                atualizarCabecalho(); // Atualiza nome/foto
+                console.log("Firebase user logged in:", firebaseUser.uid);
+                atualizarCabecalho();
 
-                // Tenta pegar o usuário Parse correspondente
                 const parseUser = Parse.User.current();
                 if (parseUser) {
-                     console.log("Parse user logado:", parseUser.id);
-                     await carregarCarrinho(); // Carrega carrinho do Parse
-                     await carregarCEPSalvo(); // Carrega CEP do Firebase
+                     console.log("Parse user logged in:", parseUser.id);
+                     await carregarCarrinho(); // Load cart from Parse
+                     await carregarCEPSalvo(); // Load user's destination CEP from Firebase
                 } else {
-                     // Isso pode acontecer se o sync no index.html falhou ou ainda não ocorreu
-                     console.error("Usuário Firebase logado, mas Parse.User.current() é null!");
+                     console.error("Firebase user logged in, but Parse.User.current() is null!");
                      alert("Erro ao carregar dados da conta. Tente recarregar ou voltar à página inicial.");
-                     // Poderia tentar forçar o login Parse aqui se tiver o UID do Firebase
-                     // mas idealmente o fluxo do index.html deve garantir isso.
                      document.getElementById('carrinhoItens').innerHTML = '<p style="color: red;">Erro ao carregar carrinho. Verifique seu login.</p>';
                 }
 
             } else {
-                // Se não há usuário Firebase, redireciona para o início
-                console.log("Nenhum usuário Firebase logado. Redirecionando...");
-                window.location.href = 'index.html'; // Ou página de login
+                console.log("No Firebase user logged in. Redirecting...");
+                window.location.href = 'index.html'; // Or login page
             }
         });
 
-        // Logout
+        // Logout Button
         document.getElementById('logoutBtn').addEventListener('click', async () => {
             try {
                 await auth.signOut(); // Logout Firebase
                 await Parse.User.logOut(); // Logout Parse
-                console.log("Logout realizado.");
+                console.log("Logout successful.");
                 window.location.href = 'index.html';
             } catch (error) {
-                console.error('Erro ao fazer logout:', error);
-                alert('❌ Erro ao fazer logout: ' + error.message);
+                console.error('Error during logout:', error);
+                alert('❌ Error logging out: ' + error.message);
             }
         });
 
-        // --- Funções de Interface e Auxiliares ---
+        // --- UI and Helper Functions ---
 
-        // Atualizar cabeçalho do perfil (usa dados do Firebase)
+        // Update profile header (uses Firebase data)
         function atualizarCabecalho() {
             if (!firebaseUser) return;
             document.getElementById('profilePhoto').src = firebaseUser.photoURL || 'https://placehold.co/120x120/eee/ccc?text=:)';
@@ -383,126 +259,142 @@
             document.getElementById('userEmail').textContent = '📧 ' + firebaseUser.email;
         }
 
-        // Formatar CEP enquanto digita
+        // Format CEP input
         function formatarCEP(input) {
-            let cep = input.value.replace(/\D/g, ''); // Remove não dígitos
-            if (cep.length > 5) {
-                cep = cep.replace(/^(\d{5})(\d)/, '$1-$2'); // Adiciona hífen
-            }
-            if (cep.length > 9) {
-                cep = cep.substring(0, 9); // Limita a 9 caracteres (00000-000)
-            }
+            let cep = input.value.replace(/\D/g, '');
+            if (cep.length > 5) cep = cep.replace(/^(\d{5})(\d)/, '$1-$2');
+            if (cep.length > 9) cep = cep.substring(0, 9);
             input.value = cep;
         }
 
-        // Voltar para página inicial
+        // Go back to index page
         function voltarParaIndex() {
             window.location.href = 'index.html';
         }
 
-        // --- Funções do Carrinho (Usando Parse) ---
+        // --- Cart Functions (Using Parse) ---
 
         /**
-         * Carrega os itens do carrinho a partir da classe Cliente no Parse.
+         * Loads cart items from the Cliente class in Parse, grouping them by store.
          */
         async function carregarCarrinho() {
             const container = document.getElementById('carrinhoItens');
             container.innerHTML = '<p>🔄 Carregando itens...</p>';
-            totalCarrinho = 0; // Reseta o subtotal global
+            totalCarrinho = 0;
+            produtosPorLoja = {}; // Reset store grouping
+            fretesSelecionados = {}; // Reset selected shipping
+            totalFreteSelecionado = 0;
+            detalhesFretesSelecionados = {};
             document.getElementById('carrinhoTotal').textContent = '0.00';
-            atualizarPrecoFinal(); // Reseta o preço final também
+            atualizarPrecoFinal();
 
             const parseUser = Parse.User.current();
             if (!parseUser) {
-                console.error("carregarCarrinho: Parse User não encontrado.");
+                console.error("carregarCarrinho: Parse User not found.");
                 container.innerHTML = '<p style="color: red;">⚠️ Erro: Usuário não logado no sistema.</p>';
                 return;
             }
 
             const Cliente = Parse.Object.extend("Cliente");
             const queryCliente = new Parse.Query(Cliente);
-            queryCliente.equalTo("usuario", parseUser); // Link com o usuário logado
+            queryCliente.equalTo("usuario", parseUser);
 
             try {
-                const cliente = await queryCliente.first(); // Busca o objeto Cliente
-
+                const cliente = await queryCliente.first();
                 if (!cliente) {
-                    console.warn("Nenhum objeto Cliente encontrado para o usuário:", parseUser.id);
+                    console.warn("No Cliente object found for user:", parseUser.id);
                     container.innerHTML = '<p>🛍️ Seu carrinho está vazio.</p>';
                     return;
                 }
 
-                const productIds = cliente.get('carrinhoclient') || []; // Array de IDs no carrinho
-                console.log("IDs no carrinho do Cliente:", productIds);
-
+                const productIds = cliente.get('carrinhoclient') || [];
                 if (productIds.length === 0) {
                     container.innerHTML = '<p>🛍️ Seu carrinho está vazio.</p>';
                     return;
                 }
 
-                // 1. Contar a quantidade de cada produto ID
                 const quantityMap = productIds.reduce((map, id) => {
                     map[id] = (map[id] || 0) + 1;
                     return map;
                 }, {});
                 const uniqueProductIds = Object.keys(quantityMap);
-                console.log("Quantidades:", quantityMap);
-                console.log("IDs únicos:", uniqueProductIds);
 
-                // 2. Buscar os detalhes dos produtos únicos no Parse
+                // Fetch product details including dimensions, weight, and store pointer
                 const Produto = Parse.Object.extend("Produto");
                 const queryProduto = new Parse.Query(Produto);
-                queryProduto.containedIn("objectId", uniqueProductIds); // Busca só os produtos do carrinho
-                queryProduto.select("nome", "preco", "imagens"); // Campos necessários
+                queryProduto.containedIn("objectId", uniqueProductIds);
+                queryProduto.include("loja"); // Include the Loja object data
+                queryProduto.select(
+                    "nome", "preco", "imagens", "loja",
+                    "altura", "largura", "comprimento", "peso" // Add dimensions and weight
+                );
                 const produtos = await queryProduto.find();
-                console.log("Produtos encontrados:", produtos.length);
 
-                // 3. Mapear produtos encontrados por ID para acesso fácil
-                const productDetailsMap = produtos.reduce((map, p) => {
-                    map[p.id] = {
+                // Map product details and group by store
+                let html = '';
+                totalCarrinho = 0;
+
+                produtos.forEach(p => {
+                    const produtoId = p.id;
+                    const quantidade = quantityMap[produtoId];
+                    const loja = p.get('loja'); // Get the related Loja object
+                    const lojaId = loja ? loja.id : 'sem_loja'; // Use loja ID or a default key
+                    const lojaNome = loja ? loja.get('nome') : 'Loja Desconhecida';
+                    const lojaCep = loja ? loja.get('cepOrigem') : null; // Assuming 'cepOrigem' field exists in Loja
+
+                    const details = {
+                        id: produtoId,
                         nome: p.get('nome') || "Produto sem nome",
                         preco: p.get('preco') || 0,
-                        imagemUrl: (p.get('imagens') && p.get('imagens').length > 0) ? p.get('imagens')[0] : 'https://placehold.co/60x60/eee/ccc?text=Img'
+                        imagemUrl: (p.get('imagens') && p.get('imagens').length > 0) ? p.get('imagens')[0] : 'https://placehold.co/60x60/eee/ccc?text=Img',
+                        altura: p.get('altura') || 1, // Default dimension if missing
+                        largura: p.get('largura') || 10,
+                        comprimento: p.get('comprimento') || 10,
+                        peso: p.get('peso') || 0.1, // Default weight if missing
+                        quantidade: quantidade,
+                        lojaId: lojaId,
+                        lojaNome: lojaNome,
+                        lojaCep: lojaCep
                     };
-                    return map;
-                }, {});
 
-                // 4. Gerar o HTML do carrinho
-                let html = '';
-                totalCarrinho = 0; // Recalcula o subtotal
-
-                uniqueProductIds.forEach(produtoId => {
-                    const details = productDetailsMap[produtoId];
-                    const quantidade = quantityMap[produtoId];
-
-                    if (details) {
-                        const precoUnitario = details.preco;
-                        const subtotalItem = precoUnitario * quantidade;
-                        totalCarrinho += subtotalItem;
-
-                        html += `
-                            <div class="produto" id="item-${produtoId}">
-                                <img src="${details.imagemUrl}" alt="${details.nome}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px; margin-right: 15px;">
-                                <div class="produto-info">
-                                    <h4>${details.nome}</h4>
-                                    <p>🔢 Quantidade: ${quantidade}</p>
-                                    <p>💲 Preço unitário: R$ ${precoUnitario.toFixed(2)}</p>
-                                    <p class="subtotal-item">💰 Subtotal: R$ ${subtotalItem.toFixed(2)}</p>
-                                </div>
-                                <button onclick="removerDoCarrinho('${produtoId}')" class="btn btn-danger">
-                                    <span class="emoji">❌</span> Remover 1
-                                </button>
-                            </div>
-                        `;
-                    } else {
-                        console.warn(`Detalhes não encontrados para o produto ID: ${produtoId}. Removendo do carrinho virtualmente.`);
-                        // Poderia adicionar lógica para remover IDs órfãos do 'carrinhoclient' aqui
+                    // Add to the store group
+                    if (!produtosPorLoja[lojaId]) {
+                        produtosPorLoja[lojaId] = {
+                            nome: lojaNome,
+                            cepOrigem: lojaCep,
+                            produtos: []
+                        };
+                        fretesSelecionados[lojaId] = 0; // Initialize shipping cost for this store
+                        detalhesFretesSelecionados[lojaId] = null; // Initialize shipping details
                     }
+                    produtosPorLoja[lojaId].produtos.push(details);
+
+                    // Calculate subtotal and generate HTML
+                    const precoUnitario = details.preco;
+                    const subtotalItem = precoUnitario * quantidade;
+                    totalCarrinho += subtotalItem;
+
+                    html += `
+                        <div class="produto" id="item-${produtoId}">
+                            <img src="${details.imagemUrl}" alt="${details.nome}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px; margin-right: 15px;">
+                            <div class="produto-info">
+                                <h4>${details.nome} <small>(${lojaNome})</small></h4>
+                                <p>🔢 Quantidade: ${quantidade}</p>
+                                <p>💲 Preço unitário: R$ ${precoUnitario.toFixed(2)}</p>
+                                <p class="subtotal-item">💰 Subtotal: R$ ${subtotalItem.toFixed(2)}</p>
+                                <p style="font-size: 0.8em; color: #777;">Dim: ${details.altura}x${details.largura}x${details.comprimento}cm, ${details.peso}kg</p>
+                            </div>
+                            <button onclick="removerDoCarrinho('${produtoId}')" class="btn btn-danger">
+                                <span class="emoji">❌</span> Remover 1
+                            </button>
+                        </div>
+                    `;
                 });
 
-                container.innerHTML = html || '<p>🛍️ Seu carrinho está vazio.</p>'; // Caso todos os IDs sejam órfãos
+                container.innerHTML = html || '<p>🛍️ Seu carrinho está vazio.</p>';
                 document.getElementById('carrinhoTotal').textContent = totalCarrinho.toFixed(2);
-                atualizarPrecoFinal(); // Atualiza o preço final com o novo subtotal
+                atualizarPrecoFinal();
+                console.log("Produtos agrupados por loja:", produtosPorLoja);
 
             } catch (error) {
                 console.error('Erro ao carregar carrinho do Parse:', error);
@@ -511,16 +403,13 @@
         }
 
         /**
-         * Remove UMA unidade do produto especificado do carrinho na classe Cliente.
-         * @param {string} produtoId - O objectId do produto a ser removido.
+         * Removes ONE unit of the specified product from the cart in the Cliente class.
+         * @param {string} produtoId - The objectId of the product to be removed.
          */
         window.removerDoCarrinho = async (produtoId) => {
-             console.log("Tentando remover produto:", produtoId);
+             console.log("Attempting to remove product:", produtoId);
              const parseUser = Parse.User.current();
-             if (!parseUser) {
-                 alert("⚠️ Erro: Usuário não logado.");
-                 return;
-             }
+             if (!parseUser) { alert("⚠️ Error: User not logged in."); return; }
 
              const Cliente = Parse.Object.extend("Cliente");
              const query = new Parse.Query(Cliente);
@@ -528,39 +417,34 @@
 
              try {
                  const cliente = await query.first();
-                 if (!cliente) {
-                     alert("⚠️ Erro: Não foi possível encontrar os dados do seu carrinho.");
-                     return;
-                 }
+                 if (!cliente) { alert("⚠️ Error: Could not find your cart data."); return; }
 
                  let productIds = cliente.get('carrinhoclient') || [];
-                 const indexToRemove = productIds.indexOf(produtoId); // Encontra o primeiro índice
+                 const indexToRemove = productIds.indexOf(produtoId);
 
                  if (indexToRemove > -1) {
-                     productIds.splice(indexToRemove, 1); // Remove apenas um item
-                     cliente.set('carrinhoclient', productIds); // Define o array modificado
-                     await cliente.save(); // Salva no Parse
-                     console.log("Produto removido. IDs restantes:", productIds);
-                     await carregarCarrinho(); // Recarrega a lista do carrinho na UI
-                     alert('🗑️ Uma unidade do item foi removida do carrinho!');
+                     productIds.splice(indexToRemove, 1);
+                     cliente.set('carrinhoclient', productIds);
+                     await cliente.save();
+                     console.log("Product removed. Remaining IDs:", productIds);
+                     await carregarCarrinho(); // Reload cart UI
+                     alert('🗑️ One unit of the item was removed from the cart!');
                  } else {
-                     console.warn("Produto ID não encontrado no array carrinhoclient:", produtoId);
-                     alert("⚠️ Item não encontrado no carrinho.");
-                     // Pode ser útil recarregar o carrinho caso haja inconsistência
-                     await carregarCarrinho();
+                     console.warn("Product ID not found in carrinhoclient array:", produtoId);
+                     alert("⚠️ Item not found in cart.");
+                     await carregarCarrinho(); // Reload in case of inconsistency
                  }
 
              } catch (error) {
-                 console.error("Erro ao remover item do Parse:", error);
-                 alert('❌ Erro ao remover item: ' + error.message);
+                 console.error("Error removing item from Parse:", error);
+                 alert('❌ Error removing item: ' + error.message);
              }
          };
 
-
-        // --- Funções de CEP e Frete (Usando Firebase para CEP e Cloud Function para Frete) ---
+        // --- CEP and Shipping Functions ---
 
         /**
-         * Carrega o CEP salvo no Firebase Realtime Database.
+         * Loads the saved destination CEP from Firebase Realtime Database.
          */
         async function carregarCEPSalvo() {
             if (!firebaseUser) return;
@@ -569,244 +453,348 @@
                 const cepSalvo = cepSnapshot.val();
                 if (cepSalvo) {
                     const cepInput = document.getElementById('cep_destino');
-                    cepInput.value = cepSalvo; // Preenche o campo
-                    formatarCEP(cepInput); // Formata
-                    await buscarEndereco(cepSalvo); // Busca endereço automaticamente
-                    console.log("CEP carregado do Firebase:", cepSalvo);
+                    cepInput.value = cepSalvo;
+                    formatarCEP(cepInput);
+                    await buscarEndereco(cepSalvo); // Fetch address automatically
+                    console.log("Destination CEP loaded from Firebase:", cepSalvo);
                 } else {
-                     console.log("Nenhum CEP salvo no Firebase encontrado.");
+                     console.log("No saved destination CEP found in Firebase.");
                 }
             } catch (error) {
-                console.error("Erro ao carregar CEP salvo:", error);
+                console.error("Error loading saved CEP:", error);
             }
         }
 
         /**
-         * Busca o endereço usando a API ViaCEP e preenche os campos.
-         * Salva o CEP válido no Firebase.
-         * @param {string} cep - O CEP a ser buscado (com ou sem hífen).
+         * Fetches the address using ViaCEP API and fills the fields.
+         * Saves the valid CEP to Firebase.
+         * @param {string} cep - The destination CEP to search (with or without hyphen).
          */
         async function buscarEndereco(cep) {
-            cep = cep.replace(/\D/g, ''); // Limpa o CEP
+            cep = cep.replace(/\D/g, '');
+            const logradouroInput = document.getElementById('logradouro');
+            const bairroInput = document.getElementById('bairro');
+            const cidadeInput = document.getElementById('cidade');
+            const ufInput = document.getElementById('uf');
+
+            // Clear fields if CEP is invalid or incomplete
             if (cep.length !== 8) {
-                // Limpa campos se o CEP for inválido ou incompleto
-                document.getElementById('logradouro').value = '';
-                document.getElementById('bairro').value = '';
-                document.getElementById('cidade').value = '';
-                document.getElementById('uf').value = '';
+                logradouroInput.value = ''; bairroInput.value = '';
+                cidadeInput.value = ''; ufInput.value = '';
                 return;
             }
 
-            console.log("Buscando endereço para CEP:", cep);
+            console.log("Fetching address for destination CEP:", cep);
             try {
                 const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const data = await response.json();
 
                 if (data.erro) {
-                    console.warn('ViaCEP retornou erro para CEP:', cep);
-                    alert('❌ CEP não encontrado!');
-                    // Limpa campos
-                     document.getElementById('logradouro').value = '';
-                     document.getElementById('bairro').value = '';
-                     document.getElementById('cidade').value = '';
-                     document.getElementById('uf').value = '';
+                    console.warn('ViaCEP returned error for CEP:', cep);
+                    alert('❌ CEP de destino não encontrado!');
+                    logradouroInput.value = ''; bairroInput.value = '';
+                    cidadeInput.value = ''; ufInput.value = '';
                     return;
                 }
 
-                // Preenche os campos do formulário
-                document.getElementById('logradouro').value = data.logradouro || '';
-                document.getElementById('bairro').value = data.bairro || '';
-                document.getElementById('cidade').value = data.localidade || '';
-                document.getElementById('uf').value = data.uf || '';
-                console.log("Endereço encontrado:", data);
+                // Fill form fields
+                logradouroInput.value = data.logradouro || '';
+                bairroInput.value = data.bairro || '';
+                cidadeInput.value = data.localidade || '';
+                ufInput.value = data.uf || '';
+                console.log("Address found:", data);
 
-                // Salva o CEP válido no Firebase (se o usuário estiver logado)
+                // Save valid CEP to Firebase (if user is logged in)
                 if (firebaseUser) {
                     await database.ref(`users/${firebaseUser.uid}/cepuser`).set(cep);
-                    console.log("CEP salvo no Firebase:", cep);
+                    console.log("Destination CEP saved to Firebase:", cep);
                 }
 
             } catch (error) {
-                console.error('Erro ao buscar CEP via ViaCEP:', error);
-                alert('❌ Erro ao buscar endereço. Verifique sua conexão ou o CEP digitado.');
+                console.error('Error fetching CEP via ViaCEP:', error);
+                alert('❌ Erro ao buscar endereço de destino. Verifique sua conexão ou o CEP digitado.');
             }
         }
 
         /**
-         * Chama a Cloud Function 'calcularFrete' no Parse.
+         * Calculates shipping costs for each store in the cart by calling the Cloud Function.
          */
-        async function calcularFrete() {
-            const cepOrigem = document.getElementById('cep_loja').value.replace(/\D/g, '');
+        async function calcularFreteMultiLoja() {
             const cepDestino = document.getElementById('cep_destino').value.replace(/\D/g, '');
-
-            if (cepOrigem.length !== 8 || cepDestino.length !== 8) {
-                alert("⚠️ Por favor, preencha um CEP de origem e destino válidos (8 dígitos).");
+            if (cepDestino.length !== 8) {
+                alert("⚠️ Por favor, preencha um CEP de destino válido (8 dígitos).");
                 return;
+            }
+            if (Object.keys(produtosPorLoja).length === 0) {
+                 alert("⚠️ Seu carrinho está vazio ou os produtos não puderam ser agrupados por loja.");
+                 return;
             }
 
             const loader = document.getElementById('mainLoader');
             const resultDiv = document.getElementById('result');
-            loader.style.display = 'block'; // Mostra o loader
-            resultDiv.innerHTML = ''; // Limpa resultados anteriores
-            freteSelecionado = 0; // Reseta frete
+            loader.style.display = 'block';
+            resultDiv.innerHTML = ''; // Clear previous results
+            fretesSelecionados = {}; // Reset selections
+            totalFreteSelecionado = 0;
+            detalhesFretesSelecionados = {};
+            lojasCalculadas = 0; // Reset counter
+            totalLojas = Object.keys(produtosPorLoja).length; // Set total stores for this calculation
             document.getElementById('finalPriceContainer').style.display = 'none';
             document.getElementById('checkoutBtn').style.display = 'none';
             atualizarPrecoFinal();
 
-            const params = {
-                cepOrigem: cepOrigem,
-                cepDestino: cepDestino,
-                package: {
-                    height: parseFloat(document.getElementById('altura').value) || 10, // Default values
-                    width: parseFloat(document.getElementById('largura').value) || 15,
-                    length: parseFloat(document.getElementById('comprimento').value) || 20,
-                    weight: parseFloat(document.getElementById('peso').value) || 0.5
+            console.log(`Calculando frete para ${totalLojas} loja(s)...`);
+
+            // Iterate through each store group
+            for (const lojaId in produtosPorLoja) {
+                const lojaInfo = produtosPorLoja[lojaId];
+                const cepOrigem = lojaInfo.cepOrigem;
+
+                if (!cepOrigem || cepOrigem.replace(/\D/g, '').length !== 8) {
+                    console.warn(`CEP de origem inválido ou ausente para a loja ${lojaInfo.nome} (${lojaId}). Pulando cálculo.`);
+                    // Display error for this store in the results
+                     resultDiv.innerHTML += `
+                        <div class="store-shipping-group">
+                            <h4><span class="emoji">🏪</span> Frete para: ${lojaInfo.nome}</h4>
+                            <p style="color: red;">❌ Não foi possível calcular o frete: CEP de origem da loja inválido ou não cadastrado.</p>
+                        </div>`;
+                    lojasCalculadas++; // Increment counter even if skipped
+                    if (lojasCalculadas === totalLojas) loader.style.display = 'none'; // Hide loader if all done
+                    continue; // Skip to the next store
                 }
-            };
-            console.log("Calculando frete com parâmetros:", params);
 
-            try {
-                // Chama a Cloud Function do Parse
-                const response = await Parse.Cloud.run("calcularFrete", params);
-                console.log("Resposta da Cloud Function:", response);
-                // A estrutura da resposta pode variar dependendo da sua Cloud Function
-                // Ajuste 'response.data' conforme necessário
-                exibirFrete(response.data || response); // Tenta acessar response.data, senão usa response direto
+                // Calculate package dimensions and weight for this store's items
+                let pesoTotalLoja = 0;
+                let alturaMax = 0;
+                let larguraMax = 0;
+                let comprimentoMax = 0;
 
-            } catch (error) {
-                console.error('Erro ao chamar Cloud Function calcularFrete:', error);
-                resultDiv.innerHTML = `<p style="color: red;">❌ Erro ao calcular frete: ${error.message}</p>`;
-            } finally {
-                loader.style.display = 'none'; // Esconde o loader
-            }
-        }
+                lojaInfo.produtos.forEach(p => {
+                    pesoTotalLoja += (p.peso * p.quantidade);
+                    alturaMax = Math.max(alturaMax, p.altura);
+                    larguraMax = Math.max(larguraMax, p.largura);
+                    comprimentoMax = Math.max(comprimentoMax, p.comprimento);
+                });
 
-        /**
-         * Exibe as opções de frete retornadas pela Cloud Function.
-         * @param {Array} servicos - Array de objetos de serviço de frete.
-         */
-        function exibirFrete(servicos) {
-            const resultDiv = document.getElementById('result');
-            if (!Array.isArray(servicos) || servicos.length === 0) {
-                 resultDiv.innerHTML = '<p>Nenhuma opção de frete encontrada para este CEP.</p>';
-                 return;
-            }
+                // Ensure minimum dimensions required by Correios/carriers if needed
+                // alturaMax = Math.max(alturaMax, 2); // Exemplo: mínimo 2cm
+                // larguraMax = Math.max(larguraMax, 11); // Exemplo: mínimo 11cm
+                // comprimentoMax = Math.max(comprimentoMax, 16); // Exemplo: mínimo 16cm
+                // pesoTotalLoja = Math.max(pesoTotalLoja, 0.1); // Exemplo: mínimo 0.1kg
 
-            // Ordena por preço (mais barato primeiro) - opcional
-            servicos.sort((a, b) => parseFloat(a.preco) - parseFloat(b.preco));
+                const params = {
+                    cepOrigem: cepOrigem.replace(/\D/g, ''),
+                    cepDestino: cepDestino,
+                    package: {
+                        height: alturaMax,
+                        width: larguraMax,
+                        length: comprimentoMax,
+                        weight: pesoTotalLoja
+                    },
+                    lojaId: lojaId // Pass lojaId to identify results later
+                };
+                console.log(`Calculando frete para Loja ${lojaInfo.nome} (${lojaId}) com parâmetros:`, params);
 
-            resultDiv.innerHTML = '<h4>Selecione uma opção de frete:</h4>' + servicos.map((servico, index) => {
-                // Tratamento básico de erros ou valores ausentes
-                const nomeServico = `${servico.empresa || 'Empresa'} - ${servico.metodo || 'Método'}`;
-                const prazo = servico.prazo ? `${servico.prazo} dias úteis` : 'Prazo indisponível';
-                const preco = parseFloat(servico.preco);
-                const precoFormatado = !isNaN(preco) ? `R$ ${preco.toFixed(2)}` : 'Preço indisponível';
-
-                return `
-                    <div class="result-card" id="frete-opcao-${index}">
-                        <p><strong><span class="emoji">🚚</span> ${nomeServico}</strong></p>
-                        <p><span class="emoji">📅</span> Prazo estimado: ${prazo}</p>
-                        <p><strong><span class="emoji">💲</span> Preço: ${precoFormatado}</strong></p>
-                        ${!isNaN(preco) ? // Só mostra botão se o preço for válido
-                            `<button class="btn-select"
-                                    onclick="selecionarFrete(${preco}, this)">
-                                <span class="emoji">✅</span> Selecionar Frete
-                            </button>`
-                            : '<p style="color: #888;">Opção indisponível</p>'
+                // Call Cloud Function asynchronously for each store
+                Parse.Cloud.run("calcularFrete", params)
+                    .then(response => {
+                        console.log(`Resposta da Cloud Function para Loja ${lojaId}:`, response);
+                        exibirFretePorLoja(response.data || response, lojaId, lojaInfo.nome);
+                    })
+                    .catch(error => {
+                        console.error(`Erro ao chamar Cloud Function para Loja ${lojaId}:`, error);
+                        resultDiv.innerHTML += `
+                            <div class="store-shipping-group">
+                                <h4><span class="emoji">🏪</span> Frete para: ${lojaInfo.nome}</h4>
+                                <p style="color: red;">❌ Erro ao calcular frete: ${error.message}</p>
+                            </div>`;
+                    })
+                    .finally(() => {
+                        lojasCalculadas++;
+                        if (lojasCalculadas === totalLojas) {
+                            loader.style.display = 'none'; // Hide loader when all calls are finished
+                            console.log("Todos os cálculos de frete concluídos.");
                         }
-                    </div>
-                `;
-            }).join('');
+                    });
+            } // End of loop through stores
         }
 
         /**
-         * Atualiza o valor do frete selecionado e a UI.
-         * @param {number} preco - O preço do frete selecionado.
-         * @param {HTMLElement} element - O botão que foi clicado.
+         * Displays shipping options for a specific store.
+         * @param {Array} servicos - Array of shipping service objects.
+         * @param {string} lojaId - The ID of the store.
+         * @param {string} lojaNome - The name of the store.
          */
-        function selecionarFrete(preco, element) {
-            // Remove a classe de seleção de todos os cards
-            document.querySelectorAll('.result-card').forEach(card => {
-                card.classList.remove('selected-shipping');
-            });
-            // Adiciona a classe ao card pai do botão clicado
+        function exibirFretePorLoja(servicos, lojaId, lojaNome) {
+            const resultDiv = document.getElementById('result');
+            let storeHtml = `<div class="store-shipping-group" id="store-group-${lojaId}">
+                                <h4><span class="emoji">🏪</span> Frete para: ${lojaNome}</h4>`;
+
+            if (!Array.isArray(servicos) || servicos.length === 0) {
+                 storeHtml += '<p>Nenhuma opção de frete encontrada para este CEP.</p>';
+            } else {
+                // Sort by price (cheapest first) - optional
+                servicos.sort((a, b) => parseFloat(a.preco) - parseFloat(b.preco));
+
+                storeHtml += '<h5>Selecione uma opção:</h5>' + servicos.map((servico, index) => {
+                    const nomeServico = `${servico.empresa || 'Empresa'} - ${servico.metodo || 'Método'}`;
+                    const prazo = servico.prazo ? `${servico.prazo} dias úteis` : 'Prazo indisponível';
+                    const preco = parseFloat(servico.preco);
+                    const precoFormatado = !isNaN(preco) ? `R$ ${preco.toFixed(2)}` : 'Preço indisponível';
+
+                    return `
+                        <div class="result-card" id="frete-opcao-${lojaId}-${index}">
+                            <p><strong><span class="emoji">🚚</span> ${nomeServico}</strong></p>
+                            <p><span class="emoji">📅</span> Prazo estimado: ${prazo}</p>
+                            <p><strong><span class="emoji">💲</span> Preço: ${precoFormatado}</strong></p>
+                            ${!isNaN(preco) ?
+                                `<button class="btn-select"
+                                        onclick="selecionarFrete('${lojaId}', ${preco}, '${nomeServico}', '${prazo}', this)">
+                                    <span class="emoji">✅</span> Selecionar
+                                </button>`
+                                : '<p style="color: #888;">Opção indisponível</p>'
+                            }
+                        </div>
+                    `;
+                }).join('');
+            }
+            storeHtml += `</div>`;
+            resultDiv.innerHTML += storeHtml; // Append this store's results
+        }
+
+        /**
+         * Updates the selected shipping cost for a specific store and the UI.
+         * @param {string} lojaId - The ID of the store for which shipping is selected.
+         * @param {number} preco - The price of the selected shipping.
+         * @param {string} metodo - The name/method of the shipping service.
+         * @param {string} prazo - The estimated delivery time.
+         * @param {HTMLElement} element - The button that was clicked.
+         */
+        function selecionarFrete(lojaId, preco, metodo, prazo, element) {
+            // Remove selection highlight from other options within the SAME store group
+            const storeGroup = document.getElementById(`store-group-${lojaId}`);
+            if (storeGroup) {
+                storeGroup.querySelectorAll('.result-card').forEach(card => {
+                    card.classList.remove('selected-shipping');
+                });
+            }
+            // Add highlight to the selected card
             element.closest('.result-card').classList.add('selected-shipping');
 
-            freteSelecionado = preco; // Atualiza a variável global
-            console.log("Frete selecionado: R$", freteSelecionado.toFixed(2));
+            // Store the selected cost and details for this store
+            fretesSelecionados[lojaId] = preco;
+            detalhesFretesSelecionados[lojaId] = { custo: preco, metodo: metodo, prazo: prazo };
+            console.log(`Frete selecionado para Loja ${lojaId}: R$ ${preco.toFixed(2)}`);
 
-            // Mostra o preço final e o botão de checkout
-            document.getElementById('finalPriceContainer').style.display = 'block';
-            document.getElementById('checkoutBtn').style.display = 'block';
+            // Recalculate total shipping cost
+            totalFreteSelecionado = Object.values(fretesSelecionados).reduce((sum, cost) => sum + cost, 0);
+            console.log("Frete total selecionado atualizado:", totalFreteSelecionado.toFixed(2));
 
-            // Não salva mais o frete no Firebase aqui
-            // database.ref(`users/${firebaseUser.uid}/carrinho/frete`).set(preco); // REMOVIDO
+            // Update the final price display
+            atualizarPrecoFinal();
 
-            atualizarPrecoFinal(); // Recalcula e exibe o preço final
+            // Check if all stores have a selection (or calculation failed) to show checkout button
+            const allStoresHandled = Object.keys(produtosPorLoja).every(id => fretesSelecionados[id] !== undefined); // Check if entry exists
+            if (allStoresHandled) {
+                document.getElementById('finalPriceContainer').style.display = 'block';
+                document.getElementById('checkoutBtn').style.display = 'block';
+            } else {
+                 document.getElementById('finalPriceContainer').style.display = 'none';
+                 document.getElementById('checkoutBtn').style.display = 'none';
+            }
         }
 
         /**
-         * Atualiza o cálculo e a exibição do preço final (Subtotal + Frete).
+         * Updates the calculation and display of the final price (Subtotal + Total Shipping).
          */
         function atualizarPrecoFinal() {
-            const precoFinal = totalCarrinho + freteSelecionado;
+            const precoFinal = totalCarrinho + totalFreteSelecionado;
             const finalPriceSpan = document.getElementById('precoFinal');
             if (finalPriceSpan) {
                 finalPriceSpan.textContent = precoFinal.toFixed(2);
             }
-             console.log(`Preço final atualizado: Subtotal(${totalCarrinho.toFixed(2)}) + Frete(${freteSelecionado.toFixed(2)}) = ${precoFinal.toFixed(2)}`);
-
-            // Não salva mais o preço total no Firebase aqui
-            // database.ref(`users/${firebaseUser.uid}/carrinho/precototal`).set(precoFinal); // REMOVIDO
+             console.log(`Preço final atualizado: Subtotal(${totalCarrinho.toFixed(2)}) + Frete Total(${totalFreteSelecionado.toFixed(2)}) = ${precoFinal.toFixed(2)}`);
         }
 
         /**
-         * Redireciona ou inicia o processo de checkout.
+         * Proceeds to checkout: Saves selected shipping details and totals to Parse Cliente object.
          */
-        function prosseguirCheckout() {
-            // Verifica se um frete foi selecionado
-            if (freteSelecionado <= 0) {
-                alert("⚠️ Por favor, calcule e selecione uma opção de frete antes de prosseguir.");
+        async function prosseguirCheckout() {
+            // Check if shipping has been calculated and selected for all stores
+            const allStoresSelected = Object.keys(produtosPorLoja).every(id => detalhesFretesSelecionados[id] !== null || !produtosPorLoja[id].cepOrigem); // Allow skipping if CEP was invalid
+            if (!allStoresSelected) {
+                alert("⚠️ Por favor, calcule e selecione uma opção de frete para cada loja antes de prosseguir.");
                 return;
             }
-            // Verifica se o carrinho não está vazio
-             if (totalCarrinho <= 0) {
+            if (totalCarrinho <= 0) {
                  alert("⚠️ Seu carrinho está vazio. Adicione produtos antes de prosseguir.");
                  return;
-             }
+            }
 
-            console.log("Prosseguindo para checkout...");
-            // Aqui você pode:
-            // 1. Salvar os dados relevantes (itens, subtotal, frete, endereço)
-            //    em uma nova classe no Parse (ex: "Pedido") antes de redirecionar.
-            // 2. Passar os dados via localStorage/sessionStorage para a página de checkout.
-            // 3. Redirecionar para a página de checkout.
+            console.log("Prosseguindo para checkout... Salvando dados no Parse.");
+            const checkoutButton = document.getElementById('checkoutBtn');
+            checkoutButton.disabled = true;
+            checkoutButton.innerHTML = '<span class="emoji">⏳</span> Salvando...';
 
-            // Exemplo simples com localStorage (CUIDADO: localStorage tem limites e não é ideal para dados sensíveis)
-             try {
-                const checkoutData = {
-                     subtotal: totalCarrinho,
-                     frete: freteSelecionado,
-                     total: totalCarrinho + freteSelecionado,
-                     // Poderia adicionar IDs dos produtos e quantidades aqui se necessário na próxima página
-                     // itens: cliente.get('carrinhoclient') // Exemplo, buscaria o cliente novamente
-                     cepDestino: document.getElementById('cep_destino').value,
-                     endereco: {
+            const parseUser = Parse.User.current();
+            if (!parseUser) {
+                 alert("⚠️ Erro: Usuário não logado. Não é possível salvar.");
+                 checkoutButton.disabled = false;
+                 checkoutButton.innerHTML = '<span class="emoji">✅</span> Prosseguir para Checkout';
+                 return;
+            }
+
+            const Cliente = Parse.Object.extend("Cliente");
+            const query = new Parse.Query(Cliente);
+            query.equalTo("usuario", parseUser);
+
+            try {
+                const cliente = await query.first();
+                if (!cliente) {
+                    throw new Error("Objeto Cliente não encontrado para este usuário.");
+                }
+
+                // Prepare shipping details array
+                const shippingDetailsArray = Object.entries(detalhesFretesSelecionados)
+                    .filter(([lojaId, details]) => details !== null) // Only include selected ones
+                    .map(([lojaId, details]) => ({
+                        lojaId: lojaId,
+                        lojaNome: produtosPorLoja[lojaId]?.nome || 'Desconhecida', // Add store name for clarity
+                        custo: details.custo,
+                        metodo: details.metodo,
+                        prazo: details.prazo
+                    }));
+
+                // Data to save
+                const finalTotal = totalCarrinho + totalFreteSelecionado;
+                cliente.set("freteDetalhes", shippingDetailsArray); // Array of selected shipping details per store
+                cliente.set("freteTotal", totalFreteSelecionado); // Total shipping cost
+                cliente.set("subtotalProdutos", totalCarrinho); // Subtotal of products
+                cliente.set("precoFinalTotal", finalTotal); // Grand total
+                cliente.set("cepDestinoCheckout", document.getElementById('cep_destino').value); // Save destination CEP used
+                cliente.set("enderecoDestinoCheckout", { // Save destination address used
                          logradouro: document.getElementById('logradouro').value,
                          bairro: document.getElementById('bairro').value,
                          cidade: document.getElementById('cidade').value,
                          uf: document.getElementById('uf').value
-                     }
-                 };
-                 localStorage.setItem('checkoutData', JSON.stringify(checkoutData));
-                 console.log("Dados salvos no localStorage para checkout:", checkoutData);
-                 window.location.href = 'checkout.html'; // Redireciona
+                     });
 
-             } catch (e) {
-                 console.error("Erro ao salvar dados para checkout no localStorage:", e);
-                 alert("Ocorreu um erro ao preparar o checkout. Tente novamente.");
-             }
+                await cliente.save();
+                console.log("Dados do checkout salvos no objeto Cliente:", cliente.id);
+
+                // Clear localStorage if previously used (optional cleanup)
+                // localStorage.removeItem('checkoutData');
+
+                alert("✅ Dados do pedido salvos! Redirecionando para o checkout...");
+                window.location.href = 'checkout.html'; // Redirect to checkout page
+
+            } catch (error) {
+                console.error("Erro ao salvar dados do checkout no Parse:", error);
+                alert("❌ Ocorreu um erro ao salvar os dados do pedido: " + error.message + "\nTente novamente.");
+                checkoutButton.disabled = false;
+                checkoutButton.innerHTML = '<span class="emoji">✅</span> Prosseguir para Checkout';
+            }
         }
 
     </script>
