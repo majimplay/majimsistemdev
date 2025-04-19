@@ -48,10 +48,10 @@
         }
     </style>
     <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-     <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
+ <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+       <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
 </head>
 <body>
     <div class="profile-header">
@@ -94,7 +94,7 @@
         firebase.initializeApp(firebaseConfig);
           const app = firebase.initializeApp(firebaseConfig);
          const auth = firebase.auth();
-         const database = firebase.database();
+       //  const database = firebase.database();
 
 
              // Monitorar estado de autenticação
@@ -123,6 +123,11 @@
                 alert('Erro ao fazer logout: ' + err.message);
             });
         });
+
+
+
+
+        
     </script>
 </body>
 </html>
