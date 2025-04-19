@@ -71,25 +71,25 @@
         </div>
 
     <script>
-        // --- Configurations ---
+                // --- Configurations ---
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY", // Substitua pela sua chave
-            authDomain: "YOUR_AUTH_DOMAIN", // Substitua pelo seu domínio
-            databaseURL: "YOUR_DATABASE_URL", // Se precisar do DB para algo relacionado ao usuário
-            projectId: "YOUR_PROJECT_ID", // Substitua pelo seu ID
-            storageBucket: "YOUR_STORAGE_BUCKET", // Substitua
-            messagingSenderId: "YOUR_SENDER_ID", // Substitua
-            appId: "YOUR_APP_ID" // Substitua
+            apiKey: "AIzaSyDlUQbbTP29VqBVmzOGHhfc67R1DTRPwxg", // Sua chave
+            authDomain: "gitautenticatio.firebaseapp.com",
+            databaseURL: "https://gitautenticatio-default-rtdb.firebaseio.com", // Mantido para CEP
+            projectId: "gitautenticatio",
+            storageBucket: "gitautenticatio.appspot.com",
+            messagingSenderId: "21514234895",
+            appId: "1:21514234895:web:d34dc4c44baf586d2cc77a"
         };
 
-        // Initialize Firebase (Auth is essential)
+        // Initialize Firebase (Auth and DB for user CEP)
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
-        // const database = firebase.database(); // Uncomment if needed for user data sync
+        const database = firebase.database();
 
         // Initialize Parse
-        Parse.initialize("YOUR_PARSE_APP_ID", "YOUR_PARSE_JS_KEY"); // Substitua pelas suas chaves
-        Parse.serverURL = "YOUR_PARSE_SERVER_URL"; // Substitua pela sua URL
+        Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I"); // Suas chaves
+        Parse.serverURL = "https://parseapi.back4app.com/";
 
         // --- Global Variables ---
         let firebaseUser = null; // Firebase user object
