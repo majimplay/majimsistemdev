@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Login Header</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f5f5f5;
+        }
+        .profile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid #eee;
+        }
+        .profile-photo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #007BFF;
+            margin-right: 2rem;
+        }
+        .profile-info h1 {
+            margin: 0;
+            color: #333;
+        }
+        .profile-info p {
+            color: #666;
+            margin: 0.5rem 0;
+        }
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+    </style>
+    <!-- Firebase SDK -->
+ <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+       <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
+</head>
+<body>
+    <div class="profile-header">
+        <div style="display: flex; align-items: center;">
+            <img id="profilePhoto" class="profile-photo" src="avatar-padrao.jpeg" alt="Foto do Perfil">
+            <div class="profile-info">
+                <h1 id="userName">📱 Carregando...</h1>
+                <p id="userEmail"></p>
+                <p id="loginMethod"></p>
+            </div>
+        </div>
+        <button id="logoutBtn" class="btn btn-secondary">🚪 Sair</button>
+    </div>
+
+    <!-- Resto da página em branco -->
+
+  <!-- Conteúdo do Teste -->
+        <div class="teste">
+            <p>ID do usuárioParse: <span id="currentUser">Carregando...</span></p>
+            <label for="campo1">Campo1:</label>
+            <input type="text" id="campo1" placeholder="Digite o valor para campo1">
+            <button onclick="registrarDados()">Registrar</button>
+        </div>
+    
+    <script>
+        // Configurações Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyDlUQbbTP29VqBVmzOGHhfc67R1DTRPwxg",
+            authDomain: "gitautenticatio.firebaseapp.com",
+            projectId: "gitautenticatio",
+            storageBucket: "gitautenticatio.appspot.com",
+            messagingSenderId: "21514234895",
+            appId: "1:21514234895:web:d34dc4c44baf586d2cc77a"
+        };
+
+        // Configurações Parse
+        Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
+        Parse.serverURL = "https://parseapi.back4app.com/";
+
+        // Inicializar Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        let currentUser = null;
+
+        // Monitorar estado de autenticação
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                currentUser = user;
+                atualizarCabecalho();
+                document.getElementById('currentUser').textContent = user.uid;
+            } else {
+                window.location.href = 'index.html';
+            }
+        });
+
+        // Atualizar cabeçalho
+        function atualizarCabecalho() {
+            document.getElementById('profilePhoto').src = currentUser.photoURL || 'imagens/avatar-padrao.jpg';
+            document.getElementById('userName').textContent = '👤 ' + (currentUser.displayName || 'Usuário');
+            document.getElementById('userEmail').textContent = '📧 ' + currentUser.email;
+        }
+
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            auth.signOut().then(() => {
+                window.location.href = 'index.html';
+            }).catch(err => {
+                alert('Erro ao fazer logout: ' + err.message);
+            });
+        });
+
+        // Registrar dados no Parse
+        async function registrarDados() {
+            const campo1 = document.getElementById('campo1').value;
+            
+            if (!campo1) {
+                alert('Por favor preencha o campo!');
+                return;
+            }
+
+            try {
+                const Teste = Parse.Object.extend("Teste");
+                const novoRegistro = new Teste();
+                
+                novoRegistro.set("campo1", campo1);
+                novoRegistro.set("userUID", currentUser.uid);
+                
+                await novoRegistro.save();
+                alert('Dados registrados com sucesso!');
+                document.getElementById('campo1').value = ''; // Limpar campo
+            } catch (error) {
+                console.error('Erro ao salvar:', error);
+                alert(`Erro: ${error.message}`);
+            }
+        }
+
+    </script>
+</body>
+</html>
