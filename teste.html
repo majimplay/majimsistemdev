@@ -2,12 +2,12 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>🛒 Base Sincronização - Multi-Loja (Corrigido)</title>
+    <title>🛒 Base Sincronização - Multi-Loja com Recompensas</title>
     <style>
-        /* Estilos CSS (mantidos do original) */
+        /* Estilos CSS (mantidos e adicionados) */
         body {
             font-family: 'Arial', sans-serif;
-            margin: 2rem; /* Added margin for better visibility */
+            margin: 2rem;
             padding: 0;
             background: #f5f5f5;
         }
@@ -23,40 +23,56 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1rem; /* Reduced margin */
-            padding-bottom: 1rem; /* Reduced padding */
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
             border-bottom: 2px solid #eee;
+            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+        }
+        .profile-left {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem; /* Add margin if wraps */
         }
         .profile-photo {
-            width: 80px; /* Smaller photo */
+            width: 80px;
             height: 80px;
             border-radius: 50%;
             object-fit: cover;
             border: 3px solid #007BFF;
             margin-right: 1rem;
         }
-        .profile-info h1 { margin: 0; color: #333; font-size: 1.2em; } /* Smaller title */
+        .profile-info h1 { margin: 0; color: #333; font-size: 1.2em; }
         .profile-info p { color: #666; margin: 0.2rem 0; font-size: 0.9em; }
-        .user-details {
-            margin-top: 1rem;
-            padding: 1rem;
+        .profile-money {
+            margin-left: 1.5rem; /* Space between info and money */
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #28a745; /* Green color for money */
+        }
+        .user-details, .daily-reward {
+            margin-top: 1.5rem; /* Increased margin */
+            padding: 1.5rem; /* Increased padding */
             background-color: #f8f9fa;
             border-radius: 8px;
             border: 1px solid #eee;
         }
-        .user-details h3 {
+        .user-details h3, .daily-reward h3 {
             margin-top: 0;
-            margin-bottom: 0.5rem;
+            margin-bottom: 1rem; /* Increased margin */
             font-size: 1.1em;
             color: #0056b3;
+            border-bottom: 1px solid #ddd; /* Add separator */
+            padding-bottom: 0.5rem; /* Space below title */
         }
          .user-details p {
-            margin: 0.3rem 0;
+            margin: 0.4rem 0; /* Increased margin */
             font-size: 0.95em;
-        }
+         }
          .user-details span.label {
             font-weight: bold;
             color: #555;
+            display: inline-block; /* Ensure alignment */
+            min-width: 100px; /* Adjust as needed */
          }
           .user-details span.value {
             color: #333;
@@ -65,63 +81,80 @@
              font-style: italic;
          }
         .btn {
-            padding: 0.6rem 1.2rem; /* Smaller button */
+            padding: 0.7rem 1.4rem; /* Slightly larger button */
             border: none; border-radius: 6px; cursor: pointer;
             font-weight: 600; transition: all 0.3s ease; white-space: nowrap;
-            font-size: 0.9em;
+            font-size: 0.95em; /* Slightly larger font */
+            margin-left: 10px; /* Add some margin between buttons */
         }
         .btn-secondary { background: #6c757d; color: white; }
+        .btn-secondary:hover { background: #5a6268; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-primary:hover { background: #0056b3; }
+        .btn:disabled {
+            background-color: #cccccc;
+            color: #666666;
+            cursor: not-allowed;
+        }
         .emoji { margin-right: 8px; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-      .day-reward {
-    padding: 0.5rem;
-    background: #e9ecef;
-    border-radius: 5px;
-    text-align: center;
-    font-size: 0.85em;
-}
 
-.day-reward.active {
-    background: #c3e6cb;
-    border: 2px solid #28a745;
-}
+        /* Daily Reward Styles */
+        .reward-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1rem;
+        }
+        .reward-table th, .reward-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+            font-size: 0.9em;
+        }
+        .reward-table th {
+            background-color: #e9ecef;
+            color: #495057;
+        }
+        .reward-status {
+            margin-top: 0.5rem;
+            font-style: italic;
+            color: #666;
+        }
 
-#userGrana .value {
-    color: #28a745;
-    font-size: 1.2em;
-}
-
-#rewardStatus {
-    color: #6c757d;
-    font-size: 0.9em;
-}
+        @media (max-width: 600px) { /* Adjust breakpoint as needed */
+            .profile-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .profile-money {
+                margin-left: 0;
+                margin-top: 0.5rem; /* Add space when stacked */
+            }
+            .profile-header > button { /* Logout button */
+                 margin-top: 1rem;
+                 align-self: flex-start; /* Align button left */
+            }
+        }
     </style>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script> <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
+    <script src="[https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js](https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js)"></script>
+    <script src="[https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js](https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js)"></script>
+    <script src="[https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js](https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js)"></script>
+    <script src="[https://unpkg.com/parse/dist/parse.min.js](https://unpkg.com/parse/dist/parse.min.js)"></script>
 </head>
 <body>
 
     <div class="container">
-      <div class="profile-header">
-    <div style="display: flex; align-items: center;">
-        <img id="profilePhoto" class="profile-photo" src="https://placehold.co/80x80/eee/ccc?text=User" alt="Foto do Perfil">
-        <div class="profile-info">
-            <h1 id="userName"><span class="emoji">👤</span> Carregando...</h1>
-            <p id="userEmail"></p>
-            <!-- Novo elemento de grana -->
-            <p id="userGrana" style="margin-top: 0.5rem; font-weight: bold;">
-                <span class="emoji">💳</span> Grana: <span class="value">0</span>
-            </p>
-        </div>
-    </div>
-    <div>
-        <button id="claimBtn" class="btn btn-secondary" style="margin-bottom: 0.5rem;">
-            <span class="emoji">🎁</span> Resgatar Diário
-        </button>
-        <button id="logoutBtn" class="btn btn-secondary"><span class="emoji">🚪</span> Sair</button>
-    </div>
-</div>
+        <div class="profile-header">
+            <div class="profile-left">
+                <img id="profilePhoto" class="profile-photo" src="[https://placehold.co/80x80/eee/ccc?text=User](https://placehold.co/80x80/eee/ccc?text=User)" alt="Foto do Perfil">
+                <div class="profile-info">
+                    <h1 id="userName"><span class="emoji">👤</span> Carregando...</h1>
+                    <p id="userEmail"></p>
+                </div>
+                 <div id="userMoney" class="profile-money">
+                    <span class="emoji">💳</span> Grana: <span id="moneyValue">💸💰 --</span>
+                </div>
+            </div>
+            <button id="logoutBtn" class="btn btn-secondary"><span class="emoji">🚪</span> Sair</button>
         </div>
 
         <div class="user-details">
@@ -130,154 +163,186 @@
             <p><span class="label">Parse User:</span> <span id="parseUserInfo" class="value">Aguardando login...</span></p>
             <p><span class="label">Status Loja:</span> <span id="lojaStatus" class="value status-loja">Verificando...</span></p>
         </div>
-<div class="user-details" style="margin-top: 1rem;">
-    <h3><span class="emoji">📅</span> Recompensa Diária</h3>
-    <div id="rewardTable" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.5rem; margin-top: 1rem;">
-        <div class="day-reward">Dia 1<br>💸10</div>
-        <div class="day-reward">Dia 2<br>💸11</div>
-        <div class="day-reward">Dia 3<br>💸11</div>
-        <div class="day-reward">Dia 4<br>💸12</div>
-        <div class="day-reward">Dia 5<br>💸15</div>
-        <div class="day-reward">Dia 6<br>💸16</div>
-        <div class="day-reward">Dia 7<br>💸20</div>
-    </div>
-    <p id="rewardStatus" style="margin-top: 1rem; font-style: italic;"></p>
-</div>
+
+         <div class="daily-reward">
+            <h3><span class="emoji">🎁</span> Recompensa Diária</h3>
+            <p>Faça login todos os dias para ganhar recompensas crescentes!</p>
+            <table class="reward-table">
+                <thead>
+                    <tr>
+                        <th>Dia Consecutivo</th>
+                        <th>Recompensa (Grana)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>1</td><td>10</td></tr>
+                    <tr><td>2</td><td>11</td></tr>
+                    <tr><td>3</td><td>11</td></tr>
+                    <tr><td>4</td><td>12</td></tr>
+                    <tr><td>5</td><td>15</td></tr>
+                    <tr><td>6</td><td>16</td></tr>
+                    <tr><td>7</td><td>20</td></tr>
+                </tbody>
+            </table>
+            <button id="claimRewardBtn" class="btn btn-primary" disabled><span class="emoji">🖐️</span> Resgatar Recompensa</button>
+            <p id="rewardStatus" class="reward-status">Verificando status da recompensa...</p>
+        </div>
+
     </div>
 
     <script>
         // --- Configurations ---
-        // IMPORTANTE: Substitua pelas suas chaves reais!
         const firebaseConfig = {
-            apiKey: "AIzaSyDlUQbbTP29VqBVmzOGHhfc67R1DTRPwxg", // Sua chave
-            authDomain: "gitautenticatio.firebaseapp.com",
-            databaseURL: "https://gitautenticatio-default-rtdb.firebaseio.com", // Necessário se usar database()
-            projectId: "gitautenticatio",
-            storageBucket: "gitautenticatio.appspot.com",
-            messagingSenderId: "21514234895",
-            appId: "1:21514234895:web:d34dc4c44baf586d2cc77a"
+            apiKey: "YOUR_FIREBASE_API_KEY", // Substitua pela sua chave
+            authDomain: "YOUR_FIREBASE_AUTH_DOMAIN",
+            databaseURL: "YOUR_FIREBASE_DATABASE_URL",
+            projectId: "YOUR_FIREBASE_PROJECT_ID",
+            storageBucket: "YOUR_FIREBASE_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_FIREBASE_MESSAGING_SENDER_ID",
+            appId: "YOUR_FIREBASE_APP_ID"
         };
 
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
-        const database = firebase.database(); // Agora deve funcionar
+        const database = firebase.database();
 
-        // Initialize Parse
-        // IMPORTANTE: Substitua pelas suas chaves reais!
-        Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I"); // Suas chaves
-        Parse.serverURL = "https://parseapi.back4app.com/";
+        Parse.initialize("YOUR_PARSE_APP_ID", "YOUR_PARSE_JS_KEY"); // Substitua pelas suas chaves
+        Parse.serverURL = "YOUR_PARSE_SERVER_URL";
 
         // --- Elementos da UI ---
         const profilePhotoElem = document.getElementById('profilePhoto');
         const userNameElem = document.getElementById('userName');
         const userEmailElem = document.getElementById('userEmail');
+        const moneyValueElem = document.getElementById('moneyValue'); // Money display
         const firebaseUserInfoElem = document.getElementById('firebaseUserInfo');
         const parseUserInfoElem = document.getElementById('parseUserInfo');
         const lojaStatusElem = document.getElementById('lojaStatus');
         const logoutButton = document.getElementById('logoutBtn');
+        const claimRewardBtn = document.getElementById('claimRewardBtn'); // Reward button
+        const rewardStatusElem = document.getElementById('rewardStatus'); // Reward status message
 
         // --- Global Variables ---
         let firebaseUser = null; // Firebase user object
-let parseUser = null;
-const claimButton = document.getElementById('claimBtn');
+        let currentParseUser = null; // Parse user object
+
+        // --- Daily Reward Configuration ---
+        const dailyRewards = [0, 10, 11, 11, 12, 15, 16, 20]; // Index 0 unused, days 1-7
+
         // --- Event Listeners and Initialization ---
 
-        // Monitor Firebase auth state (Essential for Sync/Login)
         auth.onAuthStateChanged(async user => {
             if (user) {
                 firebaseUser = user;
                 console.log("Firebase user logged in:", firebaseUser.uid);
-                atualizarCabecalhoUI(firebaseUser); // Atualiza cabeçalho
-                atualizarDetalhesFirebaseUI(firebaseUser); // Atualiza detalhes Firebase
+                atualizarCabecalhoUI(firebaseUser);
+                atualizarDetalhesFirebaseUI(firebaseUser);
 
-          parseUser = Parse.User.current();
-        await atualizarGranaUI();
-        await verificarRecompensaDisponivel();
-              
-       
-                if (parseUser) {
-                    console.log("Parse user logged in:", parseUser.id);
-                    atualizarDetalhesParseUI(parseUser); // Atualiza detalhes Parse
-                    await verificarLojaParse(parseUser); // Verifica e atualiza status da loja
-
-                  
+                currentParseUser = Parse.User.current(); // Get current Parse user
+                if (currentParseUser) {
+                    console.log("Parse user logged in:", currentParseUser.id);
+                    await currentParseUser.fetch(); // Fetch latest data including 'grana', 'lastClaimed', 'streak'
+                    console.log("Parse user data fetched:", currentParseUser.attributes);
+                    atualizarDetalhesParseUI(currentParseUser);
+                    await verificarLojaParse(currentParseUser);
+                    atualizarGranaUI(currentParseUser); // Update money display
+                    await verificarStatusRecompensa(currentParseUser); // Check reward status
                 } else {
                     console.warn("Firebase user logged in, but Parse.User.current() is null!");
                     parseUserInfoElem.textContent = 'Erro: Usuário Parse não sincronizado.';
                     lojaStatusElem.textContent = 'Não verificado (Erro Parse)';
-                    // Considerar tentar login/link Parse aqui se necessário
+                    moneyValueElem.textContent = '💸💰 --';
+                    rewardStatusElem.textContent = 'Faça login com Parse para ver recompensas.';
+                    claimRewardBtn.disabled = true;
                 }
 
             } else {
                 firebaseUser = null;
+                currentParseUser = null; // Clear Parse user on logout
                 console.log("No Firebase user logged in.");
-                limparUI(); // Limpa toda a UI
-                // Poderia redirecionar para login: window.location.href = 'login.html';
+                limparUI();
             }
         });
-
-        // Logout Button
 
         if (logoutButton) {
             logoutButton.addEventListener('click', async () => {
                 try {
-                    await auth.signOut(); // Logout Firebase
-                    await Parse.User.logOut(); // Logout Parse
+                    await auth.signOut();
+                    await Parse.User.logOut();
                     console.log("Logout successful.");
                     limparUI();
-                    // window.location.href = 'login.html'; // Opcional: redirecionar
                 } catch (error) {
                     console.error('Error during logout:', error);
                     alert('❌ Error logging out: ' + error.message);
                 }
             });
-        } else {
-            console.warn("Logout button not found.");
         }
-    // botao de resgate 
-claimButton.addEventListener('click', async () => {
-    try {
-        const result = await Parse.Cloud.run('claimDailyReward');
-        await atualizarGranaUI();
-        await verificarRecompensaDisponivel();
-        alert(`🎉 Recompensa de 💸${result.amount} resgatada!`);
-    } catch (error) {
-        alert('❌ Erro: ' + error.message);
-    }
-});
+
+        // Claim Reward Button Listener
+        if (claimRewardBtn) {
+            claimRewardBtn.addEventListener('click', async () => {
+                if (!currentParseUser) {
+                    alert("Erro: Usuário Parse não encontrado.");
+                    return;
+                }
+                claimRewardBtn.disabled = true; // Disable button immediately
+                rewardStatusElem.textContent = 'Processando resgate...';
+
+                try {
+                    // Call a Parse Cloud Code function for secure reward claiming
+                    // This is the RECOMMENDED approach
+                    // const result = await Parse.Cloud.run("claimDailyReward");
+                    // console.log("Cloud function result:", result);
+                    // await currentParseUser.fetch(); // Re-fetch user data after cloud function updates it
+                    // atualizarGranaUI(currentParseUser);
+                    // rewardStatusElem.textContent = `✅ ${result.message}`; // Use message from cloud function
+
+                    // --- Client-Side Fallback Logic (Less Secure) ---
+                    // This part runs if you don't have the Cloud Code function yet.
+                    // It's less secure as dates/times can be manipulated client-side.
+                    console.warn("Executing reward logic client-side. Consider using Parse Cloud Code for security.");
+
+                    const { canClaim, nextStreak } = await checkCanClaimClientSide(currentParseUser);
+
+                    if (canClaim) {
+                        const rewardAmount = dailyRewards[nextStreak];
+                        const currentGrana = currentParseUser.get("grana") || 0;
+                        const newGrana = currentGrana + rewardAmount;
+
+                        currentParseUser.set("grana", newGrana);
+                        currentParseUser.set("lastClaimed", new Date()); // Set last claimed to NOW
+                        currentParseUser.set("loginStreak", nextStreak);
+
+                        await currentParseUser.save();
+                        console.log(`Reward claimed! Streak: ${nextStreak}, Amount: ${rewardAmount}, New Grana: ${newGrana}`);
+
+                        atualizarGranaUI(currentParseUser); // Update money display
+                        rewardStatusElem.textContent = `✅ Recompensa de ${rewardAmount} grana resgatada! Volte amanhã.`;
+                        claimRewardBtn.disabled = true; // Keep disabled after successful claim
+
+                    } else {
+                         // This case should ideally be caught by the initial check, but handle anyway
+                        rewardStatusElem.textContent = '❌ Você já resgatou a recompensa hoje ou houve um erro.';
+                        claimRewardBtn.disabled = true;
+                    }
+                     // --- End Client-Side Fallback ---
+
+
+                } catch (error) {
+                    console.error("Erro ao resgatar recompensa:", error);
+                    rewardStatusElem.textContent = `⚠️ Erro ao resgatar: ${error.message}`;
+                    // Re-enable button only if the error wasn't related to already claimed today
+                     await verificarStatusRecompensa(currentParseUser); // Re-check status to potentially re-enable button
+                }
+            });
+        }
 
         // --- UI Update Functions ---
 
-async function atualizarGranaUI() {
-    if (!parseUser) return;
-    await parseUser.fetch(); // Atualiza dados do servidor
-    const grana = parseUser.get('grana') || 0;
-    document.querySelector('#userGrana .value').textContent = grana;
-}
-      async function verificarRecompensaDisponivel() {
-    const result = await Parse.Cloud.run('checkDailyReward');
-    const statusElem = document.getElementById('rewardStatus');
-    
-    if (result.canClaim) {
-        statusElem.innerHTML = `Pronto para resgatar! Dia ${result.streak}: 💸${result.nextAmount}`;
-        claimButton.disabled = false;
-    } else {
-        statusElem.innerHTML = `Volte amanhã! Seu streak: ${result.streak} dias`;
-        claimButton.disabled = true;
-    }
-    
-    // Atualiza destaque do dia
-    document.querySelectorAll('.day-reward').forEach((el, index) => {
-        el.classList.toggle('active', index === result.streak - 1);
-    });
-}
-      
         function atualizarCabecalhoUI(fbUser) {
             if (!fbUser) return;
-            if (profilePhotoElem) profilePhotoElem.src = fbUser.photoURL || 'https://placehold.co/80x80/eee/ccc?text=:)';
-            if (userNameElem) userNameElem.textContent = '👤 ' + (fbUser.displayName || fbUser.email || 'Usuário'); // Mostra nome ou email
-            if (userEmailElem) userEmailElem.textContent = '📧 ' + fbUser.email;
+            if (profilePhotoElem) profilePhotoElem.src = fbUser.photoURL || '[https://placehold.co/80x80/eee/ccc?text=](https://placehold.co/80x80/eee/ccc?text=):)';
+            if (userNameElem) userNameElem.innerHTML = `<span class="emoji">👤</span> ${fbUser.displayName || fbUser.email || 'Usuário'}`; // Use innerHTML for emoji
+            if (userEmailElem) userEmailElem.innerHTML = `<span class="emoji">📧</span> ${fbUser.email}`;
         }
 
         function atualizarDetalhesFirebaseUI(fbUser) {
@@ -290,47 +355,47 @@ async function atualizarGranaUI() {
          function atualizarDetalhesParseUI(pUser) {
              if (!pUser) return;
              if (parseUserInfoElem) {
-                  // Use get("username") ou outro campo relevante como 'name' ou 'email'
                  const parseName = pUser.get("username") || pUser.get("name") || pUser.get("email") || '(não definido)';
                  parseUserInfoElem.textContent = `Nome: ${parseName}, ID: ${pUser.id}`;
              }
          }
 
+        // Update money display
+        function atualizarGranaUI(pUser) {
+            if (!pUser || !moneyValueElem) return;
+            const grana = pUser.get("grana") || 0; // Default to 0 if undefined
+            moneyValueElem.textContent = `💸💰 ${grana}`;
+        }
+
+
         function limparUI() {
-            if (profilePhotoElem) profilePhotoElem.src = 'https://placehold.co/80x80/eee/ccc?text=?';
-            if (userNameElem) userNameElem.textContent = '👤 Não conectado';
+            if (profilePhotoElem) profilePhotoElem.src = '[https://placehold.co/80x80/eee/ccc?text=](https://placehold.co/80x80/eee/ccc?text=)?';
+            if (userNameElem) userNameElem.innerHTML = '<span class="emoji">👤</span> Não conectado';
             if (userEmailElem) userEmailElem.textContent = '';
+            if (moneyValueElem) moneyValueElem.textContent = '💸💰 --';
             if (firebaseUserInfoElem) firebaseUserInfoElem.textContent = 'Desconectado';
             if (parseUserInfoElem) parseUserInfoElem.textContent = 'Desconectado';
             if (lojaStatusElem) lojaStatusElem.textContent = 'Desconectado';
+            if (rewardStatusElem) rewardStatusElem.textContent = 'Desconectado';
+            if (claimRewardBtn) claimRewardBtn.disabled = true;
         }
 
         // --- Parse Logic Functions ---
 
-        /**
-         * Verifica se o usuário Parse logado tem uma loja associada na classe 'Loja'.
-         * Atualiza o elemento lojaStatusElem na UI.
-         * @param {Parse.User} parseUser - O objeto Parse.User logado.
-         */
         async function verificarLojaParse(parseUser) {
+            // (Same as your original function - kept for context)
             if (!parseUser || !lojaStatusElem) return;
-
-            lojaStatusElem.textContent = 'Verificando loja...'; // Estado inicial
-
-            const Loja = Parse.Object.extend("Loja"); // Nome da sua classe Parse para lojas
+            lojaStatusElem.textContent = 'Verificando loja...';
+            const Loja = Parse.Object.extend("Loja");
             const query = new Parse.Query(Loja);
-            query.equalTo("dono", parseUser); // Filtra pela coluna 'dono' que é um ponteiro para _User
-            query.select("nome"); // Seleciona apenas o nome da loja para otimizar (use o nome real do seu campo)
-
+            query.equalTo("dono", parseUser);
+            query.select("nome");
             try {
-                const loja = await query.first(); // Tenta encontrar a primeira loja associada
-
+                const loja = await query.first();
                 if (loja) {
-                    const nomeLoja = loja.get("nome"); // Pega o nome da loja (use o nome real do seu campo)
-                    console.log(`Loja encontrada para o usuário ${parseUser.id}: ${nomeLoja}`);
+                    const nomeLoja = loja.get("nome");
                     lojaStatusElem.textContent = `✅ Sim, possui loja: ${nomeLoja}`;
                 } else {
-                    console.log(`Nenhuma loja encontrada para o usuário ${parseUser.id}.`);
                     lojaStatusElem.textContent = '❌ Não possui loja registrada.';
                 }
             } catch (error) {
@@ -338,6 +403,98 @@ async function atualizarGranaUI() {
                 lojaStatusElem.textContent = '⚠️ Erro ao verificar loja.';
             }
         }
+
+
+        // --- Daily Reward Logic (Client-Side) ---
+
+        /**
+         * Checks if the user can claim the daily reward based on the last claim date and streak.
+         * This function runs client-side and is less secure than a server-side check.
+         * @param {Parse.User} pUser - The current Parse user object.
+         * @returns {Promise<{canClaim: boolean, nextStreak: number}>} - Object indicating if claim is possible and what the next streak day would be.
+         */
+        async function checkCanClaimClientSide(pUser) {
+            const lastClaimedDate = pUser.get("lastClaimed"); // Get the Date object from Parse
+            const currentStreak = pUser.get("loginStreak") || 0; // Default to 0
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()); // Start of today
+
+            let canClaim = false;
+            let nextStreak = 1; // Default to day 1
+
+            if (lastClaimedDate instanceof Date) {
+                const lastClaimDay = new Date(lastClaimedDate.getFullYear(), lastClaimedDate.getMonth(), lastClaimedDate.getDate());
+                const yesterday = new Date(today);
+                yesterday.setDate(today.getDate() - 1); // Start of yesterday
+
+                console.log("Last Claim Date:", lastClaimedDate);
+                console.log("Last Claim Day (start):", lastClaimDay);
+                console.log("Today (start):", today);
+                console.log("Yesterday (start):", yesterday);
+
+                if (lastClaimDay.getTime() < today.getTime()) { // Hasn't claimed today
+                    canClaim = true;
+                     // Check if the last claim was yesterday to continue the streak
+                    if (lastClaimDay.getTime() === yesterday.getTime()) {
+                         nextStreak = (currentStreak % 7) + 1; // Continue streak, wrap around after 7
+                    } else {
+                         // Missed a day or more, reset streak
+                         nextStreak = 1;
+                    }
+                } else {
+                    // Already claimed today
+                    canClaim = false;
+                    nextStreak = currentStreak; // Keep current streak, but can't claim
+                }
+            } else {
+                 // Never claimed before
+                canClaim = true;
+                nextStreak = 1;
+            }
+
+            console.log(`Check Result: canClaim=${canClaim}, nextStreak=${nextStreak}`);
+            return { canClaim, nextStreak };
+        }
+
+
+        /**
+         * Updates the reward button and status message based on claim eligibility.
+         * @param {Parse.User} pUser - The current Parse user object.
+         */
+        async function verificarStatusRecompensa(pUser) {
+            if (!pUser || !claimRewardBtn || !rewardStatusElem) return;
+
+            claimRewardBtn.disabled = true; // Disable initially
+            rewardStatusElem.textContent = 'Verificando status...';
+
+            try {
+                const { canClaim, nextStreak } = await checkCanClaimClientSide(pUser);
+
+                if (canClaim) {
+                    const rewardAmount = dailyRewards[nextStreak];
+                    rewardStatusElem.textContent = `🎁 Pronto para resgatar a recompensa do Dia ${nextStreak} (${rewardAmount} grana)!`;
+                    claimRewardBtn.disabled = false; // Enable claim button
+                } else {
+                    // Already claimed today
+                     const today = new Date();
+                     const tomorrow = new Date(today);
+                     tomorrow.setDate(today.getDate() + 1);
+                     tomorrow.setHours(0, 0, 0, 0); // Start of tomorrow
+
+                     const timeUntilTomorrow = tomorrow.getTime() - today.getTime();
+                     const hours = Math.floor(timeUntilTomorrow / (1000 * 60 * 60));
+                     const minutes = Math.floor((timeUntilTomorrow % (1000 * 60 * 60)) / (1000 * 60));
+
+                    rewardStatusElem.textContent = `✅ Recompensa de hoje já resgatada. Próxima em aprox. ${hours}h ${minutes}m.`;
+                    claimRewardBtn.disabled = true;
+                }
+            } catch (error) {
+                 console.error("Erro ao verificar status da recompensa:", error);
+                 rewardStatusElem.textContent = '⚠️ Erro ao verificar status da recompensa.';
+                 claimRewardBtn.disabled = true;
+            }
+        }
+
 
     </script>
 </body>
