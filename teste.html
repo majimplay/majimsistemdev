@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>🛒 Base Sincronização - Multi-Loja (Corrigido)</title>
+    <style>
+        /* Estilos CSS (mantidos do original) */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 2rem; /* Added margin for better visibility */
+            padding: 0;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+        }
+        .profile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem; /* Reduced margin */
+            padding-bottom: 1rem; /* Reduced padding */
+            border-bottom: 2px solid #eee;
+        }
+        .profile-photo {
+            width: 80px; /* Smaller photo */
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #007BFF;
+            margin-right: 1rem;
+        }
+        .profile-info h1 { margin: 0; color: #333; font-size: 1.2em; } /* Smaller title */
+        .profile-info p { color: #666; margin: 0.2rem 0; font-size: 0.9em; }
+        .user-details {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #eee;
+        }
+        .user-details h3 {
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+            font-size: 1.1em;
+            color: #0056b3;
+        }
+         .user-details p {
+            margin: 0.3rem 0;
+            font-size: 0.95em;
+        }
+         .user-details span.label {
+            font-weight: bold;
+            color: #555;
+         }
+          .user-details span.value {
+            color: #333;
+         }
+         .user-details span.status-loja {
+             font-style: italic;
+         }
+        .btn {
+            padding: 0.6rem 1.2rem; /* Smaller button */
+            border: none; border-radius: 6px; cursor: pointer;
+            font-weight: 600; transition: all 0.3s ease; white-space: nowrap;
+            font-size: 0.9em;
+        }
+        .btn-secondary { background: #6c757d; color: white; }
+        .emoji { margin-right: 8px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+      .day-reward {
+    padding: 0.5rem;
+    background: #e9ecef;
+    border-radius: 5px;
+    text-align: center;
+    font-size: 0.85em;
+}
+
+.day-reward.active {
+    background: #c3e6cb;
+    border: 2px solid #28a745;
+}
+
+#userGrana .value {
+    color: #28a745;
+    font-size: 1.2em;
+}
+
+#rewardStatus {
+    color: #6c757d;
+    font-size: 0.9em;
+}
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script> <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
+</head>
+<body>
+
+    <div class="container">
+      <div class="profile-header">
+    <div style="display: flex; align-items: center;">
+        <img id="profilePhoto" class="profile-photo" src="https://placehold.co/80x80/eee/ccc?text=User" alt="Foto do Perfil">
+        <div class="profile-info">
+            <h1 id="userName"><span class="emoji">👤</span> Carregando...</h1>
+            <p id="userEmail"></p>
+            <!-- Novo elemento de grana -->
+            <p id="userGrana" style="margin-top: 0.5rem; font-weight: bold;">
+                <span class="emoji">💳</span> Grana: <span class="value">0</span>
+            </p>
+        </div>
+    </div>
+    <div>
+        <button id="claimBtn" class="btn btn-secondary" style="margin-bottom: 0.5rem;">
+            <span class="emoji">🎁</span> Resgatar Diário
+        </button>
+        <button id="logoutBtn" class="btn btn-secondary"><span class="emoji">🚪</span> Sair</button>
+    </div>
+</div>
+        </div>
+
+        <div class="user-details">
+            <h3><span class="emoji">🆔</span> Detalhes da Conta</h3>
+            <p><span class="label">Firebase User:</span> <span id="firebaseUserInfo" class="value">Aguardando login...</span></p>
+            <p><span class="label">Parse User:</span> <span id="parseUserInfo" class="value">Aguardando login...</span></p>
+            <p><span class="label">Status Loja:</span> <span id="lojaStatus" class="value status-loja">Verificando...</span></p>
+        </div>
+<div class="user-details" style="margin-top: 1rem;">
+    <h3><span class="emoji">📅</span> Recompensa Diária</h3>
+    <div id="rewardTable" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.5rem; margin-top: 1rem;">
+        <div class="day-reward">Dia 1<br>💸10</div>
+        <div class="day-reward">Dia 2<br>💸11</div>
+        <div class="day-reward">Dia 3<br>💸11</div>
+        <div class="day-reward">Dia 4<br>💸12</div>
+        <div class="day-reward">Dia 5<br>💸15</div>
+        <div class="day-reward">Dia 6<br>💸16</div>
+        <div class="day-reward">Dia 7<br>💸20</div>
+    </div>
+    <p id="rewardStatus" style="margin-top: 1rem; font-style: italic;"></p>
+</div>
+    </div>
+
+    <script>
+        // --- Configurations ---
+        // IMPORTANTE: Substitua pelas suas chaves reais!
+        const firebaseConfig = {
+            apiKey: "AIzaSyDlUQbbTP29VqBVmzOGHhfc67R1DTRPwxg", // Sua chave
+            authDomain: "gitautenticatio.firebaseapp.com",
+            databaseURL: "https://gitautenticatio-default-rtdb.firebaseio.com", // Necessário se usar database()
+            projectId: "gitautenticatio",
+            storageBucket: "gitautenticatio.appspot.com",
+            messagingSenderId: "21514234895",
+            appId: "1:21514234895:web:d34dc4c44baf586d2cc77a"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database(); // Agora deve funcionar
+
+        // Initialize Parse
+        // IMPORTANTE: Substitua pelas suas chaves reais!
+        Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I"); // Suas chaves
+        Parse.serverURL = "https://parseapi.back4app.com/";
+
+        // --- Elementos da UI ---
+        const profilePhotoElem = document.getElementById('profilePhoto');
+        const userNameElem = document.getElementById('userName');
+        const userEmailElem = document.getElementById('userEmail');
+        const firebaseUserInfoElem = document.getElementById('firebaseUserInfo');
+        const parseUserInfoElem = document.getElementById('parseUserInfo');
+        const lojaStatusElem = document.getElementById('lojaStatus');
+        const logoutButton = document.getElementById('logoutBtn');
+
+        // --- Global Variables ---
+        let firebaseUser = null; // Firebase user object
+let parseUser = null;
+const claimButton = document.getElementById('claimBtn');
+        // --- Event Listeners and Initialization ---
+
+        // Monitor Firebase auth state (Essential for Sync/Login)
+        auth.onAuthStateChanged(async user => {
+            if (user) {
+                firebaseUser = user;
+                console.log("Firebase user logged in:", firebaseUser.uid);
+                atualizarCabecalhoUI(firebaseUser); // Atualiza cabeçalho
+                atualizarDetalhesFirebaseUI(firebaseUser); // Atualiza detalhes Firebase
+
+        parseUser = await Parse.User.currentAsync();
+        await atualizarGranaUI();
+        await verificarRecompensaDisponivel();
+              
+                const parseUser = Parse.User.current();
+                if (parseUser) {
+                    console.log("Parse user logged in:", parseUser.id);
+                    atualizarDetalhesParseUI(parseUser); // Atualiza detalhes Parse
+                    await verificarLojaParse(parseUser); // Verifica e atualiza status da loja
+
+                  
+                } else {
+                    console.warn("Firebase user logged in, but Parse.User.current() is null!");
+                    parseUserInfoElem.textContent = 'Erro: Usuário Parse não sincronizado.';
+                    lojaStatusElem.textContent = 'Não verificado (Erro Parse)';
+                    // Considerar tentar login/link Parse aqui se necessário
+                }
+
+            } else {
+                firebaseUser = null;
+                console.log("No Firebase user logged in.");
+                limparUI(); // Limpa toda a UI
+                // Poderia redirecionar para login: window.location.href = 'login.html';
+            }
+        });
+
+        // Logout Button
+
+        if (logoutButton) {
+            logoutButton.addEventListener('click', async () => {
+                try {
+                    await auth.signOut(); // Logout Firebase
+                    await Parse.User.logOut(); // Logout Parse
+                    console.log("Logout successful.");
+                    limparUI();
+                    // window.location.href = 'login.html'; // Opcional: redirecionar
+                } catch (error) {
+                    console.error('Error during logout:', error);
+                    alert('❌ Error logging out: ' + error.message);
+                }
+            });
+        } else {
+            console.warn("Logout button not found.");
+        }
+    // botao de resgate 
+claimButton.addEventListener('click', async () => {
+    try {
+        const result = await Parse.Cloud.run('claimDailyReward');
+        await atualizarGranaUI();
+        await verificarRecompensaDisponivel();
+        alert(`🎉 Recompensa de 💸${result.amount} resgatada!`);
+    } catch (error) {
+        alert('❌ Erro: ' + error.message);
+    }
+});
+
+        // --- UI Update Functions ---
+
+async function atualizarGranaUI() {
+    parseUser = await Parse.User.currentAsync();
+    const grana = parseUser.get('grana') || 0;
+    document.querySelector('#userGrana .value').textContent = grana;
+}
+      async function verificarRecompensaDisponivel() {
+    const result = await Parse.Cloud.run('checkDailyReward');
+    const statusElem = document.getElementById('rewardStatus');
+    
+    if (result.canClaim) {
+        statusElem.innerHTML = `Pronto para resgatar! Dia ${result.streak}: 💸${result.nextAmount}`;
+        claimButton.disabled = false;
+    } else {
+        statusElem.innerHTML = `Volte amanhã! Seu streak: ${result.streak} dias`;
+        claimButton.disabled = true;
+    }
+    
+    // Atualiza destaque do dia
+    document.querySelectorAll('.day-reward').forEach((el, index) => {
+        el.classList.toggle('active', index === result.streak - 1);
+    });
+}
+      
+        function atualizarCabecalhoUI(fbUser) {
+            if (!fbUser) return;
+            if (profilePhotoElem) profilePhotoElem.src = fbUser.photoURL || 'https://placehold.co/80x80/eee/ccc?text=:)';
+            if (userNameElem) userNameElem.textContent = '👤 ' + (fbUser.displayName || fbUser.email || 'Usuário'); // Mostra nome ou email
+            if (userEmailElem) userEmailElem.textContent = '📧 ' + fbUser.email;
+        }
+
+        function atualizarDetalhesFirebaseUI(fbUser) {
+             if (!fbUser) return;
+             if (firebaseUserInfoElem) {
+                 firebaseUserInfoElem.textContent = `Nome: ${fbUser.displayName || '(não definido)'}, ID: ${fbUser.uid}`;
+             }
+        }
+
+         function atualizarDetalhesParseUI(pUser) {
+             if (!pUser) return;
+             if (parseUserInfoElem) {
+                  // Use get("username") ou outro campo relevante como 'name' ou 'email'
+                 const parseName = pUser.get("username") || pUser.get("name") || pUser.get("email") || '(não definido)';
+                 parseUserInfoElem.textContent = `Nome: ${parseName}, ID: ${pUser.id}`;
+             }
+         }
+
+        function limparUI() {
+            if (profilePhotoElem) profilePhotoElem.src = 'https://placehold.co/80x80/eee/ccc?text=?';
+            if (userNameElem) userNameElem.textContent = '👤 Não conectado';
+            if (userEmailElem) userEmailElem.textContent = '';
+            if (firebaseUserInfoElem) firebaseUserInfoElem.textContent = 'Desconectado';
+            if (parseUserInfoElem) parseUserInfoElem.textContent = 'Desconectado';
+            if (lojaStatusElem) lojaStatusElem.textContent = 'Desconectado';
+        }
+
+        // --- Parse Logic Functions ---
+
+        /**
+         * Verifica se o usuário Parse logado tem uma loja associada na classe 'Loja'.
+         * Atualiza o elemento lojaStatusElem na UI.
+         * @param {Parse.User} parseUser - O objeto Parse.User logado.
+         */
+        async function verificarLojaParse(parseUser) {
+            if (!parseUser || !lojaStatusElem) return;
+
+            lojaStatusElem.textContent = 'Verificando loja...'; // Estado inicial
+
+            const Loja = Parse.Object.extend("Loja"); // Nome da sua classe Parse para lojas
+            const query = new Parse.Query(Loja);
+            query.equalTo("dono", parseUser); // Filtra pela coluna 'dono' que é um ponteiro para _User
+            query.select("nome"); // Seleciona apenas o nome da loja para otimizar (use o nome real do seu campo)
+
+            try {
+                const loja = await query.first(); // Tenta encontrar a primeira loja associada
+
+                if (loja) {
+                    const nomeLoja = loja.get("nome"); // Pega o nome da loja (use o nome real do seu campo)
+                    console.log(`Loja encontrada para o usuário ${parseUser.id}: ${nomeLoja}`);
+                    lojaStatusElem.textContent = `✅ Sim, possui loja: ${nomeLoja}`;
+                } else {
+                    console.log(`Nenhuma loja encontrada para o usuário ${parseUser.id}.`);
+                    lojaStatusElem.textContent = '❌ Não possui loja registrada.';
+                }
+            } catch (error) {
+                console.error("Erro ao buscar loja no Parse:", error);
+                lojaStatusElem.textContent = '⚠️ Erro ao verificar loja.';
+            }
+        }
+
+    </script>
+</body>
+</html>
