@@ -191,11 +191,11 @@ const claimButton = document.getElementById('claimBtn');
                 atualizarCabecalhoUI(firebaseUser); // Atualiza cabeçalho
                 atualizarDetalhesFirebaseUI(firebaseUser); // Atualiza detalhes Firebase
 
-        parseUser = await Parse.User.currentAsync();
+            const parseUser = Parse.User.current();
         await atualizarGranaUI();
         await verificarRecompensaDisponivel();
               
-                const parseUser = Parse.User.current();
+       
                 if (parseUser) {
                     console.log("Parse user logged in:", parseUser.id);
                     atualizarDetalhesParseUI(parseUser); // Atualiza detalhes Parse
