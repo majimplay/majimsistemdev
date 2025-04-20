@@ -2,12 +2,12 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>🛒 Base Sincronização - Multi-Loja (Corrigido)</title>
+    <title>🛒 Base Sincronização + Teste Parse (Auto-Save)</title>
     <style>
-        /* Estilos CSS (mantidos do original) */
+        /* Estilos CSS (mantidos e adicionados) */
         body {
             font-family: 'Arial', sans-serif;
-            margin: 2rem; /* Added margin for better visibility */
+            margin: 2rem;
             padding: 0;
             background: #f5f5f5;
         }
@@ -23,40 +23,44 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1rem; /* Reduced margin */
-            padding-bottom: 1rem; /* Reduced padding */
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
             border-bottom: 2px solid #eee;
         }
         .profile-photo {
-            width: 80px; /* Smaller photo */
+            width: 80px;
             height: 80px;
             border-radius: 50%;
             object-fit: cover;
             border: 3px solid #007BFF;
             margin-right: 1rem;
         }
-        .profile-info h1 { margin: 0; color: #333; font-size: 1.2em; } /* Smaller title */
+        .profile-info h1 { margin: 0; color: #333; font-size: 1.2em; }
         .profile-info p { color: #666; margin: 0.2rem 0; font-size: 0.9em; }
-        .user-details {
-            margin-top: 1rem;
-            padding: 1rem;
+        .user-details, .teste-section { /* Aplicar estilo a ambas as seções */
+            margin-top: 1.5rem; /* Aumentar espaço entre seções */
+            padding: 1rem 1.5rem; /* Ajustar padding */
             background-color: #f8f9fa;
             border-radius: 8px;
             border: 1px solid #eee;
         }
-        .user-details h3 {
+        .user-details h3, .teste-section h3 { /* Estilo dos títulos das seções */
             margin-top: 0;
-            margin-bottom: 0.5rem;
+            margin-bottom: 1rem; /* Mais espaço abaixo do título */
             font-size: 1.1em;
             color: #0056b3;
+            border-bottom: 1px solid #ddd; /* Linha abaixo do título */
+            padding-bottom: 0.5rem;
         }
-         .user-details p {
-            margin: 0.3rem 0;
+         .user-details p, .teste-section p, .teste-section label { /* Estilo textos e labels */
+            margin: 0.5rem 0; /* Aumentar margem vertical */
             font-size: 0.95em;
-        }
-         .user-details span.label {
+         }
+         .user-details span.label, .teste-section label {
             font-weight: bold;
             color: #555;
+            display: block; /* Fazer label ocupar linha inteira */
+            margin-bottom: 0.2rem;
          }
           .user-details span.value {
             color: #333;
@@ -64,8 +68,30 @@
          .user-details span.status-loja {
              font-style: italic;
          }
+         /* Estilo para inputs */
+         .teste-section input[type="text"] {
+             width: 100%;
+             padding: 10px;
+             border: 1px solid #ccc;
+             border-radius: 4px;
+             box-sizing: border-box; /* Para padding não aumentar tamanho total */
+             margin-bottom: 0.5rem; /* Espaço abaixo do input */
+         }
+         /* Estilo para status do teste */
+         #testeStatus {
+             display: block; /* Ocupar linha */
+             margin-top: 0.8rem;
+             font-size: 0.9em;
+             font-style: italic;
+             color: #667;
+             min-height: 1.2em; /* Evitar que layout pule */
+         }
+         #testeStatus.saving { color: #ffc107; } /* Amarelo para salvando */
+         #testeStatus.saved { color: #28a745; } /* Verde para salvo */
+         #testeStatus.error { color: #dc3545; } /* Vermelho para erro */
+
         .btn {
-            padding: 0.6rem 1.2rem; /* Smaller button */
+            padding: 0.6rem 1.2rem;
             border: none; border-radius: 6px; cursor: pointer;
             font-weight: 600; transition: all 0.3s ease; white-space: nowrap;
             font-size: 0.9em;
@@ -76,7 +102,8 @@
     </style>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script> <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
 </head>
 <body>
 
@@ -99,6 +126,19 @@
             <p><span class="label">Status Loja:</span> <span id="lojaStatus" class="value status-loja">Verificando...</span></p>
         </div>
 
+        <div class="teste-section">
+            <h3><span class="emoji">🧪</span> Teste Parse (Auto-Save)</h3>
+            <div>
+                <label for="inputCampoA">Campo A:</label>
+                <input type="text" id="inputCampoA" placeholder="Digite algo para o Campo A">
+            </div>
+            <div>
+                <label for="inputCampoB">Campo B:</label>
+                <input type="text" id="inputCampoB" placeholder="Digite algo para o Campo B">
+            </div>
+            <span id="testeStatus">Carregando dados de teste...</span>
+        </div>
+
     </div>
 
     <script>
@@ -107,7 +147,7 @@
         const firebaseConfig = {
             apiKey: "AIzaSyDlUQbbTP29VqBVmzOGHhfc67R1DTRPwxg", // Sua chave
             authDomain: "gitautenticatio.firebaseapp.com",
-            databaseURL: "https://gitautenticatio-default-rtdb.firebaseio.com", // Necessário se usar database()
+            databaseURL: "https://gitautenticatio-default-rtdb.firebaseio.com",
             projectId: "gitautenticatio",
             storageBucket: "gitautenticatio.appspot.com",
             messagingSenderId: "21514234895",
@@ -117,7 +157,7 @@
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
-        const database = firebase.database(); // Agora deve funcionar
+        const database = firebase.database();
 
         // Initialize Parse
         // IMPORTANTE: Substitua pelas suas chaves reais!
@@ -132,37 +172,49 @@
         const parseUserInfoElem = document.getElementById('parseUserInfo');
         const lojaStatusElem = document.getElementById('lojaStatus');
         const logoutButton = document.getElementById('logoutBtn');
+        // Elementos da Seção de Teste
+        const inputCampoA = document.getElementById('inputCampoA');
+        const inputCampoB = document.getElementById('inputCampoB');
+        const testeStatusElem = document.getElementById('testeStatus');
+
 
         // --- Global Variables ---
         let firebaseUser = null; // Firebase user object
+        let currentParseUser = null; // Parse user object
+        let currentUserTesteObject = null; // Parse 'Teste' object for the user
+        let saveTimeoutId = null; // ID for debounce timeout
+        const SAVE_DELAY = 1500; // Delay in ms (1.5 seconds) for auto-save
 
         // --- Event Listeners and Initialization ---
 
-        // Monitor Firebase auth state (Essential for Sync/Login)
+        // Monitor Firebase auth state
         auth.onAuthStateChanged(async user => {
             if (user) {
                 firebaseUser = user;
-                console.log("Firebase user logged in:", firebaseUser.uid);
-                atualizarCabecalhoUI(firebaseUser); // Atualiza cabeçalho
-                atualizarDetalhesFirebaseUI(firebaseUser); // Atualiza detalhes Firebase
+                currentParseUser = Parse.User.current(); // Get current Parse user
 
-                const parseUser = Parse.User.current();
-                if (parseUser) {
-                    console.log("Parse user logged in:", parseUser.id);
-                    atualizarDetalhesParseUI(parseUser); // Atualiza detalhes Parse
-                    await verificarLojaParse(parseUser); // Verifica e atualiza status da loja
+                console.log("Firebase user logged in:", firebaseUser.uid);
+                atualizarCabecalhoUI(firebaseUser);
+                atualizarDetalhesFirebaseUI(firebaseUser);
+
+                if (currentParseUser) {
+                    console.log("Parse user logged in:", currentParseUser.id);
+                    atualizarDetalhesParseUI(currentParseUser);
+                    await verificarLojaParse(currentParseUser);
+                    await loadOrCreateTesteData(currentParseUser); // Carrega ou prepara para criar dados de Teste
                 } else {
                     console.warn("Firebase user logged in, but Parse.User.current() is null!");
                     parseUserInfoElem.textContent = 'Erro: Usuário Parse não sincronizado.';
                     lojaStatusElem.textContent = 'Não verificado (Erro Parse)';
-                    // Considerar tentar login/link Parse aqui se necessário
+                    testeStatusElem.textContent = 'Faça login no Parse para usar o teste.';
+                    disableTesteInputs(true); // Desabilita inputs de teste
                 }
 
             } else {
                 firebaseUser = null;
+                currentParseUser = null;
                 console.log("No Firebase user logged in.");
-                limparUI(); // Limpa toda a UI
-                // Poderia redirecionar para login: window.location.href = 'login.html';
+                limparUI();
             }
         });
 
@@ -170,31 +222,50 @@
         if (logoutButton) {
             logoutButton.addEventListener('click', async () => {
                 try {
-                    await auth.signOut(); // Logout Firebase
-                    await Parse.User.logOut(); // Logout Parse
+                    await auth.signOut();
+                    await Parse.User.logOut();
                     console.log("Logout successful.");
                     limparUI();
-                    // window.location.href = 'login.html'; // Opcional: redirecionar
                 } catch (error) {
                     console.error('Error during logout:', error);
                     alert('❌ Error logging out: ' + error.message);
                 }
             });
-        } else {
-            console.warn("Logout button not found.");
         }
 
+        // Event Listeners for Teste Inputs (with Debounce)
+        if (inputCampoA && inputCampoB) {
+            [inputCampoA, inputCampoB].forEach(input => {
+                input.addEventListener('input', () => {
+                    if (!currentParseUser) return; // Não faz nada se não houver usuário Parse
+
+                    setTesteStatus("Digitando...", ""); // Mostra que está digitando
+
+                    // Limpa o timeout anterior se existir
+                    if (saveTimeoutId) {
+                        clearTimeout(saveTimeoutId);
+                    }
+
+                    // Define um novo timeout para salvar após o delay
+                    saveTimeoutId = setTimeout(async () => {
+                        await saveTesteData();
+                    }, SAVE_DELAY);
+                });
+            });
+        }
 
         // --- UI Update Functions ---
 
         function atualizarCabecalhoUI(fbUser) {
+            // ... (código mantido igual)
             if (!fbUser) return;
             if (profilePhotoElem) profilePhotoElem.src = fbUser.photoURL || 'https://placehold.co/80x80/eee/ccc?text=:)';
-            if (userNameElem) userNameElem.textContent = '👤 ' + (fbUser.displayName || fbUser.email || 'Usuário'); // Mostra nome ou email
+            if (userNameElem) userNameElem.textContent = '👤 ' + (fbUser.displayName || fbUser.email || 'Usuário');
             if (userEmailElem) userEmailElem.textContent = '📧 ' + fbUser.email;
         }
 
         function atualizarDetalhesFirebaseUI(fbUser) {
+            // ... (código mantido igual)
              if (!fbUser) return;
              if (firebaseUserInfoElem) {
                  firebaseUserInfoElem.textContent = `Nome: ${fbUser.displayName || '(não definido)'}, ID: ${fbUser.uid}`;
@@ -202,54 +273,150 @@
         }
 
          function atualizarDetalhesParseUI(pUser) {
+            // ... (código mantido igual)
              if (!pUser) return;
              if (parseUserInfoElem) {
-                  // Use get("username") ou outro campo relevante como 'name' ou 'email'
                  const parseName = pUser.get("username") || pUser.get("name") || pUser.get("email") || '(não definido)';
                  parseUserInfoElem.textContent = `Nome: ${parseName}, ID: ${pUser.id}`;
              }
          }
 
         function limparUI() {
+            // ... (limpeza dos detalhes do usuário mantida)
             if (profilePhotoElem) profilePhotoElem.src = 'https://placehold.co/80x80/eee/ccc?text=?';
             if (userNameElem) userNameElem.textContent = '👤 Não conectado';
             if (userEmailElem) userEmailElem.textContent = '';
             if (firebaseUserInfoElem) firebaseUserInfoElem.textContent = 'Desconectado';
             if (parseUserInfoElem) parseUserInfoElem.textContent = 'Desconectado';
             if (lojaStatusElem) lojaStatusElem.textContent = 'Desconectado';
+
+            // Limpeza da seção de Teste
+            if (inputCampoA) inputCampoA.value = '';
+            if (inputCampoB) inputCampoB.value = '';
+            setTesteStatus("Desconectado", "");
+            disableTesteInputs(true); // Desabilita inputs ao deslogar
+            currentUserTesteObject = null; // Reseta o objeto Teste
+            if (saveTimeoutId) clearTimeout(saveTimeoutId); // Cancela qualquer save pendente
+        }
+
+        // Habilita/Desabilita inputs da seção de teste
+        function disableTesteInputs(disabled) {
+             if (inputCampoA) inputCampoA.disabled = disabled;
+             if (inputCampoB) inputCampoB.disabled = disabled;
+        }
+
+        // Atualiza o status da seção de teste
+        function setTesteStatus(message, statusClass = "") {
+            if (testeStatusElem) {
+                testeStatusElem.textContent = message;
+                testeStatusElem.className = statusClass; // Define a classe para estilização (saved, error, saving)
+            }
         }
 
         // --- Parse Logic Functions ---
 
         /**
          * Verifica se o usuário Parse logado tem uma loja associada na classe 'Loja'.
-         * Atualiza o elemento lojaStatusElem na UI.
-         * @param {Parse.User} parseUser - O objeto Parse.User logado.
          */
         async function verificarLojaParse(parseUser) {
+            // ... (código mantido igual)
             if (!parseUser || !lojaStatusElem) return;
-
-            lojaStatusElem.textContent = 'Verificando loja...'; // Estado inicial
-
-            const Loja = Parse.Object.extend("Loja"); // Nome da sua classe Parse para lojas
+            lojaStatusElem.textContent = 'Verificando loja...';
+            const Loja = Parse.Object.extend("Loja");
             const query = new Parse.Query(Loja);
-            query.equalTo("dono", parseUser); // Filtra pela coluna 'dono' que é um ponteiro para _User
-            query.select("nome"); // Seleciona apenas o nome da loja para otimizar (use o nome real do seu campo)
-
+            query.equalTo("dono", parseUser);
+            query.select("nome");
             try {
-                const loja = await query.first(); // Tenta encontrar a primeira loja associada
-
+                const loja = await query.first();
                 if (loja) {
-                    const nomeLoja = loja.get("nome"); // Pega o nome da loja (use o nome real do seu campo)
-                    console.log(`Loja encontrada para o usuário ${parseUser.id}: ${nomeLoja}`);
+                    const nomeLoja = loja.get("nome");
                     lojaStatusElem.textContent = `✅ Sim, possui loja: ${nomeLoja}`;
                 } else {
-                    console.log(`Nenhuma loja encontrada para o usuário ${parseUser.id}.`);
                     lojaStatusElem.textContent = '❌ Não possui loja registrada.';
                 }
             } catch (error) {
                 console.error("Erro ao buscar loja no Parse:", error);
                 lojaStatusElem.textContent = '⚠️ Erro ao verificar loja.';
+            }
+        }
+
+        /**
+         * Carrega os dados da classe 'Teste' para o usuário atual ou prepara para criar um novo.
+         * @param {Parse.User} parseUser - O objeto Parse.User logado.
+         */
+        async function loadOrCreateTesteData(parseUser) {
+            if (!parseUser) return;
+
+            disableTesteInputs(false); // Habilita inputs
+            setTesteStatus("Carregando dados de teste...", "");
+
+            const Teste = Parse.Object.extend("Teste");
+            const query = new Parse.Query(Teste);
+            query.equalTo("user", parseUser); // Assumindo que o ponteiro se chama 'user'
+
+            try {
+                currentUserTesteObject = await query.first(); // Tenta encontrar o objeto existente
+
+                if (currentUserTesteObject) {
+                    // Objeto encontrado, preenche os inputs
+                    console.log("Objeto Teste encontrado:", currentUserTesteObject.id);
+                    inputCampoA.value = currentUserTesteObject.get("campoA") || "";
+                    inputCampoB.value = currentUserTesteObject.get("campoB") || "";
+                    setTesteStatus("Dados carregados. Pronto para editar.", "saved"); // Indica que carregou
+                } else {
+                    // Nenhum objeto encontrado
+                    console.log("Nenhum objeto Teste encontrado para o usuário. Será criado ao digitar.");
+                    inputCampoA.value = "";
+                    inputCampoB.value = "";
+                    setTesteStatus("Nenhum dado salvo. Digite para criar.", "");
+                    currentUserTesteObject = null; // Garante que está nulo para a criação
+                }
+            } catch (error) {
+                console.error("Erro ao carregar dados da classe Teste:", error);
+                setTesteStatus(`Erro ao carregar dados: ${error.message}`, "error");
+                disableTesteInputs(true); // Desabilita em caso de erro grave
+            }
+        }
+
+        /**
+         * Salva os dados dos inputs na classe 'Teste' no Parse.
+         * Cria um novo objeto se necessário.
+         */
+        async function saveTesteData() {
+            if (!currentParseUser) {
+                console.warn("Tentativa de salvar Teste sem usuário Parse logado.");
+                return;
+            }
+
+            const valorA = inputCampoA.value;
+            const valorB = inputCampoB.value;
+
+            setTesteStatus("Salvando...", "saving");
+
+            try {
+                if (!currentUserTesteObject) {
+                    // Cria um novo objeto Teste se não existir
+                    console.log("Criando novo objeto Teste...");
+                    const Teste = Parse.Object.extend("Teste");
+                    currentUserTesteObject = new Teste();
+                    currentUserTesteObject.set("user", currentParseUser); // Define o ponteiro para o usuário
+                }
+
+                // Define os valores (seja em objeto novo ou existente)
+                currentUserTesteObject.set("campoA", valorA);
+                currentUserTesteObject.set("campoB", valorB);
+
+                // Salva o objeto
+                await currentUserTesteObject.save();
+                console.log("Objeto Teste salvo/atualizado com sucesso:", currentUserTesteObject.id);
+                setTesteStatus("Salvo!", "saved");
+
+            } catch (error) {
+                console.error("Erro ao salvar dados na classe Teste:", error);
+                setTesteStatus(`Erro ao salvar: ${error.message}`, "error");
+                // Poderia tentar reverter os inputs para o valor anterior ou mostrar um erro mais persistente
+            } finally {
+                 saveTimeoutId = null; // Reseta o ID do timeout após a tentativa de salvar
             }
         }
 
