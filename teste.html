@@ -2,9 +2,9 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>🛒 Base Sincronização + Teste Parse (Auto-Save)</title>
+    <title>🛒 Base Sincronização + Teste Parse (Timer Backend)</title>
     <style>
-        /* Estilos CSS (mantidos e adicionados) */
+        /* Estilos CSS (mantidos da versão anterior) */
         body {
             font-family: 'Arial', sans-serif;
             margin: 2rem;
@@ -37,29 +37,29 @@
         }
         .profile-info h1 { margin: 0; color: #333; font-size: 1.2em; }
         .profile-info p { color: #666; margin: 0.2rem 0; font-size: 0.9em; }
-        .user-details, .teste-section { /* Aplicar estilo a ambas as seções */
-            margin-top: 1.5rem; /* Aumentar espaço entre seções */
-            padding: 1rem 1.5rem; /* Ajustar padding */
+        .user-details, .teste-section {
+            margin-top: 1.5rem;
+            padding: 1rem 1.5rem;
             background-color: #f8f9fa;
             border-radius: 8px;
             border: 1px solid #eee;
         }
-        .user-details h3, .teste-section h3 { /* Estilo dos títulos das seções */
+        .user-details h3, .teste-section h3 {
             margin-top: 0;
-            margin-bottom: 1rem; /* Mais espaço abaixo do título */
+            margin-bottom: 1rem;
             font-size: 1.1em;
             color: #0056b3;
-            border-bottom: 1px solid #ddd; /* Linha abaixo do título */
+            border-bottom: 1px solid #ddd;
             padding-bottom: 0.5rem;
         }
-         .user-details p, .teste-section p, .teste-section label { /* Estilo textos e labels */
-            margin: 0.5rem 0; /* Aumentar margem vertical */
+         .user-details p, .teste-section p, .teste-section label {
+            margin: 0.5rem 0;
             font-size: 0.95em;
          }
          .user-details span.label, .teste-section label {
             font-weight: bold;
             color: #555;
-            display: block; /* Fazer label ocupar linha inteira */
+            display: block;
             margin-bottom: 0.2rem;
          }
           .user-details span.value {
@@ -68,27 +68,26 @@
          .user-details span.status-loja {
              font-style: italic;
          }
-         /* Estilo para inputs */
-         .teste-section input[type="text"] {
+         .teste-section input[type="text"], .teste-section input[type="number"] { /* Atualizado para number */
              width: 100%;
              padding: 10px;
              border: 1px solid #ccc;
              border-radius: 4px;
-             box-sizing: border-box; /* Para padding não aumentar tamanho total */
-             margin-bottom: 0.5rem; /* Espaço abaixo do input */
+             box-sizing: border-box;
+             margin-bottom: 0.5rem;
          }
          /* Estilo para status do teste */
          #testeStatus {
-             display: block; /* Ocupar linha */
+             display: block;
              margin-top: 0.8rem;
              font-size: 0.9em;
              font-style: italic;
              color: #667;
-             min-height: 1.2em; /* Evitar que layout pule */
+             min-height: 1.2em;
          }
-         #testeStatus.saving { color: #ffc107; } /* Amarelo para salvando */
-         #testeStatus.saved { color: #28a745; } /* Verde para salvo */
-         #testeStatus.error { color: #dc3545; } /* Vermelho para erro */
+         #testeStatus.saving { color: #ffc107; }
+         #testeStatus.saved { color: #28a745; }
+         #testeStatus.error { color: #dc3545; }
 
         .btn {
             padding: 0.6rem 1.2rem;
@@ -127,14 +126,14 @@
         </div>
 
         <div class="teste-section">
-            <h3><span class="emoji">🧪</span> Teste Parse (Auto-Save)</h3>
+            <h3><span class="emoji">🧪</span> Teste Parse (Timer Backend)</h3>
             <div>
-                <label for="inputCampoA">Campo A:</label>
-                <input type="text" id="inputCampoA" placeholder="Digite algo para o Campo A">
+                <label for="inputCampoA">Campo A (será limpo pelo timer):</label>
+                <input type="text" id="inputCampoA" placeholder="Este campo será limpo...">
             </div>
             <div>
-                <label for="inputCampoB">Campo B:</label>
-                <input type="text" id="inputCampoB" placeholder="Digite algo para o Campo B">
+                <label for="inputCampoB">Campo B (Duração em Segundos):</label>
+                <input type="number" id="inputCampoB" placeholder="Ex: 30 (para 30 segundos)">
             </div>
             <span id="testeStatus">Carregando dados de teste...</span>
         </div>
@@ -172,26 +171,24 @@
         const parseUserInfoElem = document.getElementById('parseUserInfo');
         const lojaStatusElem = document.getElementById('lojaStatus');
         const logoutButton = document.getElementById('logoutBtn');
-        // Elementos da Seção de Teste
         const inputCampoA = document.getElementById('inputCampoA');
-        const inputCampoB = document.getElementById('inputCampoB');
+        const inputCampoB = document.getElementById('inputCampoB'); // Agora é type="number"
         const testeStatusElem = document.getElementById('testeStatus');
 
 
         // --- Global Variables ---
-        let firebaseUser = null; // Firebase user object
-        let currentParseUser = null; // Parse user object
-        let currentUserTesteObject = null; // Parse 'Teste' object for the user
-        let saveTimeoutId = null; // ID for debounce timeout
-        const SAVE_DELAY = 1500; // Delay in ms (1.5 seconds) for auto-save
+        let firebaseUser = null;
+        let currentParseUser = null;
+        let currentUserTesteObject = null;
+        let saveTimeoutId = null;
+        const SAVE_DELAY = 1500; // Delay in ms for auto-save
 
         // --- Event Listeners and Initialization ---
 
-        // Monitor Firebase auth state
         auth.onAuthStateChanged(async user => {
             if (user) {
                 firebaseUser = user;
-                currentParseUser = Parse.User.current(); // Get current Parse user
+                currentParseUser = Parse.User.current();
 
                 console.log("Firebase user logged in:", firebaseUser.uid);
                 atualizarCabecalhoUI(firebaseUser);
@@ -201,15 +198,14 @@
                     console.log("Parse user logged in:", currentParseUser.id);
                     atualizarDetalhesParseUI(currentParseUser);
                     await verificarLojaParse(currentParseUser);
-                    await loadOrCreateTesteData(currentParseUser); // Carrega ou prepara para criar dados de Teste
+                    await loadOrCreateTesteData(currentParseUser);
                 } else {
                     console.warn("Firebase user logged in, but Parse.User.current() is null!");
                     parseUserInfoElem.textContent = 'Erro: Usuário Parse não sincronizado.';
                     lojaStatusElem.textContent = 'Não verificado (Erro Parse)';
                     testeStatusElem.textContent = 'Faça login no Parse para usar o teste.';
-                    disableTesteInputs(true); // Desabilita inputs de teste
+                    disableTesteInputs(true);
                 }
-
             } else {
                 firebaseUser = null;
                 currentParseUser = null;
@@ -218,7 +214,6 @@
             }
         });
 
-        // Logout Button
         if (logoutButton) {
             logoutButton.addEventListener('click', async () => {
                 try {
@@ -233,31 +228,23 @@
             });
         }
 
-        // Event Listeners for Teste Inputs (with Debounce)
+        // Event Listeners for Teste Inputs
         if (inputCampoA && inputCampoB) {
             [inputCampoA, inputCampoB].forEach(input => {
                 input.addEventListener('input', () => {
-                    if (!currentParseUser) return; // Não faz nada se não houver usuário Parse
-
-                    setTesteStatus("Digitando...", ""); // Mostra que está digitando
-
-                    // Limpa o timeout anterior se existir
-                    if (saveTimeoutId) {
-                        clearTimeout(saveTimeoutId);
-                    }
-
-                    // Define um novo timeout para salvar após o delay
+                    if (!currentParseUser) return;
+                    setTesteStatus("Digitando...", "");
+                    if (saveTimeoutId) clearTimeout(saveTimeoutId);
                     saveTimeoutId = setTimeout(async () => {
-                        await saveTesteData();
+                        await saveTesteData(); // Chama a função de salvar atualizada
                     }, SAVE_DELAY);
                 });
             });
         }
 
         // --- UI Update Functions ---
-
+        // (atualizarCabecalhoUI, atualizarDetalhesFirebaseUI, atualizarDetalhesParseUI mantidas iguais)
         function atualizarCabecalhoUI(fbUser) {
-            // ... (código mantido igual)
             if (!fbUser) return;
             if (profilePhotoElem) profilePhotoElem.src = fbUser.photoURL || 'https://placehold.co/80x80/eee/ccc?text=:)';
             if (userNameElem) userNameElem.textContent = '👤 ' + (fbUser.displayName || fbUser.email || 'Usuário');
@@ -265,7 +252,6 @@
         }
 
         function atualizarDetalhesFirebaseUI(fbUser) {
-            // ... (código mantido igual)
              if (!fbUser) return;
              if (firebaseUserInfoElem) {
                  firebaseUserInfoElem.textContent = `Nome: ${fbUser.displayName || '(não definido)'}, ID: ${fbUser.uid}`;
@@ -273,7 +259,6 @@
         }
 
          function atualizarDetalhesParseUI(pUser) {
-            // ... (código mantido igual)
              if (!pUser) return;
              if (parseUserInfoElem) {
                  const parseName = pUser.get("username") || pUser.get("name") || pUser.get("email") || '(não definido)';
@@ -292,34 +277,28 @@
 
             // Limpeza da seção de Teste
             if (inputCampoA) inputCampoA.value = '';
-            if (inputCampoB) inputCampoB.value = '';
+            if (inputCampoB) inputCampoB.value = ''; // Limpa campo B também
             setTesteStatus("Desconectado", "");
-            disableTesteInputs(true); // Desabilita inputs ao deslogar
-            currentUserTesteObject = null; // Reseta o objeto Teste
-            if (saveTimeoutId) clearTimeout(saveTimeoutId); // Cancela qualquer save pendente
+            disableTesteInputs(true);
+            currentUserTesteObject = null;
+            if (saveTimeoutId) clearTimeout(saveTimeoutId);
         }
 
-        // Habilita/Desabilita inputs da seção de teste
         function disableTesteInputs(disabled) {
              if (inputCampoA) inputCampoA.disabled = disabled;
              if (inputCampoB) inputCampoB.disabled = disabled;
         }
 
-        // Atualiza o status da seção de teste
         function setTesteStatus(message, statusClass = "") {
             if (testeStatusElem) {
                 testeStatusElem.textContent = message;
-                testeStatusElem.className = statusClass; // Define a classe para estilização (saved, error, saving)
+                testeStatusElem.className = statusClass;
             }
         }
 
         // --- Parse Logic Functions ---
-
-        /**
-         * Verifica se o usuário Parse logado tem uma loja associada na classe 'Loja'.
-         */
+        // (verificarLojaParse mantida igual)
         async function verificarLojaParse(parseUser) {
-            // ... (código mantido igual)
             if (!parseUser || !lojaStatusElem) return;
             lojaStatusElem.textContent = 'Verificando loja...';
             const Loja = Parse.Object.extend("Loja");
@@ -342,45 +321,56 @@
 
         /**
          * Carrega os dados da classe 'Teste' para o usuário atual ou prepara para criar um novo.
-         * @param {Parse.User} parseUser - O objeto Parse.User logado.
+         * Preenche ambos os campos, incluindo o campo B (duração).
          */
         async function loadOrCreateTesteData(parseUser) {
             if (!parseUser) return;
-
-            disableTesteInputs(false); // Habilita inputs
+            disableTesteInputs(false);
             setTesteStatus("Carregando dados de teste...", "");
-
             const Teste = Parse.Object.extend("Teste");
             const query = new Parse.Query(Teste);
-            query.equalTo("user", parseUser); // Assumindo que o ponteiro se chama 'user'
+            query.equalTo("user", parseUser);
 
             try {
-                currentUserTesteObject = await query.first(); // Tenta encontrar o objeto existente
-
+                currentUserTesteObject = await query.first();
                 if (currentUserTesteObject) {
-                    // Objeto encontrado, preenche os inputs
                     console.log("Objeto Teste encontrado:", currentUserTesteObject.id);
                     inputCampoA.value = currentUserTesteObject.get("campoA") || "";
-                    inputCampoB.value = currentUserTesteObject.get("campoB") || "";
-                    setTesteStatus("Dados carregados. Pronto para editar.", "saved"); // Indica que carregou
+                    // Preenche campoB com o valor salvo (se houver)
+                    // Nota: Não vamos preencher com a data de expiração, mas sim com o valor que o usuário digitou (se salvarmos ele)
+                    // Por simplicidade, vamos deixar campoB vazio no load inicial ou preencher com um valor padrão se fizer sentido.
+                    // Ou podemos adicionar um campo 'duracaoSalva' na classe Teste.
+                    // Vamos manter simples: preenche A, deixa B para o usuário digitar a *nova* duração.
+                     inputCampoB.value = ""; // Limpa campo B no load inicial
+
+                    // Verifica se a ação já foi executada para dar um status inicial
+                    if(currentUserTesteObject.get("acaoExecutada")) {
+                         setTesteStatus("Dados carregados (Ação anterior executada).", "saved");
+                    } else if (currentUserTesteObject.get("expiraEm") && currentUserTesteObject.get("expiraEm") > new Date()) {
+                         setTesteStatus("Dados carregados (Timer anterior ativo). Digite nova duração para resetar.", "saved");
+                    }
+                     else {
+                         setTesteStatus("Dados carregados. Digite duração em segundos no Campo B.", "saved");
+                    }
+
                 } else {
-                    // Nenhum objeto encontrado
-                    console.log("Nenhum objeto Teste encontrado para o usuário. Será criado ao digitar.");
+                    console.log("Nenhum objeto Teste encontrado para o usuário.");
                     inputCampoA.value = "";
                     inputCampoB.value = "";
                     setTesteStatus("Nenhum dado salvo. Digite para criar.", "");
-                    currentUserTesteObject = null; // Garante que está nulo para a criação
+                    currentUserTesteObject = null;
                 }
             } catch (error) {
                 console.error("Erro ao carregar dados da classe Teste:", error);
                 setTesteStatus(`Erro ao carregar dados: ${error.message}`, "error");
-                disableTesteInputs(true); // Desabilita em caso de erro grave
+                disableTesteInputs(true);
             }
         }
 
         /**
          * Salva os dados dos inputs na classe 'Teste' no Parse.
-         * Cria um novo objeto se necessário.
+         * Calcula e salva a data de expiração ('expiraEm') com base no Campo B.
+         * Reseta a flag 'acaoExecutada'.
          */
         async function saveTesteData() {
             if (!currentParseUser) {
@@ -389,34 +379,57 @@
             }
 
             const valorA = inputCampoA.value;
-            const valorB = inputCampoB.value;
+            const valorBStr = inputCampoB.value;
+
+            // Validar Campo B (duração)
+            const duracaoSegundos = parseInt(valorBStr, 10);
+            let expirationDate = null; // Data de expiração
+
+            if (!isNaN(duracaoSegundos) && duracaoSegundos > 0) {
+                // Calcula a data de expiração apenas se for um número válido > 0
+                expirationDate = new Date(Date.now() + duracaoSegundos * 1000);
+                console.log(`Timer definido para expirar em: ${expirationDate.toLocaleString()}`);
+            } else if (valorBStr.trim() !== "") {
+                 // Se o campo B não está vazio mas não é um número válido
+                 setTesteStatus("Erro: Duração inválida. Insira apenas números (segundos).", "error");
+                 return; // Não salva se a duração for inválida e não vazia
+            } else {
+                 // Se o campo B está vazio, não define timer (expiraEm será null)
+                 console.log("Campo B vazio, nenhum timer será definido.");
+            }
+
 
             setTesteStatus("Salvando...", "saving");
 
             try {
                 if (!currentUserTesteObject) {
-                    // Cria um novo objeto Teste se não existir
                     console.log("Criando novo objeto Teste...");
                     const Teste = Parse.Object.extend("Teste");
                     currentUserTesteObject = new Teste();
-                    currentUserTesteObject.set("user", currentParseUser); // Define o ponteiro para o usuário
+                    currentUserTesteObject.set("user", currentParseUser);
                 }
 
-                // Define os valores (seja em objeto novo ou existente)
+                // Define os valores
                 currentUserTesteObject.set("campoA", valorA);
-                currentUserTesteObject.set("campoB", valorB);
+                // currentUserTesteObject.set("campoB", valorBStr); // Opcional: salvar a string digitada
+                currentUserTesteObject.set("expiraEm", expirationDate); // Salva a data de expiração (ou null)
+                currentUserTesteObject.set("acaoExecutada", false); // Reseta a flag sempre que salvar
 
-                // Salva o objeto
                 await currentUserTesteObject.save();
                 console.log("Objeto Teste salvo/atualizado com sucesso:", currentUserTesteObject.id);
-                setTesteStatus("Salvo!", "saved");
+
+                if (expirationDate) {
+                     setTesteStatus(`Salvo! Timer definido para ${duracaoSegundos}s.`, "saved");
+                } else {
+                     setTesteStatus("Salvo! (Sem timer definido).", "saved");
+                }
+
 
             } catch (error) {
                 console.error("Erro ao salvar dados na classe Teste:", error);
                 setTesteStatus(`Erro ao salvar: ${error.message}`, "error");
-                // Poderia tentar reverter os inputs para o valor anterior ou mostrar um erro mais persistente
             } finally {
-                 saveTimeoutId = null; // Reseta o ID do timeout após a tentativa de salvar
+                 saveTimeoutId = null;
             }
         }
 
