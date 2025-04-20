@@ -191,7 +191,7 @@ const claimButton = document.getElementById('claimBtn');
                 atualizarCabecalhoUI(firebaseUser); // Atualiza cabeçalho
                 atualizarDetalhesFirebaseUI(firebaseUser); // Atualiza detalhes Firebase
 
-            const parseUser = Parse.User.current();
+          parseUser = Parse.User.current();
         await atualizarGranaUI();
         await verificarRecompensaDisponivel();
               
