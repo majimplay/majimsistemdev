@@ -250,7 +250,8 @@ claimButton.addEventListener('click', async () => {
         // --- UI Update Functions ---
 
 async function atualizarGranaUI() {
-    parseUser = await Parse.User.currentAsync();
+    if (!parseUser) return;
+    await parseUser.fetch(); // Atualiza dados do servidor
     const grana = parseUser.get('grana') || 0;
     document.querySelector('#userGrana .value').textContent = grana;
 }
