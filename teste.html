@@ -192,22 +192,27 @@
 
     <script>
         // --- Configurations ---
+        // --- Configurations ---
+        // IMPORTANTE: Substitua pelas suas chaves reais!
         const firebaseConfig = {
-            apiKey: "YOUR_FIREBASE_API_KEY", // Substitua pela sua chave
-            authDomain: "YOUR_FIREBASE_AUTH_DOMAIN",
-            databaseURL: "YOUR_FIREBASE_DATABASE_URL",
-            projectId: "YOUR_FIREBASE_PROJECT_ID",
-            storageBucket: "YOUR_FIREBASE_STORAGE_BUCKET",
-            messagingSenderId: "YOUR_FIREBASE_MESSAGING_SENDER_ID",
-            appId: "YOUR_FIREBASE_APP_ID"
+            apiKey: "AIzaSyDlUQbbTP29VqBVmzOGHhfc67R1DTRPwxg", // Sua chave
+            authDomain: "gitautenticatio.firebaseapp.com",
+            databaseURL: "https://gitautenticatio-default-rtdb.firebaseio.com", // Necessário se usar database()
+            projectId: "gitautenticatio",
+            storageBucket: "gitautenticatio.appspot.com",
+            messagingSenderId: "21514234895",
+            appId: "1:21514234895:web:d34dc4c44baf586d2cc77a"
         };
 
+        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
-        const database = firebase.database();
+        const database = firebase.database(); // Agora deve funcionar
 
-        Parse.initialize("YOUR_PARSE_APP_ID", "YOUR_PARSE_JS_KEY"); // Substitua pelas suas chaves
-        Parse.serverURL = "YOUR_PARSE_SERVER_URL";
+        // Initialize Parse
+        // IMPORTANTE: Substitua pelas suas chaves reais!
+        Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I"); // Suas chaves
+        Parse.serverURL = "https://parseapi.back4app.com/";
 
         // --- Elementos da UI ---
         const profilePhotoElem = document.getElementById('profilePhoto');
