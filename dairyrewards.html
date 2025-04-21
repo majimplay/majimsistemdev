@@ -70,41 +70,14 @@
             font-weight: 600; transition: all 0.3s ease; white-space: nowrap;
             font-size: 0.9em;
         }
+        .btn-success { 
+         background: #28a745; 
+         color: white; 
+         }
+        
         .btn-secondary { background: #6c757d; color: white; }
         .emoji { margin-right: 8px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-      .day-reward {
-    padding: 0.5rem;
-    background: #e9ecef;
-    border-radius: 5px;
-    text-align: center;
-    font-size: 0.85em;
-}
-
-.day-reward.active {
-    background: #c3e6cb;
-    border: 2px solid #28a745;
-}
-
-#userGrana .value {
-    color: #28a745;
-    font-size: 1.2em;
-}
-
-#rewardStatus {
-    color: #6c757d;
-    font-size: 0.9em;
-}
-#userGrana .value {
-    color: #28a745;
-    font-size: 1.2em;
-    margin: 0 5px;
-}
-
-.emoji-coin {
-    font-size: 1.4em;
-    vertical-align: middle;
-}
     </style>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
@@ -113,27 +86,15 @@
 <body>
 
     <div class="container">
-      <div class="profile-header">
-    <div style="display: flex; align-items: center;">
-        <img id="profilePhoto" class="profile-photo" src="https://placehold.co/80x80/eee/ccc?text=User" alt="Foto do Perfil">
-        <div class="profile-info">
-            <h1 id="userName"><span class="emoji">👤</span> Carregando...</h1>
-            <p id="userEmail"></p>
-            <!-- Novo elemento de grana -->
-<p id="userGrana" style="margin-top: 0.5rem; font-weight: bold;">
-    <span class="emoji">💳</span> Grana: 
-    <span class="value">0</span>
-    <span class="emoji">💰</span>
-</p>
-        </div>
-    </div>
-    <div>
-        <button id="claimBtn" class="btn btn-secondary" style="margin-bottom: 0.5rem;">
-            <span class="emoji">🎁</span> Resgatar Diário
-        </button>
-        <button id="logoutBtn" class="btn btn-secondary"><span class="emoji">🚪</span> Sair</button>
-    </div>
-</div>
+        <div class="profile-header">
+            <div style="display: flex; align-items: center;">
+                <img id="profilePhoto" class="profile-photo" src="https://placehold.co/80x80/eee/ccc?text=User" alt="Foto do Perfil">
+                <div class="profile-info">
+                    <h1 id="userName"><span class="emoji">👤</span> Carregando...</h1>
+                    <p id="userEmail"></p>
+                </div>
+            </div>
+            <button id="logoutBtn" class="btn btn-secondary"><span class="emoji">🚪</span> Sair</button>
         </div>
 
         <div class="user-details">
@@ -141,25 +102,16 @@
             <p><span class="label">Firebase User:</span> <span id="firebaseUserInfo" class="value">Aguardando login...</span></p>
             <p><span class="label">Parse User:</span> <span id="parseUserInfo" class="value">Aguardando login...</span></p>
             <p><span class="label">Status Loja:</span> <span id="lojaStatus" class="value status-loja">Verificando...</span></p>
-        </div>
-<div class="user-details" style="margin-top: 1rem;">
-    <h3><span class="emoji">📅</span> Recompensa Diária</h3>
-    <div id="rewardTable" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.5rem; margin-top: 1rem;">
-        <div class="day-reward">Dia 1<br>💸10</div>
-        <div class="day-reward">Dia 2<br>💸11</div>
-        <div class="day-reward">Dia 3<br>💸11</div>
-        <div class="day-reward">Dia 4<br>💸12</div>
-        <div class="day-reward">Dia 5<br>💸15</div>
-        <div class="day-reward">Dia 6<br>💸16</div>
-        <div class="day-reward">Dia 7<br>💸20</div>
-    </div>
-    <p id="rewardStatus" style="margin-top: 1rem; font-style: italic;"></p>
-</div>
-    </div>
+            <h3><span class="emoji">🎮</span> Jogo de Recompensas</h3>
+            <p><span class="label">Saldo:</span> <span id="userMoney" class="value">💳 0</span></p>
+            <p><span class="label">Sequência:</span> <span id="dailyStreak" class="value">🔥 0 dias</span> 
+            <button id="claimRewardBtn" class="btn btn-success" disabled><span class="emoji">🎁</span> Resgatar Recompensa</button>
+            <p id="rewardMessage" style="margin-top: 0.5rem; color: #666; font-size: 0.9em;"></p>
+            </div>
 
+    </div>
     <script>
         // --- Configurations ---
-        // IMPORTANTE: Substitua pelas suas chaves reais!
         const firebaseConfig = {
             apiKey: "AIzaSyDlUQbbTP29VqBVmzOGHhfc67R1DTRPwxg", // Sua chave
             authDomain: "gitautenticatio.firebaseapp.com",
@@ -169,14 +121,11 @@
             messagingSenderId: "21514234895",
             appId: "1:21514234895:web:d34dc4c44baf586d2cc77a"
         };
-
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const database = firebase.database(); // Agora deve funcionar
-
         // Initialize Parse
-        // IMPORTANTE: Substitua pelas suas chaves reais!
         Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I"); // Suas chaves
         Parse.serverURL = "https://parseapi.back4app.com/";
 
@@ -188,11 +137,16 @@
         const parseUserInfoElem = document.getElementById('parseUserInfo');
         const lojaStatusElem = document.getElementById('lojaStatus');
         const logoutButton = document.getElementById('logoutBtn');
+        
+        const claimRewardBtn = document.getElementById('claimRewardBtn');
+        const userMoneyElem = document.getElementById('userMoney');
+        const dailyStreakElem = document.getElementById('dailyStreak');
+        const rewardMessageElem = document.getElementById('rewardMessage');
 
         // --- Global Variables ---
         let firebaseUser = null; // Firebase user object
-let parseUser = null;
-const claimButton = document.getElementById('claimBtn');
+        let parseUser = null;
+        const REWARD_SCHEDULE = [10, 11, 11, 12, 15, 16, 20]; // Recompensas para 7 dias
         // --- Event Listeners and Initialization ---
 
         // Monitor Firebase auth state (Essential for Sync/Login)
@@ -203,17 +157,14 @@ const claimButton = document.getElementById('claimBtn');
                 atualizarCabecalhoUI(firebaseUser); // Atualiza cabeçalho
                 atualizarDetalhesFirebaseUI(firebaseUser); // Atualiza detalhes Firebase
 
-          parseUser = Parse.User.current();
-        await atualizarGranaUI();
-        await verificarRecompensaDisponivel();
-              
-       
+                const parseUser = Parse.User.current();
+                parseUser = await Parse.User.currentAsync();
                 if (parseUser) {
+                     await initializeUserData(); // Novo método
                     console.log("Parse user logged in:", parseUser.id);
                     atualizarDetalhesParseUI(parseUser); // Atualiza detalhes Parse
                     await verificarLojaParse(parseUser); // Verifica e atualiza status da loja
-
-                  
+                     updateRewardUI(); // Novo método
                 } else {
                     console.warn("Firebase user logged in, but Parse.User.current() is null!");
                     parseUserInfoElem.textContent = 'Erro: Usuário Parse não sincronizado.';
@@ -230,7 +181,6 @@ const claimButton = document.getElementById('claimBtn');
         });
 
         // Logout Button
-
         if (logoutButton) {
             logoutButton.addEventListener('click', async () => {
                 try {
@@ -247,44 +197,7 @@ const claimButton = document.getElementById('claimBtn');
         } else {
             console.warn("Logout button not found.");
         }
-    // botao de resgate 
-claimButton.addEventListener('click', async () => {
-    try {
-        const result = await Parse.Cloud.run('claimDailyReward');
-        await atualizarGranaUI();
-        await verificarRecompensaDisponivel();
-        alert(`🎉 Recompensa de 💸${result.amount} resgatada!`);
-    } catch (error) {
-        alert('❌ Erro: ' + error.message);
-    }
-});
-
         // --- UI Update Functions ---
-
-async function atualizarGranaUI() {
-    if (!parseUser) return;
-    await parseUser.fetch(); // Atualiza dados do servidor
-    const grana = parseUser.get('grana') || 0;
-    document.querySelector('#userGrana .value').textContent = grana;
-}
-      async function verificarRecompensaDisponivel() {
-    const result = await Parse.Cloud.run('checkDailyReward');
-    const statusElem = document.getElementById('rewardStatus');
-    
-    if (result.canClaim) {
-        statusElem.innerHTML = `Pronto para resgatar! Dia ${result.streak}: 💸${result.nextAmount}`;
-        claimButton.disabled = false;
-    } else {
-        statusElem.innerHTML = `Volte amanhã! Seu streak: ${result.streak} dias`;
-        claimButton.disabled = true;
-    }
-    
-    // Atualiza destaque do dia
-    document.querySelectorAll('.day-reward').forEach((el, index) => {
-        el.classList.toggle('active', index === result.streak - 1);
-    });
-}
-      
         function atualizarCabecalhoUI(fbUser) {
             if (!fbUser) return;
             if (profilePhotoElem) profilePhotoElem.src = fbUser.photoURL || 'https://placehold.co/80x80/eee/ccc?text=:)';
@@ -316,7 +229,74 @@ async function atualizarGranaUI() {
             if (parseUserInfoElem) parseUserInfoElem.textContent = 'Desconectado';
             if (lojaStatusElem) lojaStatusElem.textContent = 'Desconectado';
         }
+        //funcoes do jogo 
+async function initializeUserData() {
+    if (!parseUser.get('grana')) {
+        parseUser.set('grana', 0);
+    }
+    if (!parseUser.get('dailyStreak')) {
+        parseUser.set('dailyStreak', 0);
+    }
+    if (!parseUser.get('lastRewardDate')) {
+        parseUser.set('lastRewardDate', new Date(0)); // Data antiga
+    }
+    await parseUser.save();
+}
 
+function updateRewardUI() {
+    // Atualiza saldo
+    userMoneyElem.textContent = `💳 ${parseUser.get('grana') || 0}`;
+    
+    // Atualiza streak
+    dailyStreakElem.textContent = `🔥 ${parseUser.get('dailyStreak') || 0} dias`;
+    
+    // Verifica se pode resgatar
+    const lastClaim = parseUser.get('lastRewardDate');
+    const canClaim = canClaimReward(lastClaim);
+    claimRewardBtn.disabled = !canClaim;
+    rewardMessageElem.textContent = canClaim ? 
+        "Recompensa diária disponível!" : 
+        `Volte amanhã para mais! Último resgate: ${formatDate(lastClaim)}`;
+}
+
+function canClaimReward(lastDate) {
+    const now = new Date();
+    const lastClaimDate = new Date(lastDate);
+    
+    // Verifica se já passou 24 horas
+    return (now - lastClaimDate) > 24 * 60 * 60 * 1000;
+}
+
+function formatDate(date) {
+    return date.toLocaleDateString('pt-BR');
+}
+
+// Event Listener para o botão de recompensa
+claimRewardBtn.addEventListener('click', async () => {
+    try {
+        const reward = calculateDailyReward();
+        
+        // Atualiza dados do usuário
+        parseUser.increment('grana', reward);
+        parseUser.increment('dailyStreak', 1);
+        parseUser.set('lastRewardDate', new Date());
+        
+        await parseUser.save();
+        updateRewardUI();
+        
+        rewardMessageElem.textContent = `🎉 +${reward} moedas resgatadas!`;
+    } catch (error) {
+        console.error('Erro ao resgatar:', error);
+        rewardMessageElem.textContent = '❌ Erro ao resgatar recompensa';
+    }
+});
+
+function calculateDailyReward() {
+    const streak = parseUser.get('dailyStreak') || 0;
+    const dayIndex = Math.min(streak % 7, REWARD_SCHEDULE.length - 1);
+    return REWARD_SCHEDULE[dayIndex];
+}
+        
         // --- Parse Logic Functions ---
 
         /**
@@ -350,7 +330,6 @@ async function atualizarGranaUI() {
                 lojaStatusElem.textContent = '⚠️ Erro ao verificar loja.';
             }
         }
-
     </script>
 </body>
 </html>
