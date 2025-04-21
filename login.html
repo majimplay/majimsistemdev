@@ -33,8 +33,25 @@
   </div>
 
   <script>
-    // Configuração do Parse
-    Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
+    // --- Configuração Firebase ---
+    const firebaseConfig = {
+      apiKey: "AIzaSyDlUQbbTP29VqBVmzOGHhfc67R1DTRPwxg", // Substitua pela sua chave real
+      authDomain: "gitautenticatio.firebaseapp.com",
+      projectId: "gitautenticatio",
+      storageBucket: "gitautenticatio.appspot.com",
+      messagingSenderId: "21514234895",
+      appId: "1:21514234895:web:d34dc4c44baf586d2cc77a",
+      databaseURL: "https://gitautenticatio-default-rtdb.firebaseio.com" // Adicione se usar Realtime DB
+    };
+
+    // --- Inicialização Firebase ---
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const database = firebase.database(); // Inicializa Realtime Database se necessário
+    const googleProvider = new firebase.auth.GoogleAuthProvider();
+
+    // --- Configuração Parse/Back4App ---
+    Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I"); // Substitua pelas suas chaves
     Parse.serverURL = "https://parseapi.back4app.com/";
 
     // CLIENT_ID precisa bater com o backend
