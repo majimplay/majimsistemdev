@@ -198,6 +198,35 @@
     margin: 0 auto 10px;
     border: 2px solid #007BFF;
 }   
+.reward-table td.current-day-cell {
+    position: relative;
+    padding-top: 35px !important;
+}
+
+.current-day-marker {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.current-day-marker img {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 2px solid #007BFF;
+    margin-bottom: 5px;
+}
+
+.current-day-marker::after {
+    content: "↓";
+    color: #2196F3;
+    font-size: 24px;
+    display: block;
+    text-align: center;
+}
+
+        
     </style>
    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
@@ -484,36 +513,47 @@
 
         // --- Daily Reward Status Check (Client-Side for Initial UI) ---
         // Renamed from verificarStatusRecompensa to avoid confusion <<< RENAMED
-    async function verificarStatusRecompensaInicial(pUser) {
+ async function verificarStatusRecompensaInicial(pUser) {
     if (!pUser || !claimRewardBtn || !rewardStatusElem) return;
 
     claimRewardBtn.disabled = true;
     rewardStatusElem.textContent = 'Verificando status...';
 
     try {
-        const { canClaim, nextStreak } = checkCanClaimClientSideForUI(pUser);
+        const { canClaim, nextStreak, claimedToday } = checkCanClaimClientSideForUI(pUser);
         const tbody = document.querySelector('.reward-table tbody');
         tbody.innerHTML = '';
 
-        // Popula a tabela dinamicamente
+        // Determina o dia que deve mostrar a foto e seta
+        let targetDay = nextStreak;
+        if(claimedToday) targetDay = nextStreak === 7 ? 1 : nextStreak + 1;
+
         for (let day = 1; day <= 7; day++) {
             const tr = document.createElement('tr');
-            const isCurrent = nextStreak === day;
             const isClaimed = day < nextStreak;
+            const isCurrent = day === targetDay;
 
-            if (isCurrent) tr.classList.add('current-day');
-            if (isClaimed) tr.classList.add('claimed');
+            if(isCurrent) tr.classList.add('current-day');
+            if(isClaimed) tr.classList.add('claimed');
+
+            let dayContent = `${day}`;
+            if(isCurrent) {
+                dayContent = `
+                    <div class="current-day-marker">
+                        <img src="${firebaseUser?.photoURL || 'https://placehold.co/30x30/eee/ccc?text=U'}" 
+                             alt="Seu dia atual">
+                    </div>
+                    ${day}
+                `;
+            }
 
             tr.innerHTML = `
-                <td>${day}</td>
-                <td>${dailyRewards[day]} ${isClaimed ? '✓' : ''}</td>
+                <td class="${isCurrent ? 'current-day-cell' : ''}">${dayContent}</td>
+                <td>${dailyRewards[day]} ${isClaimed ? '✅' : ''}</td>
             `;
+
             tbody.appendChild(tr);
         }
-
-        // Atualiza a foto na tabela
-        document.getElementById('tableProfilePhoto').src = 
-            firebaseUser?.photoURL || 'https://placehold.co/40x40/eee/ccc?text=U';
 
         if (canClaim) {
             const rewardAmount = dailyRewards[nextStreak];
