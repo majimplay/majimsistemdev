@@ -158,7 +158,7 @@
     <div class="container">
         <div class="profile-header">
             <div class="profile-left">
-               <img id="profilePhoto" class="profile-photo"src="https://placehold.co/80x80/eee/ccc?text=User"alt="Foto do Perfil">
+ <img id="profilePhoto" class="profile-photo"    src="https://placehold.co/80x80/eee/ccc?text=User"   alt="Foto do Perfil">
                 <div class="profile-info">
                     <h1 id="userName"><span class="emoji">👤</span> Carregando...</h1>
                     <p id="userEmail"></p>
@@ -388,7 +388,7 @@
 
         function limparUI() {
             // Corrigido o URL quebrado do placeholder
-            if (profilePhotoElem) profilePhotoElem.src = '[https://placehold.co/80x80/eee/ccc?text=](https://placehold.co/80x80/eee/ccc?text=)?';
+            if (profilePhotoElem) profilePhotoElem.src = 'https://placehold.co/80x80/eee/ccc?text=User';
             if (userNameElem) userNameElem.innerHTML = '<span class="emoji">👤</span> Não conectado';
             if (userEmailElem) userEmailElem.textContent = '';
             if (moneyValueElem) moneyValueElem.textContent = '💸💰 --';
