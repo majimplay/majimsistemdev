@@ -97,7 +97,6 @@
             cursor: not-allowed;
         }
         .emoji { margin-right: 8px; }
-
         /* Daily Reward Styles */
         .reward-table {
             width: 100%;
@@ -131,7 +130,6 @@
             vertical-align: middle;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
         .streak-photo {
             width: 30px;
             height: 30px;
@@ -144,7 +142,6 @@
             background-color: #d4edda;
             color: #155724;
         }
-
         @media (max-width: 600px) {
             .profile-header {
                 flex-direction: column;
@@ -166,7 +163,6 @@
     <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
 </head>
 <body>
-
     <div class="container">
         <div class="profile-header">
             <div class="profile-left">
@@ -181,14 +177,12 @@
             </div>
             <button id="logoutBtn" class="btn btn-secondary"><span class="emoji">🚪</span> Sair</button>
         </div>
-
         <div class="user-details">
             <h3><span class="emoji">🆔</span> Detalhes da Conta</h3>
             <p><span class="label">Firebase User:</span> <span id="firebaseUserInfo" class="value">Aguardando login...</span></p>
             <p><span class="label">Parse User:</span> <span id="parseUserInfo" class="value">Aguardando login...</span></p>
             <p><span class="label">Status Loja:</span> <span id="lojaStatus" class="value status-loja">Verificando...</span></p>
         </div>
-
         <div class="daily-reward">
             <h3><span class="emoji">🎁</span> Recompensa Diária</h3>
             <p>Faça login todos os dias para ganhar recompensas crescentes!</p>
@@ -213,9 +207,7 @@
             <span id="claimSpinner" class="loading-spinner" style="display: none;"></span>
             <p id="rewardStatus" class="reward-status">Verificando status da recompensa...</p>
         </div>
-
     </div>
-
     <script>
        // --- Configurações ---
         const firebaseConfig = {
@@ -232,7 +224,6 @@
         const database = firebase.database();
         Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
         Parse.serverURL = "https://parseapi.back4app.com/";
-
         const profilePhotoElem = document.getElementById('profilePhoto');
         const userNameElem = document.getElementById('userName');
         const userEmailElem = document.getElementById('userEmail');
@@ -244,11 +235,9 @@
         const claimRewardBtn = document.getElementById('claimRewardBtn');
         const rewardStatusElem = document.getElementById('rewardStatus');
         const claimSpinner = document.getElementById('claimSpinner');
-
         let firebaseUser = null;
         let currentParseUser = null;
         const dailyRewards = [0, 10, 11, 11, 12, 15, 16, 20];
-
         auth.onAuthStateChanged(async user => {
             if (user) {
                 firebaseUser = user;
@@ -281,13 +270,11 @@
                 limparUI();
             }
         });
-
         logoutButton.addEventListener('click', async () => {
             await auth.signOut();
             await Parse.User.logOut();
             limparUI();
         });
-
         claimRewardBtn.addEventListener('click', async () => {
             if (!currentParseUser) return;
             claimRewardBtn.disabled = true;
@@ -309,7 +296,6 @@
                 await verificarStatusRecompensaInicial(currentParseUser);
             }
         });
-
         function highlightCurrentStreak() {
             if (!currentParseUser) return;
             const streak = currentParseUser.get("loginStreak") || 0;
@@ -325,51 +311,37 @@
             img.className = "streak-photo";
             rewardCell.appendChild(img);
         }
-
-    function markClaimedDays() {
+        function markClaimedDays() {
             if (!currentParseUser) return;
             const streak = currentParseUser.get("loginStreak") || 0;
-            const last = currentParseUser.get("lastClaimed");
-            const now = new Date();
-            const today = new Date(now.getFullYear(),now.getMonth(),now.getDate());
-            let claimedToday = false;
-            if (last instanceof Date) {
-                const ld = new Date(last.getFullYear(),last.getMonth(),last.getDate());
-                claimedToday = ld.getTime() === today.getTime();
-            }
-            const max = claimedToday ? streak : streak - 1;
-            const rows = document.querySelectorAll("#rewardTableBody tr");
-            rows.forEach((row,i) => {
-                const day = i+1;
-                if (day <= max) {
+            const tbody = document.getElementById("rewardTableBody");
+            const rows = tbody.querySelectorAll("tr");
+            rows.forEach((row, index) => {
+                const day = index + 1;
+                if (day < streak) {
                     row.classList.add("claimed");
-                    const cell = row.querySelector("td:nth-child(2)");
-                    cell.textContent = `${dailyRewards[day]} ✅ já resgatou`;
+                    const rewardCell = row.querySelector("td:nth-child(2)");
+                    rewardCell.textContent = `${dailyRewards[day]} ✅ já resgatou`;
                 }
             });
         }
-
         function atualizarCabecalhoUI(fbUser) {
             if (!fbUser) return;
             profilePhotoElem.src = fbUser.photoURL || "https://placehold.co/80x80/eee/ccc?text=User";
             userNameElem.innerHTML = `<span class="emoji">👤</span> ${fbUser.displayName || fbUser.email}`;
             userEmailElem.innerHTML = `<span class="emoji">📧</span> ${fbUser.email}`;
         }
-
         function atualizarDetalhesFirebaseUI(fbUser) {
             firebaseUserInfoElem.textContent = `Nome: ${fbUser.displayName || '(não definido)'}, ID: ${fbUser.uid}`;
         }
-
         function atualizarDetalhesParseUI(pUser) {
             const parseName = pUser.get("username") || pUser.get("name") || '(não definido)';
             parseUserInfoElem.textContent = `Nome: ${parseName}, ID: ${pUser.id}`;
         }
-
         function atualizarGranaUI(pUser) {
             const grana = pUser.get("grana") || 0;
             moneyValueElem.textContent = `💸💰 ${grana}`;
         }
-
         function limparUI() {
             profilePhotoElem.src = "https://placehold.co/80x80/eee/ccc?text=User";
             userNameElem.innerHTML = '<span class="emoji">👤</span> Não conectado';
@@ -382,7 +354,6 @@
             claimRewardBtn.disabled = true;
             claimSpinner.style.display = 'none';
         }
-
         async function verificarLojaParse(parseUser) {
             lojaStatusElem.textContent = 'Verificando loja...';
             const Loja = Parse.Object.extend("Loja");
@@ -396,7 +367,6 @@
                 lojaStatusElem.textContent = '⚠️ Erro ao verificar loja.';
             }
         }
-
         async function verificarStatusRecompensaInicial(pUser) {
             claimRewardBtn.disabled = true;
             rewardStatusElem.textContent = 'Verificando status...';
