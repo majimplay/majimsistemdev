@@ -326,17 +326,25 @@
             rewardCell.appendChild(img);
         }
 
-        function markClaimedDays() {
+    function markClaimedDays() {
             if (!currentParseUser) return;
             const streak = currentParseUser.get("loginStreak") || 0;
-            const tbody = document.getElementById("rewardTableBody");
-            const rows = tbody.querySelectorAll("tr");
-            rows.forEach((row, index) => {
-                const day = index + 1;
-                if (day < streak) {
+            const last = currentParseUser.get("lastClaimed");
+            const now = new Date();
+            const today = new Date(now.getFullYear(),now.getMonth(),now.getDate());
+            let claimedToday = false;
+            if (last instanceof Date) {
+                const ld = new Date(last.getFullYear(),last.getMonth(),last.getDate());
+                claimedToday = ld.getTime() === today.getTime();
+            }
+            const max = claimedToday ? streak : streak - 1;
+            const rows = document.querySelectorAll("#rewardTableBody tr");
+            rows.forEach((row,i) => {
+                const day = i+1;
+                if (day <= max) {
                     row.classList.add("claimed");
-                    const rewardCell = row.querySelector("td:nth-child(2)");
-                    rewardCell.textContent = `${dailyRewards[day]} ✅ já resgatou`;
+                    const cell = row.querySelector("td:nth-child(2)");
+                    cell.textContent = `${dailyRewards[day]} ✅ já resgatou`;
                 }
             });
         }
