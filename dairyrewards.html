@@ -157,8 +157,8 @@
                 atualizarCabecalhoUI(firebaseUser); // Atualiza cabeçalho
                 atualizarDetalhesFirebaseUI(firebaseUser); // Atualiza detalhes Firebase
 
-                const parseUser = Parse.User.current();
-                parseUser = await Parse.User.currentAsync();
+               // const parseUser = Parse.User.current();
+                   parseUser = await Parse.User.currentAsync(); 
                 if (parseUser) {
                      await initializeUserData(); // Novo método
                     console.log("Parse user logged in:", parseUser.id);
