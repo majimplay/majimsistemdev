@@ -147,6 +147,57 @@
                  align-self: flex-start; /* Align button left */
             }
         }
+
+/* Novos estilos para a tabela de recompensas */
+.reward-table tr.current-day {
+    background-color: #e3f2fd;
+    position: relative;
+    border: 2px solid #2196F3;
+}
+
+.reward-table tr.current-day td {
+    font-weight: bold;
+}
+
+.reward-table .claimed {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+}
+
+.reward-table .claimed td:first-child {
+    position: relative;
+    padding-left: 30px;
+}
+
+.reward-table .claimed td:first-child::before {
+    content: "✅";
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.current-day-marker {
+    position: relative;
+}
+
+.current-day-marker::after {
+    content: "↓";
+    color: #2196F3;
+    font-size: 24px;
+    position: absolute;
+    left: 50%;
+    bottom: -35px;
+    transform: translateX(-50%);
+}
+
+.user-photo-mark {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin: 0 auto 10px;
+    border: 2px solid #007BFF;
+}   
     </style>
    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
@@ -180,13 +231,19 @@
          <div class="daily-reward">
             <h3><span class="emoji">🎁</span> Recompensa Diária</h3>
             <p>Faça login todos os dias para ganhar recompensas crescentes!</p>
-            <table class="reward-table">
-                <thead>
-                    <tr>
-                        <th>Dia Consecutivo</th>
-                        <th>Recompensa (Grana)</th>
-                    </tr>
-                </thead>
+             <table class="reward-table">
+                  <thead>
+        <tr>
+            <th colspan="2">
+                <img id="tableProfilePhoto" class="user-photo-mark" src="https://placehold.co/40x40/eee/ccc?text=U" alt="Sua foto">
+                <div class="current-day-marker"></div>
+            </th>
+        </tr>
+        <tr>
+            <th>Dia Consecutivo</th>
+            <th>Recompensa (Grana)</th>
+        </tr>
+    </thead>
                 <tbody>
                     <tr><td>1</td><td>10</td></tr>
                     <tr><td>2</td><td>11</td></tr>
@@ -455,6 +512,18 @@
                     rewardStatusElem.textContent = `✅ Recompensa de hoje já resgatada. Próxima em aprox. ${hours}h ${minutes}m.`;
                     claimRewardBtn.disabled = true;
                 }
+                                 <thead>
+                                     <tr>
+                                     <th colspan="2">
+                                    <img id="tableProfilePhoto" class="user-photo-mark" src="https://placehold.co/40x40/eee/ccc?text=U" alt="Sua foto">
+                                    <div class="current-day-marker"></div>
+                                    </th>
+                                  </tr>
+                                  <tr>
+                                  <th>Dia Consecutivo</th>
+                                  <th>Recompensa (Grana)</th>
+                                  </tr>
+                                  </thead>
             } catch (error) {
                  console.error("Erro ao verificar status inicial da recompensa:", error);
                  rewardStatusElem.textContent = '⚠️ Erro ao verificar status da recompensa.';
@@ -498,6 +567,7 @@
                 canClaim = true;
                 nextStreak = 1;
             }
+            window.currentStreakDay = nextStreak;
             return { canClaim, nextStreak };
         }
 
