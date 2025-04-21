@@ -26,12 +26,12 @@
             margin-bottom: 1rem;
             padding-bottom: 1rem;
             border-bottom: 2px solid #eee;
-            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+            flex-wrap: wrap;
         }
         .profile-left {
             display: flex;
             align-items: center;
-            margin-bottom: 1rem; /* Add margin if wraps */
+            margin-bottom: 1rem;
         }
         .profile-photo {
             width: 80px;
@@ -44,48 +44,48 @@
         .profile-info h1 { margin: 0; color: #333; font-size: 1.2em; }
         .profile-info p { color: #666; margin: 0.2rem 0; font-size: 0.9em; }
         .profile-money {
-            margin-left: 1.5rem; /* Space between info and money */
+            margin-left: 1.5rem;
             font-size: 1.1em;
             font-weight: bold;
-            color: #28a745; /* Green color for money */
+            color: #28a745;
         }
         .user-details, .daily-reward {
-            margin-top: 1.5rem; /* Increased margin */
-            padding: 1.5rem; /* Increased padding */
+            margin-top: 1.5rem;
+            padding: 1.5rem;
             background-color: #f8f9fa;
             border-radius: 8px;
             border: 1px solid #eee;
         }
         .user-details h3, .daily-reward h3 {
             margin-top: 0;
-            margin-bottom: 1rem; /* Increased margin */
+            margin-bottom: 1rem;
             font-size: 1.1em;
             color: #0056b3;
-            border-bottom: 1px solid #ddd; /* Add separator */
-            padding-bottom: 0.5rem; /* Space below title */
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 0.5rem;
         }
-         .user-details p {
-            margin: 0.4rem 0; /* Increased margin */
+        .user-details p {
+            margin: 0.4rem 0;
             font-size: 0.95em;
-         }
-         .user-details span.label {
+        }
+        .user-details span.label {
             font-weight: bold;
             color: #555;
-            display: inline-block; /* Ensure alignment */
-            min-width: 100px; /* Adjust as needed */
-         }
-          .user-details span.value {
+            display: inline-block;
+            min-width: 100px;
+        }
+        .user-details span.value {
             color: #333;
-         }
-         .user-details span.status-loja {
-             font-style: italic;
-         }
+        }
+        .user-details span.status-loja {
+            font-style: italic;
+        }
         .btn {
-            padding: 0.7rem 1.4rem; /* Slightly larger button */
+            padding: 0.7rem 1.4rem;
             border: none; border-radius: 6px; cursor: pointer;
             font-weight: 600; transition: all 0.3s ease; white-space: nowrap;
-            font-size: 0.95em; /* Slightly larger font */
-            margin-left: 10px; /* Add some margin between buttons */
+            font-size: 0.95em;
+            margin-left: 10px;
         }
         .btn-secondary { background: #6c757d; color: white; }
         .btn-secondary:hover { background: #5a6268; }
@@ -119,116 +119,48 @@
             font-style: italic;
             color: #666;
         }
-        .loading-spinner { /* Basic spinner */
+        .loading-spinner {
             display: inline-block;
-            border: 3px solid #f3f3f3; /* Light grey */
-            border-top: 3px solid #007bff; /* Blue */
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #007bff;
             border-radius: 50%;
             width: 16px;
             height: 16px;
             animation: spin 1s linear infinite;
             margin-left: 5px;
-            vertical-align: middle; /* Align with text */
+            vertical-align: middle;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
+        .streak-photo {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-left: 6px;
+            vertical-align: middle;
+        }
+        .reward-table .claimed {
+            background-color: #d4edda;
+            color: #155724;
+        }
 
-        @media (max-width: 600px) { /* Adjust breakpoint as needed */
+        @media (max-width: 600px) {
             .profile-header {
                 flex-direction: column;
                 align-items: flex-start;
             }
             .profile-money {
                 margin-left: 0;
-                margin-top: 0.5rem; /* Add space when stacked */
+                margin-top: 0.5rem;
             }
-            .profile-header > button { /* Logout button */
-                 margin-top: 1rem;
-                 align-self: flex-start; /* Align button left */
+            .profile-header > button {
+                margin-top: 1rem;
+                align-self: flex-start;
             }
         }
-
-/* Novos estilos para a tabela de recompensas */
-.reward-table tr.current-day {
-    background-color: #e3f2fd;
-    position: relative;
-    border: 2px solid #2196F3;
-}
-
-.reward-table tr.current-day td {
-    font-weight: bold;
-}
-
-.reward-table .claimed {
-    background-color: #e8f5e9;
-    color: #2e7d32;
-}
-
-.reward-table .claimed td:first-child {
-    position: relative;
-    padding-left: 30px;
-}
-
-.reward-table .claimed td:first-child::before {
-    content: "✅";
-    position: absolute;
-    left: 8px;
-    top: 50%;
-    transform: translateY(-50%);
-}
-
-.current-day-marker {
-    position: relative;
-}
-
-.current-day-marker::after {
-    content: "↓";
-    color: #2196F3;
-    font-size: 24px;
-    position: absolute;
-    left: 50%;
-    bottom: -35px;
-    transform: translateX(-50%);
-}
-
-.user-photo-mark {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    margin: 0 auto 10px;
-    border: 2px solid #007BFF;
-}   
-.reward-table td.current-day-cell {
-    position: relative;
-    padding-top: 35px !important;
-}
-
-.current-day-marker {
-    position: absolute;
-    top: -30px;
-    left: 50%;
-    transform: translateX(-50%);
-}
-
-.current-day-marker img {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    border: 2px solid #007BFF;
-    margin-bottom: 5px;
-}
-
-.current-day-marker::after {
-    content: "↓";
-    color: #2196F3;
-    font-size: 24px;
-    display: block;
-    text-align: center;
-}
-
-        
     </style>
-   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
@@ -238,12 +170,12 @@
     <div class="container">
         <div class="profile-header">
             <div class="profile-left">
-                <img id="profilePhoto" class="profile-photo" src="[https://placehold.co/80x80/eee/ccc?text=User](https://placehold.co/80x80/eee/ccc?text=User)" alt="Foto do Perfil">
+                <img id="profilePhoto" class="profile-photo" src="https://placehold.co/80x80/eee/ccc?text=User" alt="Foto do Perfil">
                 <div class="profile-info">
                     <h1 id="userName"><span class="emoji">👤</span> Carregando...</h1>
                     <p id="userEmail"></p>
                 </div>
-                 <div id="userMoney" class="profile-money">
+                <div id="userMoney" class="profile-money">
                     <span class="emoji">💳</span> Grana: <span id="moneyValue">💸💰 --</span>
                 </div>
             </div>
@@ -257,23 +189,17 @@
             <p><span class="label">Status Loja:</span> <span id="lojaStatus" class="value status-loja">Verificando...</span></p>
         </div>
 
-         <div class="daily-reward">
+        <div class="daily-reward">
             <h3><span class="emoji">🎁</span> Recompensa Diária</h3>
             <p>Faça login todos os dias para ganhar recompensas crescentes!</p>
-             <table class="reward-table">
-                  <thead>
-        <tr>
-            <th colspan="2">
-                <img id="tableProfilePhoto" class="user-photo-mark" src="https://placehold.co/40x40/eee/ccc?text=U" alt="Sua foto">
-                <div class="current-day-marker"></div>
-            </th>
-        </tr>
-        <tr>
-            <th>Dia Consecutivo</th>
-            <th>Recompensa (Grana)</th>
-        </tr>
-    </thead>
-                <tbody>
+            <table class="reward-table">
+                <thead>
+                    <tr>
+                        <th>Dia Consecutivo</th>
+                        <th>Recompensa (Grana)</th>
+                    </tr>
+                </thead>
+                <tbody id="rewardTableBody">
                     <tr><td>1</td><td>10</td></tr>
                     <tr><td>2</td><td>11</td></tr>
                     <tr><td>3</td><td>11</td></tr>
@@ -291,28 +217,22 @@
     </div>
 
     <script>
-       // --- Configurations ---
-        // IMPORTANTE: Substitua pelas suas chaves reais!
+       // --- Configurações ---
         const firebaseConfig = {
-            apiKey: "AIzaSyDlUQbbTP29VqBVmzOGHhfc67R1DTRPwxg", // Sua chave
+            apiKey: "AIzaSyDlUQbbTP29VqBVmzOGHhfc67R1DTRPwxg",
             authDomain: "gitautenticatio.firebaseapp.com",
-            databaseURL: "https://gitautenticatio-default-rtdb.firebaseio.com", // Necessário se usar database()
+            databaseURL: "https://gitautenticatio-default-rtdb.firebaseio.com",
             projectId: "gitautenticatio",
             storageBucket: "gitautenticatio.appspot.com",
             messagingSenderId: "21514234895",
             appId: "1:21514234895:web:d34dc4c44baf586d2cc77a"
         };
-
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
-        const database = firebase.database(); // Agora deve funcionar
-
-        // Initialize Parse
-        // IMPORTANTE: Substitua pelas suas chaves reais!
-        Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I"); // Suas chaves
+        const database = firebase.database();
+        Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
         Parse.serverURL = "https://parseapi.back4app.com/";
-        // --- Elementos da UI ---
+
         const profilePhotoElem = document.getElementById('profilePhoto');
         const userNameElem = document.getElementById('userName');
         const userEmailElem = document.getElementById('userEmail');
@@ -323,174 +243,139 @@
         const logoutButton = document.getElementById('logoutBtn');
         const claimRewardBtn = document.getElementById('claimRewardBtn');
         const rewardStatusElem = document.getElementById('rewardStatus');
-        const claimSpinner = document.getElementById('claimSpinner'); // Spinner element
+        const claimSpinner = document.getElementById('claimSpinner');
 
-        // --- Global Variables ---
         let firebaseUser = null;
         let currentParseUser = null;
-
-        // --- Daily Reward Configuration (Client-side reference for display) ---
         const dailyRewards = [0, 10, 11, 11, 12, 15, 16, 20];
-
-        // --- Event Listeners and Initialization ---
 
         auth.onAuthStateChanged(async user => {
             if (user) {
                 firebaseUser = user;
-                console.log("Firebase user logged in:", firebaseUser.uid);
                 atualizarCabecalhoUI(firebaseUser);
                 atualizarDetalhesFirebaseUI(firebaseUser);
-
                 currentParseUser = Parse.User.current();
                 if (currentParseUser) {
-                    console.log("Parse user logged in:", currentParseUser.id);
                     try {
-                        await currentParseUser.fetch(); // Fetch latest data
-                        console.log("Parse user data fetched:", currentParseUser.attributes);
+                        await currentParseUser.fetch();
                         atualizarDetalhesParseUI(currentParseUser);
                         await verificarLojaParse(currentParseUser);
                         atualizarGranaUI(currentParseUser);
-                        // Check status on load (uses client-side check for initial display)
-                        await verificarStatusRecompensaInicial(currentParseUser); // <<< CHANGED
+                        await verificarStatusRecompensaInicial(currentParseUser);
++                       markClaimedDays();
++                       highlightCurrentStreak();
                     } catch (error) {
-                        console.error("Error fetching Parse user data on login:", error);
                         parseUserInfoElem.textContent = 'Erro ao buscar dados do Parse.';
                         moneyValueElem.textContent = '💸💰 Erro';
                         rewardStatusElem.textContent = 'Erro ao verificar status.';
                         claimRewardBtn.disabled = true;
                     }
                 } else {
-                    console.warn("Firebase user logged in, but Parse.User.current() is null!");
                     parseUserInfoElem.textContent = 'Erro: Usuário Parse não sincronizado.';
                     lojaStatusElem.textContent = 'Não verificado (Erro Parse)';
                     moneyValueElem.textContent = '💸💰 --';
                     rewardStatusElem.textContent = 'Faça login com Parse para ver recompensas.';
                     claimRewardBtn.disabled = true;
                 }
-
             } else {
-                firebaseUser = null;
-                currentParseUser = null;
-                console.log("No Firebase user logged in.");
                 limparUI();
             }
         });
 
-        if (logoutButton) {
-            logoutButton.addEventListener('click', async () => {
-                try {
-                    await auth.signOut();
-                    await Parse.User.logOut();
-                    console.log("Logout successful.");
-                    limparUI();
-                } catch (error) {
-                    console.error('Error during logout:', error);
-                    alert('❌ Error logging out: ' + error.message);
-                }
-            });
-        }
+        logoutButton.addEventListener('click', async () => {
+            await auth.signOut();
+            await Parse.User.logOut();
+            limparUI();
+        });
 
-        // Claim Reward Button Listener - Calls Cloud Code <<< UPDATED BLOCK
-        if (claimRewardBtn) {
-            claimRewardBtn.addEventListener('click', async () => {
-                if (!currentParseUser) {
-                    alert("Erro: Usuário Parse não encontrado.");
-                    return;
-                }
-                claimRewardBtn.disabled = true; // Disable button
-                claimSpinner.style.display = 'inline-block'; // Show spinner
-                rewardStatusElem.textContent = 'Processando resgate...';
-
-                try {
-                    // Call the Cloud Code function "claimDailyReward"
-                    console.log("Calling Parse.Cloud.run('claimDailyReward')...");
-                    const result = await Parse.Cloud.run("claimDailyReward");
-                    console.log("Cloud function result:", result);
-
-                    claimSpinner.style.display = 'none'; // Hide spinner
-
-                    if (result && result.success) {
-                         // Success! Update UI with data from Cloud Code response
-                         moneyValueElem.textContent = `💸💰 ${result.newGrana}`;
-                         rewardStatusElem.textContent = `✅ ${result.message} Volte amanhã.`;
-                         claimRewardBtn.disabled = true; // Keep disabled, already claimed
-
-                    } else {
-                        // Cloud function returned an error or success: false
-                        const errorMessage = (result && result.message) ? result.message : "Erro desconhecido retornado pelo servidor.";
-                        console.error("Cloud function returned error:", errorMessage);
-                        rewardStatusElem.textContent = `❌ ${errorMessage}`;
-                        // Re-check status to potentially re-enable button if error wasn't "already claimed"
-                        await verificarStatusRecompensaInicial(currentParseUser);
-                    }
-
-                } catch (error) {
-                    // Handle errors during the Parse.Cloud.run call itself (e.g., network error, function not found)
-                    claimSpinner.style.display = 'none'; // Hide spinner
-                    console.error("Erro ao chamar Parse.Cloud.run('claimDailyReward'):", error);
-                    // Check for specific Parse error codes if needed
-                    let displayError = error.message;
-                    if (error.code === Parse.Error.INVALID_FUNCTION_NAME) {
-                        displayError = "Função 'claimDailyReward' não encontrada no servidor.";
-                    }
-                    rewardStatusElem.textContent = `⚠️ Erro de comunicação: ${displayError}`;
-                    // Attempt to re-check status to see if button should be enabled
+        claimRewardBtn.addEventListener('click', async () => {
+            if (!currentParseUser) return;
+            claimRewardBtn.disabled = true;
+            claimSpinner.style.display = 'inline-block';
+            rewardStatusElem.textContent = 'Processando resgate...';
+            try {
+                const result = await Parse.Cloud.run("claimDailyReward");
+                claimSpinner.style.display = 'none';
+                if (result && result.success) {
+                    moneyValueElem.textContent = `💸💰 ${result.newGrana}`;
+                    rewardStatusElem.textContent = `✅ ${result.message} Volte amanhã.`;
+                } else {
+                    rewardStatusElem.textContent = `❌ ${(result && result.message) ? result.message : 'Erro desconhecido.'}`;
                     await verificarStatusRecompensaInicial(currentParseUser);
                 }
+            } catch (error) {
+                claimSpinner.style.display = 'none';
+                rewardStatusElem.textContent = `⚠️ Erro de comunicação: ${error.message}`;
+                await verificarStatusRecompensaInicial(currentParseUser);
+            }
+        });
+
+        function highlightCurrentStreak() {
+            if (!currentParseUser) return;
+            const streak = currentParseUser.get("loginStreak") || 0;
+            if (streak < 1 || streak > 7) return;
+            const photoSrc = profilePhotoElem.src;
+            const tbody = document.getElementById("rewardTableBody");
+            const rows = tbody.querySelectorAll("tr");
+            const targetRow = rows[streak - 1];
+            const rewardCell = targetRow.querySelector("td:nth-child(2)");
+            const img = document.createElement("img");
+            img.src = photoSrc;
+            img.alt = `Dia ${streak}`;
+            img.className = "streak-photo";
+            rewardCell.appendChild(img);
+        }
+
+        function markClaimedDays() {
+            if (!currentParseUser) return;
+            const streak = currentParseUser.get("loginStreak") || 0;
+            const tbody = document.getElementById("rewardTableBody");
+            const rows = tbody.querySelectorAll("tr");
+            rows.forEach((row, index) => {
+                const day = index + 1;
+                if (day < streak) {
+                    row.classList.add("claimed");
+                    const rewardCell = row.querySelector("td:nth-child(2)");
+                    rewardCell.textContent = `${dailyRewards[day]} ✅ já resgatou`;
+                }
             });
         }
-        // --- End of Updated Block ---
-
-        // --- UI Update Functions ---
 
         function atualizarCabecalhoUI(fbUser) {
             if (!fbUser) return;
-            // Corrigido o URL quebrado do placeholder
-            if (profilePhotoElem) profilePhotoElem.src = fbUser.photoURL || '[https://placehold.co/80x80/eee/ccc?text=](https://placehold.co/80x80/eee/ccc?text=):)';
-            if (userNameElem) userNameElem.innerHTML = `<span class="emoji">👤</span> ${fbUser.displayName || fbUser.email || 'Usuário'}`;
-            if (userEmailElem) userEmailElem.innerHTML = `<span class="emoji">📧</span> ${fbUser.email}`;
+            profilePhotoElem.src = fbUser.photoURL || "https://placehold.co/80x80/eee/ccc?text=User";
+            userNameElem.innerHTML = `<span class="emoji">👤</span> ${fbUser.displayName || fbUser.email}`;
+            userEmailElem.innerHTML = `<span class="emoji">📧</span> ${fbUser.email}`;
         }
 
         function atualizarDetalhesFirebaseUI(fbUser) {
-             if (!fbUser) return;
-             if (firebaseUserInfoElem) {
-                 firebaseUserInfoElem.textContent = `Nome: ${fbUser.displayName || '(não definido)'}, ID: ${fbUser.uid}`;
-             }
+            firebaseUserInfoElem.textContent = `Nome: ${fbUser.displayName || '(não definido)'}, ID: ${fbUser.uid}`;
         }
 
-         function atualizarDetalhesParseUI(pUser) {
-             if (!pUser) return;
-             if (parseUserInfoElem) {
-                 const parseName = pUser.get("username") || pUser.get("name") || pUser.get("email") || '(não definido)';
-                 parseUserInfoElem.textContent = `Nome: ${parseName}, ID: ${pUser.id}`;
-             }
-         }
+        function atualizarDetalhesParseUI(pUser) {
+            const parseName = pUser.get("username") || pUser.get("name") || '(não definido)';
+            parseUserInfoElem.textContent = `Nome: ${parseName}, ID: ${pUser.id}`;
+        }
 
         function atualizarGranaUI(pUser) {
-            if (!pUser || !moneyValueElem) return;
             const grana = pUser.get("grana") || 0;
             moneyValueElem.textContent = `💸💰 ${grana}`;
         }
 
         function limparUI() {
-            // Corrigido o URL quebrado do placeholder
-            if (profilePhotoElem) profilePhotoElem.src = '[https://placehold.co/80x80/eee/ccc?text=](https://placehold.co/80x80/eee/ccc?text=)?';
-            if (userNameElem) userNameElem.innerHTML = '<span class="emoji">👤</span> Não conectado';
-            if (userEmailElem) userEmailElem.textContent = '';
-            if (moneyValueElem) moneyValueElem.textContent = '💸💰 --';
-            if (firebaseUserInfoElem) firebaseUserInfoElem.textContent = 'Desconectado';
-            if (parseUserInfoElem) parseUserInfoElem.textContent = 'Desconectado';
-            if (lojaStatusElem) lojaStatusElem.textContent = 'Desconectado';
-            if (rewardStatusElem) rewardStatusElem.textContent = 'Desconectado';
-            if (claimRewardBtn) claimRewardBtn.disabled = true;
-            if (claimSpinner) claimSpinner.style.display = 'none';
+            profilePhotoElem.src = "https://placehold.co/80x80/eee/ccc?text=User";
+            userNameElem.innerHTML = '<span class="emoji">👤</span> Não conectado';
+            userEmailElem.textContent = '';
+            moneyValueElem.textContent = '💸💰 --';
+            firebaseUserInfoElem.textContent = 'Desconectado';
+            parseUserInfoElem.textContent = 'Desconectado';
+            lojaStatusElem.textContent = 'Desconectado';
+            rewardStatusElem.textContent = 'Desconectado';
+            claimRewardBtn.disabled = true;
+            claimSpinner.style.display = 'none';
         }
 
-        // --- Parse Logic Functions ---
-
         async function verificarLojaParse(parseUser) {
-            // (Mantido da versão anterior)
-             if (!parseUser || !lojaStatusElem) return;
             lojaStatusElem.textContent = 'Verificando loja...';
             const Loja = Parse.Object.extend("Loja");
             const query = new Parse.Query(Loja);
@@ -498,130 +383,56 @@
             query.select("nome");
             try {
                 const loja = await query.first();
-                if (loja) {
-                    const nomeLoja = loja.get("nome");
-                    lojaStatusElem.textContent = `✅ Sim, possui loja: ${nomeLoja}`;
-                } else {
-                    lojaStatusElem.textContent = '❌ Não possui loja registrada.';
-                }
-            } catch (error) {
-                console.error("Erro ao buscar loja no Parse:", error);
+                lojaStatusElem.textContent = loja ? `✅ Sim, possui loja: ${loja.get("nome")}` : '❌ Não possui loja registrada.';
+            } catch {
                 lojaStatusElem.textContent = '⚠️ Erro ao verificar loja.';
             }
         }
 
-
-        // --- Daily Reward Status Check (Client-Side for Initial UI) ---
-        // Renamed from verificarStatusRecompensa to avoid confusion <<< RENAMED
- async function verificarStatusRecompensaInicial(pUser) {
-    if (!pUser || !claimRewardBtn || !rewardStatusElem) return;
-
-    claimRewardBtn.disabled = true;
-    rewardStatusElem.textContent = 'Verificando status...';
-
-    try {
-        const { canClaim, nextStreak, claimedToday } = checkCanClaimClientSideForUI(pUser);
-        const tbody = document.querySelector('.reward-table tbody');
-        tbody.innerHTML = '';
-
-        // Determina o dia que deve mostrar a foto e seta
-        let targetDay = nextStreak;
-        if(claimedToday) targetDay = nextStreak === 7 ? 1 : nextStreak + 1;
-
-        for (let day = 1; day <= 7; day++) {
-            const tr = document.createElement('tr');
-            const isClaimed = day < nextStreak;
-            const isCurrent = day === targetDay;
-
-            if(isCurrent) tr.classList.add('current-day');
-            if(isClaimed) tr.classList.add('claimed');
-
-            let dayContent = `${day}`;
-            if(isCurrent) {
-                dayContent = `
-                    <div class="current-day-marker">
-                        <img src="${firebaseUser?.photoURL || 'https://placehold.co/30x30/eee/ccc?text=U'}" 
-                             alt="Seu dia atual">
-                    </div>
-                    ${day}
-                `;
-            }
-
-            tr.innerHTML = `
-                <td class="${isCurrent ? 'current-day-cell' : ''}">${dayContent}</td>
-                <td>${dailyRewards[day]} ${isClaimed ? '✅' : ''}</td>
-            `;
-
-            tbody.appendChild(tr);
-        }
-
-        if (canClaim) {
-            const rewardAmount = dailyRewards[nextStreak];
-            rewardStatusElem.textContent = `🎁 Pronto para resgatar a recompensa do Dia ${nextStreak} (${rewardAmount} grana)!`;
-            claimRewardBtn.disabled = false;
-        } else {
-            const today = new Date();
-            const tomorrow = new Date(today);
-            tomorrow.setDate(today.getDate() + 1);
-            tomorrow.setHours(0, 0, 0, 0);
-
-            const timeUntilTomorrow = tomorrow - today;
-            const hours = Math.floor(timeUntilTomorrow / 3_600_000);
-            const minutes = Math.floor((timeUntilTomorrow % 3_600_000) / 60_000);
-
-            rewardStatusElem.textContent = `✅ Recompensa já resgatada. Próxima em ${hours}h ${minutes}m.`;
+        async function verificarStatusRecompensaInicial(pUser) {
             claimRewardBtn.disabled = true;
+            rewardStatusElem.textContent = 'Verificando status...';
+            try {
+                const { canClaim, nextStreak } = checkCanClaimClientSideForUI(pUser);
+                if (canClaim) {
+                    const rewardAmount = dailyRewards[nextStreak] || '??';
+                    rewardStatusElem.textContent = `🎁 Pronto para resgatar a recompensa do Dia ${nextStreak} (${rewardAmount} grana)!`;
+                    claimRewardBtn.disabled = false;
+                } else {
+                    const today = new Date();
+                    const tomorrow = new Date(today);
+                    tomorrow.setDate(today.getDate() + 1);
+                    tomorrow.setHours(0,0,0,0);
+                    const diff = tomorrow - today;
+                    const hours = Math.floor(diff / 36e5);
+                    const minutes = Math.floor((diff % 36e5) / 6e4);
+                    rewardStatusElem.textContent = `✅ Recompensa de hoje já resgatada. Próxima em aprox. ${hours}h ${minutes}m.`;
+                }
+            } catch {
+                rewardStatusElem.textContent = '⚠️ Erro ao verificar status da recompensa.';
+            }
         }
 
-    } catch (error) { // <<- BLOCO CATCH CORRIGIDO
-        console.error("Erro ao verificar status:", error);
-        rewardStatusElem.textContent = '⚠️ Erro ao verificar status.';
-        claimRewardBtn.disabled = true;
-    }
-}
-        /**
-         * Client-side check purely for initial UI display (button state, message).
-         * Does NOT perform the actual claim. Relies on client time.
-         * @param {Parse.User} pUser - The current Parse user object.
-         * @returns {{canClaim: boolean, nextStreak: number}}
-         */
-        function checkCanClaimClientSideForUI(pUser) { // <<< HELPER FUNCTION
+        function checkCanClaimClientSideForUI(pUser) {
             const lastClaimedDate = pUser.get("lastClaimed");
             const currentStreak = pUser.get("loginStreak") || 0;
-            const now = new Date(); // Client's time
+            const now = new Date();
             const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
             let canClaim = false;
             let nextStreak = 1;
-
             if (lastClaimedDate instanceof Date) {
-                const lastClaimDay = new Date(lastClaimedDate.getFullYear(), lastClaimedDate.getMonth(), lastClaimedDate.getDate());
-                 const yesterday = new Date(today);
-                 yesterday.setDate(today.getDate() - 1);
-
-                if (lastClaimDay.getTime() < today.getTime()) { // Hasn't claimed today (client time)
+                const lastDay = new Date(lastClaimedDate.getFullYear(), lastClaimedDate.getMonth(), lastClaimedDate.getDate());
+                const yesterday = new Date(today);
+                yesterday.setDate(today.getDate() - 1);
+                if (lastDay < today) {
                     canClaim = true;
-                    if (lastClaimDay.getTime() === yesterday.getTime()) {
-                         nextStreak = (currentStreak % 7) + 1;
-                    } else {
-                         nextStreak = 1;
-                    }
-                } else {
-                    canClaim = false; // Already claimed today
-                    nextStreak = currentStreak;
+                    nextStreak = (lastDay.getTime() === yesterday.getTime()) ? ((currentStreak % 7) + 1) : 1;
                 }
             } else {
-                 // Never claimed before
                 canClaim = true;
-                nextStreak = 1;
             }
-            window.currentStreakDay = nextStreak;
             return { canClaim, nextStreak };
         }
-
-        // REMOVED: The old 'checkCanClaimClientSide' function is no longer needed here
-        // as the core logic is in the Cloud Code.
-
     </script>
 </body>
 </html>
