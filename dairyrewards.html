@@ -484,53 +484,61 @@
 
         // --- Daily Reward Status Check (Client-Side for Initial UI) ---
         // Renamed from verificarStatusRecompensa to avoid confusion <<< RENAMED
-        async function verificarStatusRecompensaInicial(pUser) {
-            if (!pUser || !claimRewardBtn || !rewardStatusElem) return;
+    async function verificarStatusRecompensaInicial(pUser) {
+    if (!pUser || !claimRewardBtn || !rewardStatusElem) return;
 
-            claimRewardBtn.disabled = true; // Disable initially
-            rewardStatusElem.textContent = 'Verificando status...';
+    claimRewardBtn.disabled = true;
+    rewardStatusElem.textContent = 'Verificando status...';
 
-            try {
-                // Use the client-side check just for the initial UI state
-                const { canClaim, nextStreak } = checkCanClaimClientSideForUI(pUser); // <<< Uses helper
+    try {
+        const { canClaim, nextStreak } = checkCanClaimClientSideForUI(pUser);
+        const tbody = document.querySelector('.reward-table tbody');
+        tbody.innerHTML = '';
 
-                if (canClaim) {
-                    const rewardAmount = dailyRewards[nextStreak] || '??';
-                    rewardStatusElem.textContent = `🎁 Pronto para resgatar a recompensa do Dia ${nextStreak} (${rewardAmount} grana)!`;
-                    claimRewardBtn.disabled = false; // Enable claim button
-                } else {
-                    // Already claimed today
-                     const today = new Date();
-                     const tomorrow = new Date(today);
-                     tomorrow.setDate(today.getDate() + 1);
-                     tomorrow.setHours(0, 0, 0, 0); // Start of tomorrow
+        // Popula a tabela dinamicamente
+        for (let day = 1; day <= 7; day++) {
+            const tr = document.createElement('tr');
+            const isCurrent = nextStreak === day;
+            const isClaimed = day < nextStreak;
 
-                     const timeUntilTomorrow = tomorrow.getTime() - today.getTime();
-                     const hours = Math.floor(timeUntilTomorrow / (1000 * 60 * 60));
-                     const minutes = Math.floor((timeUntilTomorrow % (1000 * 60 * 60)) / (1000 * 60));
+            if (isCurrent) tr.classList.add('current-day');
+            if (isClaimed) tr.classList.add('claimed');
 
-                    rewardStatusElem.textContent = `✅ Recompensa de hoje já resgatada. Próxima em aprox. ${hours}h ${minutes}m.`;
-                    claimRewardBtn.disabled = true;
-                }
-                                 <thead>
-                                     <tr>
-                                     <th colspan="2">
-                                    <img id="tableProfilePhoto" class="user-photo-mark" src="https://placehold.co/40x40/eee/ccc?text=U" alt="Sua foto">
-                                    <div class="current-day-marker"></div>
-                                    </th>
-                                  </tr>
-                                  <tr>
-                                  <th>Dia Consecutivo</th>
-                                  <th>Recompensa (Grana)</th>
-                                  </tr>
-                                  </thead>
-            } catch (error) {
-                 console.error("Erro ao verificar status inicial da recompensa:", error);
-                 rewardStatusElem.textContent = '⚠️ Erro ao verificar status da recompensa.';
-                 claimRewardBtn.disabled = true;
-            }
+            tr.innerHTML = `
+                <td>${day}</td>
+                <td>${dailyRewards[day]} ${isClaimed ? '✓' : ''}</td>
+            `;
+            tbody.appendChild(tr);
         }
 
+        // Atualiza a foto na tabela
+        document.getElementById('tableProfilePhoto').src = 
+            firebaseUser?.photoURL || 'https://placehold.co/40x40/eee/ccc?text=U';
+
+        if (canClaim) {
+            const rewardAmount = dailyRewards[nextStreak];
+            rewardStatusElem.textContent = `🎁 Pronto para resgatar a recompensa do Dia ${nextStreak} (${rewardAmount} grana)!`;
+            claimRewardBtn.disabled = false;
+        } else {
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(today.getDate() + 1);
+            tomorrow.setHours(0, 0, 0, 0);
+
+            const timeUntilTomorrow = tomorrow - today;
+            const hours = Math.floor(timeUntilTomorrow / 3_600_000);
+            const minutes = Math.floor((timeUntilTomorrow % 3_600_000) / 60_000);
+
+            rewardStatusElem.textContent = `✅ Recompensa já resgatada. Próxima em ${hours}h ${minutes}m.`;
+            claimRewardBtn.disabled = true;
+        }
+
+    } catch (error) { // <<- BLOCO CATCH CORRIGIDO
+        console.error("Erro ao verificar status:", error);
+        rewardStatusElem.textContent = '⚠️ Erro ao verificar status.';
+        claimRewardBtn.disabled = true;
+    }
+}
         /**
          * Client-side check purely for initial UI display (button state, message).
          * Does NOT perform the actual claim. Relies on client time.
