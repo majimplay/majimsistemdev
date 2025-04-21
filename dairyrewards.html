@@ -174,6 +174,7 @@
 
             } else {
                 firebaseUser = null;
+                parseUser = null; // Reset também o Parse User
                 console.log("No Firebase user logged in.");
                 limparUI(); // Limpa toda a UI
                 // Poderia redirecionar para login: window.location.href = 'login.html';
