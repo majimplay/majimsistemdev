@@ -34,7 +34,7 @@
 
     // CLIENT_ID precisa bater com o backend
     const CLIENT_ID = '21514234895-keiqos567ifvs4hjkg3l1q5mvun8lri0.apps.googleusercontent.com';
-    const REDIRECT_URI = 'https://majimplay.github.io/';
+    const REDIRECT_URI = 'https://majimplay.github.io/majimsistemdev/login.html';
 
     async function iniciarLoginGoogle() {
       const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&scope=email%20profile&prompt=select_account`;
