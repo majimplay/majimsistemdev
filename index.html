@@ -234,7 +234,7 @@
     // --- Configuração Parse/Back4App ---
     Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I"); // Substitua pelas suas chaves
     Parse.serverURL = "https://parseapi.back4app.com/";
-
+    Parse.User.disableUnsafeCurrentUser(); // Desabilita armazenamento automático do usuário
 
     // --- Funções ---
 
@@ -257,7 +257,10 @@
       try {
         // Tenta fazer login no Parse usando o UID do Firebase como username e senha
         await Parse.User.logIn(firebaseUID, firebaseUID);
-        console.log(`[Parse Sync] Usuário ${firebaseUID} logado com sucesso no Parse.`);
+        console.log(`[Parse Sync] Usuário ${firebaseUID} logado com sucesso no Parse usando o UID do Firebase.`);
+                // Salva apenas o session token
+        const sessionToken = Parse.User.current().getSessionToken();
+        localStorage.setItem('parseSessionToken', sessionToken);
 
         // **Verifica se o Cliente existe após o login bem-sucedido**
         const currentUser = Parse.User.current();
@@ -292,6 +295,9 @@
           // parseUser.set("carrinho", []); // **REMOVIDO: Não vamos mais usar o carrinho no _User**
           parseUser.set("firebaseUID", firebaseUID);
 
+          const newUser = await parseUser.signUp();
+          // Salva session token após cadastro
+          localStorage.setItem('parseSessionToken', newUser.getSessionToken());
           try {
             // Tenta registrar o novo usuário no Parse
             const newUser = await parseUser.signUp();
@@ -303,7 +309,7 @@
             newCliente.set("carrinhoclient", []); // Inicializa array de produtos VAZIO
             await newCliente.save();
             console.log("[Cliente Check] Parse ClienteClass criado com sucesso para novo usuário:", newCliente.id);
-            // alert(`🎉 Conta e Cliente criados com sucesso!`); // Opcional
+             alert(`🎉 Conta e Cliente criados com sucesso!`); // Opcional
 
           } catch (signUpError) {
             console.error(`[Parse Sync] Erro ao criar usuário ${firebaseUID} no Parse:`, signUpError);
@@ -325,12 +331,30 @@
    auth.onAuthStateChanged(async (user) => {
       console.log("[Auth State] Mudança detectada. Usuário:", user ? user.uid : "Nenhum");
       if (user) {
+  
+        // Tenta restaurar sessão com token
+        const token = localStorage.getItem('parseSessionToken');
+        if(token) {
+          try {
+            await Parse.User.become(token);
+            console.log("[Auth State] Sessão Parse restaurada via token");
+          } catch(error) {
+            console.error("[Auth State] Token inválido:", error);
+            localStorage.removeItem('parseSessionToken');
+            await syncFirebaseUserToParse(user);
+          }
+        } else {
+          await syncFirebaseUserToParse(user);
+        }
+        
         await syncFirebaseUserToParse(user); // Sincroniza/Cria User e Cliente
         await loadInitialCartCount(); // Carrega contagem do Cliente associado
         checkAdminStatus(user.uid); // Verifica admin
       } else {
          // Se deslogou, zera a contagem do carrinho na UI
          updateCartCount(0);
+         localStorage.removeItem('parseSessionToken'); // Limpa token ao deslogar
+        
          if (Parse.User.current()) {
             console.log("[Auth State] Deslogando usuário Parse...");
             try {
@@ -427,6 +451,9 @@
         await auth.signOut(); // Desloga do Firebase
         // O onAuthStateChanged cuidará do logout do Parse e da UI.
         console.log('[Logout] Firebase signOut concluído.');
+        await Parse.User.logOut();
+          localStorage.removeItem('parseSessionToken'); // Limpa token
+        console.log('[Logout] Todos os dados removidos');
       } catch (error) {
         console.error('[Logout] Erro ao sair:', error);
         alert('Erro ao sair: ' + error.message);
