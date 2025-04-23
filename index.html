@@ -235,7 +235,7 @@
     Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I"); // Substitua pelas suas chaves
     Parse.serverURL = "https://parseapi.back4app.com/";
     Parse.User.disableUnsafeCurrentUser(); // Desabilita armazenamento automático do usuário
-
+        const CLOUD_FUNCTION_URL = 'https://parseapi.back4app.com/verifySession'; // URL da sua cloud function
     // --- Funções ---
 
     /**
@@ -245,80 +245,113 @@
      * e o email do Firebase. Cria também um objeto Cliente associado.
      * @param {firebase.User} user - O objeto de usuário do Firebase.
      */
+
+  // --- Funções de Autenticação Aprimoradas ---
+    async function validateParseSession(firebaseUser) {
+        const token = localStorage.getItem('parseSessionToken');
+        if (!token) return null;
+
+        try {
+            // Verifica diretamente na classe _Session
+            const Session = Parse.Object.extend('_Session');
+            const query = new Parse.Query(Session);
+            query.equalTo('sessionToken', token);
+            query.include('user');
+            const session = await query.first();
+
+            if (!session) {
+                console.log('[Session] Sessão não encontrada');
+                return null;
+            }
+
+            // Verifica expiração
+            const expiresAt = session.get('expiresAt');
+            if (new Date(expiresAt.iso) < new Date()) {
+                console.log('[Session] Sessão expirada');
+                return null;
+            }
+
+            // Verifica correspondência com Firebase UID
+            const parseUser = session.get('user');
+            if (parseUser.get('firebaseUID') !== firebaseUser.uid) {
+                console.log('[Session] UID não corresponde');
+                return null;
+            }
+
+            // Atualiza sessão ativa
+            Parse.User.currentAsync = () => Promise.resolve(parseUser);
+            return parseUser;
+
+        } catch (error) {
+            console.error('[Session] Erro na validação:', error);
+            return null;
+        }
+    }
+    
  async function syncFirebaseUserToParse(user) {
-  if (!user) return;
+        try {
+            // Login/Criação com verificação reforçada
+            let parseUser = await Parse.User.logIn(user.uid, user.uid);
+            
+            // Validação adicional
+            if (parseUser.get('firebaseUID') !== user.uid) {
+                await Parse.User.logOut();
+                throw new Error('UID mismatch');
+            }
 
-  const firebaseUID = user.uid;
-  const firebaseEmail = user.email;
-  const Cliente = Parse.Object.extend("Cliente");
+            // Atualiza dados do usuário
+            parseUser.set('email', user.email);
+            parseUser.set('username', user.uid);
+            await parseUser.save();
 
-  try {
-    const parseUser = await Parse.User.logIn(firebaseUID, firebaseUID);
-    localStorage.setItem('parseSessionToken', parseUser.getSessionToken());
+            // Gera novo token seguro
+            const newToken = parseUser.getSessionToken();
+            localStorage.setItem('parseSessionToken', newToken);
+            
+            return parseUser;
 
-    const queryCliente = new Parse.Query(Cliente);
-    queryCliente.equalTo("usuario", parseUser);
-    let currentCliente = await queryCliente.first();
-
-    if (!currentCliente) {
-      currentCliente = new Cliente();
-      currentCliente.set("usuario", parseUser);
-      currentCliente.set("carrinhoclient", []);
-      await currentCliente.save();
+        } catch (error) {
+            // Cria novo usuário se falhar
+            const parseUser = new Parse.User();
+            parseUser.set('username', user.uid);
+            parseUser.set('password', user.uid);
+            parseUser.set('email', user.email);
+            parseUser.set('firebaseUID', user.uid);
+            
+            const newUser = await parseUser.signUp();
+            localStorage.setItem('parseSessionToken', newUser.getSessionToken());
+            
+            return newUser;
+        }
     }
-  } catch (error) {
-    if (error.code === Parse.Error.OBJECT_NOT_FOUND) {
-      const parseUser = new Parse.User();
-      parseUser.set("username", firebaseUID);
-      parseUser.set("password", firebaseUID);
-      parseUser.set("email", firebaseEmail);
-      parseUser.set("firebaseUID", firebaseUID);
-
-      const newUser = await parseUser.signUp();
-      localStorage.setItem('parseSessionToken', newUser.getSessionToken());
-
-      const newCliente = new Cliente();
-      newCliente.set("usuario", newUser);
-      newCliente.set("carrinhoclient", []);
-      await newCliente.save();
-    } else {
-      console.error("[Parse Sync] Erro:", error);
-    }
-  }
-}
 
     /**
      * Monitora o estado de autenticação do Firebase.
      * Quando o usuário faz login, sincroniza com o Parse e carrega o carrinho do Cliente.
      * Atualiza a UI e o conteúdo do iframe.
      */
- auth.onAuthStateChanged(async (user) => {
-  if (user) {
-    let parseSessionRestored = false;
-    const token = localStorage.getItem('parseSessionToken');
+   // --- Fluxo Principal Atualizado ---
+    auth.onAuthStateChanged(async (firebaseUser) => {
+        if (firebaseUser) {
+            let parseUser = await validateParseSession(firebaseUser);
+            
+            if (!parseUser) {
+                parseUser = await syncFirebaseUserToParse(firebaseUser);
+                await createClienteRecord(parseUser);
+            }
 
-    if (token) {
-      try {
-        await Parse.User.become(token);
-        parseSessionRestored = true;
-      } catch {
-        localStorage.removeItem('parseSessionToken');
-      }
-    }
+            await checkAdminStatus(firebaseUser.uid);
+            await loadInitialCartCount(parseUser);
+            
+        } else {
+            localStorage.removeItem('parseSessionToken');
+            await Parse.User.logOut();
+        }
+        
+        updateAuthUI(firebaseUser);
+        updateIframeContent(firebaseUser);
+    });
 
-    if (!parseSessionRestored) {
-      await syncFirebaseUserToParse(user);
-    }
-
-    await loadInitialCartCount();
-    checkAdminStatus(user.uid);
-  } else {
-    localStorage.removeItem('parseSessionToken');
-    await Parse.User.logOut();
-  }
-  updateAuthUI(user);
-  updateIframeContent(user);
-});
     /**
      * Atualiza a interface de autenticação (mostra/esconde áreas de login/usuário)
      * e os botões relacionados ao carrinho.
@@ -445,49 +478,30 @@
       console.log(`[Iframe Update] Iframe atualizado para: ${targetSrc}`);
     }
 
-    /**
-     * Atualiza o contador de itens no botão do carrinho na UI.
-     * @param {number} count - O número de itens no carrinho.
-     */
-   async function loadInitialCartCount() {
-  const token = localStorage.getItem('parseSessionToken');
-  if (!token) {
-    updateCartCount(0);
-    return;
-  }
 
-  try {
-    const parseUser = await Parse.User.become(token);
-    const Cliente = Parse.Object.extend("Cliente");
-    const query = new Parse.Query(Cliente);
-    query.equalTo("usuario", parseUser);
-    const cliente = await query.first();
-    updateCartCount(cliente ? cliente.get('carrinhoclient').length : 0);
-  } catch (error) {
-    updateCartCount(0);
-  }
-}
 
     /**
      * **CORRIGIDO:** Carrega a contagem inicial do carrinho buscando o objeto Cliente
      * associado ao usuário Parse logado.
      */
-    async function loadInitialCartCount() {
-        const token = localStorage.getItem('parseSessionToken');
-        if (!token) {
-            updateCartCount(0);
-            return;
-        }
+  // --- Sistema de Carrinho Corrigido ---
+    function updateCartCount(count) { // Função missing adicionada
+        const cartCount = document.getElementById('cart-count');
+        if (cartCount) cartCount.textContent = count;
+    }
 
+    async function loadInitialCartCount(parseUser) {
         try {
-            const parseUser = await Parse.User.become(token);
-            const Cliente = Parse.Object.extend("Cliente");
+            const Cliente = Parse.Object.extend('Cliente');
             const query = new Parse.Query(Cliente);
-            query.equalTo("usuario", parseUser);
+            query.equalTo('usuario', parseUser);
             const cliente = await query.first();
-            updateCartCount(cliente ? cliente.get('carrinhoclient').length : 0);
-        } catch {
+            
+            updateCartCount(cliente.get('carrinhoclient').length || 0);
+            
+        } catch (error) {
             updateCartCount(0);
+            console.error('[Cart] Erro ao carregar:', error);
         }
     }
     /**
