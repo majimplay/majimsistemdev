@@ -255,70 +255,42 @@
       console.log(`[Parse Sync] Iniciando para Firebase UID: ${firebaseUID}`);
 
       try {
-        // Tenta fazer login no Parse usando o UID do Firebase como username e senha
-        await Parse.User.logIn(firebaseUID, firebaseUID);
+      // Modificado: Captura o usuário retornado pelo login
+        const parseUser = await Parse.User.logIn(firebaseUID, firebaseUID);
+    
         console.log(`[Parse Sync] Usuário ${firebaseUID} logado com sucesso no Parse usando o UID do Firebase.`);
-                // Salva apenas o session token
-        const sessionToken = Parse.User.current().getSessionToken();
+              
+          // Usa o usuário retornado diretamente
+        const sessionToken = parseUser.getSessionToken();
         localStorage.setItem('parseSessionToken', sessionToken);
+              const queryCliente = new Parse.Query(Cliente);
+              queryCliente.equalTo("usuario", parseUser); // Usa parseUser ao invés de current()
+              let currentCliente = await queryCliente.first();
 
-        // **Verifica se o Cliente existe após o login bem-sucedido**
-        const currentUser = Parse.User.current();
-        const queryCliente = new Parse.Query(Cliente);
-        queryCliente.equalTo("usuario", currentUser);
-        let currentCliente = await queryCliente.first();
+
 
         if (!currentCliente) {
             console.warn(`[Parse Sync] Usuário ${firebaseUID} logado, mas objeto Cliente não encontrado. Criando...`);
             currentCliente = new Cliente();
-            currentCliente.set("usuario", currentUser);
+            currentCliente.set("usuario", parseUser);
             currentCliente.set("carrinhoclient", []); // Inicializa array de produtos VAZIO
-            try {
-                await currentCliente.save();
-                console.log("[Cliente Check] Parse ClienteClass criado com sucesso após login:", currentCliente.id);
-            } catch (saveError) {
-                 console.error("[Cliente Check] Erro ao criar Cliente após login:", saveError);
-                 alert(`Erro ao inicializar sua conta de cliente (${saveError.code}). Tente recarregar.`);
-            }
-        } else {
-            console.log("[Cliente Check] Objeto Cliente encontrado para o usuário:", currentCliente.id);
-        }
-
-      } catch (error) {
-        // Se o erro for "objeto não encontrado" (usuário não existe no Parse)
+                       await currentCliente.save();
+    
+  } catch (error) {
         if (error.code === Parse.Error.OBJECT_NOT_FOUND) {
-          console.log(`[Parse Sync] Usuário ${firebaseUID} não encontrado no Parse. Criando...`);
           const parseUser = new Parse.User();
           parseUser.set("username", firebaseUID);
-          parseUser.set("password", firebaseUID); // IMPORTANTE: considere uma estratégia mais segura
+          parseUser.set("password", firebaseUID);
           parseUser.set("email", firebaseEmail);
-          // parseUser.set("carrinho", []); // **REMOVIDO: Não vamos mais usar o carrinho no _User**
           parseUser.set("firebaseUID", firebaseUID);
 
           const newUser = await parseUser.signUp();
-          // Salva session token após cadastro
           localStorage.setItem('parseSessionToken', newUser.getSessionToken());
-          try {
-            // Tenta registrar o novo usuário no Parse
-            const newUser = await parseUser.signUp();
-            console.log(`[Parse Sync] Novo usuário ${firebaseUID} criado e logado no Parse.`);
 
-            // Cria o objeto Cliente associado ao novo usuário
-            const newCliente = new Cliente();
-            newCliente.set("usuario", newUser); // Associa ao usuário Parse recém-criado
-            newCliente.set("carrinhoclient", []); // Inicializa array de produtos VAZIO
-            await newCliente.save();
-            console.log("[Cliente Check] Parse ClienteClass criado com sucesso para novo usuário:", newCliente.id);
-             alert(`🎉 Conta e Cliente criados com sucesso!`); // Opcional
-
-          } catch (signUpError) {
-            console.error(`[Parse Sync] Erro ao criar usuário ${firebaseUID} no Parse:`, signUpError);
-            alert(`Erro ao sincronizar sua conta (${signUpError.code}). Tente recarregar a página.`);
-          }
-        } else {
-          // Outro erro durante o login no Parse
-          console.error(`[Parse Sync] Erro ao logar usuário ${firebaseUID} no Parse:`, error);
-           alert(`Erro ao acessar sua conta (${error.code}). Tente recarregar a página.`);
+          const newCliente = new Cliente();
+          newCliente.set("usuario", newUser);
+          newCliente.set("carrinhoclient", []);
+          await newCliente.save();
         }
       }
     }
@@ -329,46 +301,36 @@
      * Atualiza a UI e o conteúdo do iframe.
      */
    auth.onAuthStateChanged(async (user) => {
-      console.log("[Auth State] Mudança detectada. Usuário:", user ? user.uid : "Nenhum");
       if (user) {
-  
-        // Tenta restaurar sessão com token
         const token = localStorage.getItem('parseSessionToken');
+        let parseSessionRestored = false;
+        
         if(token) {
           try {
             await Parse.User.become(token);
+            parseSessionRestored = true;
             console.log("[Auth State] Sessão Parse restaurada via token");
           } catch(error) {
-            console.error("[Auth State] Token inválido:", error);
             localStorage.removeItem('parseSessionToken');
-            await syncFirebaseUserToParse(user);
           }
-        } else {
+        }
+
+        // Só sincroniza se não restaurou a sessão
+        if (!parseSessionRestored) {
           await syncFirebaseUserToParse(user);
         }
-        
-        await syncFirebaseUserToParse(user); // Sincroniza/Cria User e Cliente
-        await loadInitialCartCount(); // Carrega contagem do Cliente associado
-        checkAdminStatus(user.uid); // Verifica admin
-      } else {
-         // Se deslogou, zera a contagem do carrinho na UI
-         updateCartCount(0);
-         localStorage.removeItem('parseSessionToken'); // Limpa token ao deslogar
-        
-         if (Parse.User.current()) {
-            console.log("[Auth State] Deslogando usuário Parse...");
-            try {
-                await Parse.User.logOut();
-                console.log("[Auth State] Usuário Parse deslogado.");
-            } catch (parseLogoutError) {
-                console.error("[Auth State] Erro ao deslogar do Parse:", parseLogoutError);
-            }
-         }
-      }
-      updateAuthUI(user); // Atualiza botões de login/logout, etc.
-      updateIframeContent(user); // Atualiza o iframe (produtos.html ou produtosoff.html)
-    });
 
+        await loadInitialCartCount();
+        checkAdminStatus(user.uid);
+      } else {
+        localStorage.removeItem('parseSessionToken');
+        if (Parse.User.current()) {
+          await Parse.User.logOut();
+        }
+      }
+      updateAuthUI(user);
+      updateIframeContent(user);
+    });
     /**
      * Atualiza a interface de autenticação (mostra/esconde áreas de login/usuário)
      * e os botões relacionados ao carrinho.
@@ -512,33 +474,23 @@
      * associado ao usuário Parse logado.
      */
     async function loadInitialCartCount() {
-        const parseUser = Parse.User.current();
-        if (parseUser) {
-            console.log("[Load Cart Count] Usuário Parse logado:", parseUser.id);
+        const token = localStorage.getItem('parseSessionToken');
+        if (!token) {
+            updateCartCount(0);
+            return;
+        }
+
+        try {
+            const parseUser = await Parse.User.become(token);
             const Cliente = Parse.Object.extend("Cliente");
             const query = new Parse.Query(Cliente);
-            query.equalTo("usuario", parseUser); // Busca o Cliente ligado a este usuário
-            try {
-                const cliente = await query.first(); // Pega o primeiro (e único) Cliente
-                if (cliente) {
-                    const cart = cliente.get('carrinhoclient') || []; // Pega o array do Cliente
-                    console.log("[Load Cart Count] Cliente encontrado. Itens no carrinho:", cart.length);
-                    updateCartCount(cart.length); // Atualiza a UI com a contagem correta
-                } else {
-                    console.warn("[Load Cart Count] Usuário logado, mas nenhum objeto Cliente encontrado. Contagem zerada.");
-                    updateCartCount(0); // Cliente não encontrado (pode acontecer brevemente antes da criação)
-                    // Considerar criar o Cliente aqui se realmente necessário, mas syncFirebaseUserToParse já faz isso.
-                }
-            } catch (error) {
-                console.error("[Load Cart Count] Erro ao buscar Cliente:", error);
-                updateCartCount(0); // Zera em caso de erro
-            }
-        } else {
-            console.log("[Load Cart Count] Nenhum usuário Parse logado. Contagem zerada.");
-            updateCartCount(0); // Zera se não houver usuário Parse
+            query.equalTo("usuario", parseUser);
+            const cliente = await query.first();
+            updateCartCount(cliente ? cliente.get('carrinhoclient').length : 0);
+        } catch {
+            updateCartCount(0);
         }
     }
-
     /**
      * **CORRIGIDO:** Limpa o carrinho buscando o objeto Cliente associado
      * ao usuário Parse logado e zerando o array 'carrinhoclient'.
