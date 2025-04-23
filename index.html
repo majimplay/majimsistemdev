@@ -321,7 +321,7 @@
             console.log("[Parse Login] Tentando logar/linkar com Google via Parse...");
             // Tenta logar ou criar/linkar um usuário Parse com a conta Google
             // O Parse Server valida o id_token com o Google e associa ao usuário correto
-            const user = await Parse.User.logInWith('google', { authData: authData });
+            Parse.User.logInWith({ provider: 'google' }, { authData });
             console.log(`[Parse Login] Sucesso! Usuário ${user.existed() ? 'logado' : 'criado/linkado'}:`, user.id);
 
             // **Aprimoramento: Salvar nome e foto do Google no Parse User se for novo**
