@@ -439,7 +439,9 @@
         if(clearCartButton) clearCartButton.style.display = 'inline-block'; // ou 'inline-flex'
 
       } else {
+        
         // --- Estado Deslogado ---
+                    renderGoogleButton(); // Força a renderização do botão
         loginArea.style.display = 'flex'; // Mostra área de login
         userArea.style.display = 'none'; // Esconde área do usuário
         welcomeUser.innerHTML = ''; // Limpa mensagem de boas-vindas
