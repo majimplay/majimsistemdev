@@ -245,21 +245,16 @@
      * e o email do Firebase. Cria também um objeto Cliente associado.
      * @param {firebase.User} user - O objeto de usuário do Firebase.
      */
-  async function syncFirebaseUserToParse(user) {
+ async function syncFirebaseUserToParse(user) {
   if (!user) return;
 
   const firebaseUID = user.uid;
   const firebaseEmail = user.email;
   const Cliente = Parse.Object.extend("Cliente");
 
-  console.log(`[Parse Sync] Iniciando para Firebase UID: ${firebaseUID}`);
-
   try {
     const parseUser = await Parse.User.logIn(firebaseUID, firebaseUID);
-    console.log(`[Parse Sync] Usuário ${firebaseUID} logado com sucesso no Parse.`);
-
-    const sessionToken = parseUser.getSessionToken();
-    localStorage.setItem('parseSessionToken', sessionToken);
+    localStorage.setItem('parseSessionToken', parseUser.getSessionToken());
 
     const queryCliente = new Parse.Query(Cliente);
     queryCliente.equalTo("usuario", parseUser);
@@ -271,7 +266,7 @@
       currentCliente.set("carrinhoclient", []);
       await currentCliente.save();
     }
-  } catch (error) { // <-- Fechamento correto do try antes do catch
+  } catch (error) {
     if (error.code === Parse.Error.OBJECT_NOT_FOUND) {
       const parseUser = new Parse.User();
       parseUser.set("username", firebaseUID);
@@ -286,6 +281,8 @@
       newCliente.set("usuario", newUser);
       newCliente.set("carrinhoclient", []);
       await newCliente.save();
+    } else {
+      console.error("[Parse Sync] Erro:", error);
     }
   }
 }
@@ -295,37 +292,33 @@
      * Quando o usuário faz login, sincroniza com o Parse e carrega o carrinho do Cliente.
      * Atualiza a UI e o conteúdo do iframe.
      */
-   auth.onAuthStateChanged(async (user) => {
-      if (user) {
-        const token = localStorage.getItem('parseSessionToken');
-        let parseSessionRestored = false;
-        
-        if(token) {
-          try {
-            await Parse.User.become(token);
-            parseSessionRestored = true;
-            console.log("[Auth State] Sessão Parse restaurada via token");
-          } catch(error) {
-            localStorage.removeItem('parseSessionToken');
-          }
-        }
+ auth.onAuthStateChanged(async (user) => {
+  if (user) {
+    let parseSessionRestored = false;
+    const token = localStorage.getItem('parseSessionToken');
 
-        // Só sincroniza se não restaurou a sessão
-        if (!parseSessionRestored) {
-          await syncFirebaseUserToParse(user);
-        }
-
-        await loadInitialCartCount();
-        checkAdminStatus(user.uid);
-      } else {
+    if (token) {
+      try {
+        await Parse.User.become(token);
+        parseSessionRestored = true;
+      } catch {
         localStorage.removeItem('parseSessionToken');
-        if (Parse.User.current()) {
-          await Parse.User.logOut();
-        }
       }
-      updateAuthUI(user);
-      updateIframeContent(user);
-    });
+    }
+
+    if (!parseSessionRestored) {
+      await syncFirebaseUserToParse(user);
+    }
+
+    await loadInitialCartCount();
+    checkAdminStatus(user.uid);
+  } else {
+    localStorage.removeItem('parseSessionToken');
+    await Parse.User.logOut();
+  }
+  updateAuthUI(user);
+  updateIframeContent(user);
+});
     /**
      * Atualiza a interface de autenticação (mostra/esconde áreas de login/usuário)
      * e os botões relacionados ao carrinho.
@@ -456,13 +449,24 @@
      * Atualiza o contador de itens no botão do carrinho na UI.
      * @param {number} count - O número de itens no carrinho.
      */
-    function updateCartCount(count) {
-        const cartCountSpan = document.getElementById('cart-count');
-        if (cartCountSpan) {
-            cartCountSpan.textContent = count;
-            console.log(`[Cart Count UI] Atualizado para: ${count}`);
-        }
-    }
+   async function loadInitialCartCount() {
+  const token = localStorage.getItem('parseSessionToken');
+  if (!token) {
+    updateCartCount(0);
+    return;
+  }
+
+  try {
+    const parseUser = await Parse.User.become(token);
+    const Cliente = Parse.Object.extend("Cliente");
+    const query = new Parse.Query(Cliente);
+    query.equalTo("usuario", parseUser);
+    const cliente = await query.first();
+    updateCartCount(cliente ? cliente.get('carrinhoclient').length : 0);
+  } catch (error) {
+    updateCartCount(0);
+  }
+}
 
     /**
      * **CORRIGIDO:** Carrega a contagem inicial do carrinho buscando o objeto Cliente
