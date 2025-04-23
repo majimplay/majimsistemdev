@@ -300,7 +300,13 @@
     async function handleGoogleCredentialResponse(response) {
         console.log("[Google Sign-In] Credencial recebida:", response);
         const googleIdToken = response.credential; // Este é o JWT ID Token
-
+    const decodedToken = JSON.parse(atob(googleIdToken.split('.')[1]));
+    const googleUserId = decodedToken.sub; // ID do usuário Google
+ const authData = {
+        id: googleUserId,       // Obrigatório
+        id_token: googleIdToken // Obrigatório
+    };
+      
         if (!googleIdToken) {
             console.error("[Google Sign-In] ID Token não encontrado na resposta.");
             alert("Falha ao obter credenciais do Google. Tente novamente.");
@@ -340,7 +346,7 @@
                     const decodedToken = JSON.parse(jsonPayload);
                     const googleName = decodedToken.name;
                     const googlePicture = decodedToken.picture; // URL da foto do perfil Google
-
+                    const user = await Parse.User.logInWith('google', { authData });
                     let needsSave = false;
                     // Define campos customizados no objeto Parse.User se eles existirem no token
                     if (googleName && !user.get('displayName')) { // Salva apenas se não tiver um nome ainda
