@@ -245,55 +245,50 @@
      * e o email do Firebase. Cria também um objeto Cliente associado.
      * @param {firebase.User} user - O objeto de usuário do Firebase.
      */
-    async function syncFirebaseUserToParse(user) {
-      if (!user) return;
+  async function syncFirebaseUserToParse(user) {
+  if (!user) return;
 
-      const firebaseUID = user.uid;
-      const firebaseEmail = user.email;
-      const Cliente = Parse.Object.extend("Cliente"); // Define a classe Cliente aqui
+  const firebaseUID = user.uid;
+  const firebaseEmail = user.email;
+  const Cliente = Parse.Object.extend("Cliente");
 
-      console.log(`[Parse Sync] Iniciando para Firebase UID: ${firebaseUID}`);
+  console.log(`[Parse Sync] Iniciando para Firebase UID: ${firebaseUID}`);
 
-      try {
-      // Modificado: Captura o usuário retornado pelo login
-        const parseUser = await Parse.User.logIn(firebaseUID, firebaseUID);
-    
-        console.log(`[Parse Sync] Usuário ${firebaseUID} logado com sucesso no Parse usando o UID do Firebase.`);
-              
-          // Usa o usuário retornado diretamente
-        const sessionToken = parseUser.getSessionToken();
-        localStorage.setItem('parseSessionToken', sessionToken);
-              const queryCliente = new Parse.Query(Cliente);
-              queryCliente.equalTo("usuario", parseUser); // Usa parseUser ao invés de current()
-              let currentCliente = await queryCliente.first();
+  try {
+    const parseUser = await Parse.User.logIn(firebaseUID, firebaseUID);
+    console.log(`[Parse Sync] Usuário ${firebaseUID} logado com sucesso no Parse.`);
 
+    const sessionToken = parseUser.getSessionToken();
+    localStorage.setItem('parseSessionToken', sessionToken);
 
+    const queryCliente = new Parse.Query(Cliente);
+    queryCliente.equalTo("usuario", parseUser);
+    let currentCliente = await queryCliente.first();
 
-        if (!currentCliente) {
-            console.warn(`[Parse Sync] Usuário ${firebaseUID} logado, mas objeto Cliente não encontrado. Criando...`);
-            currentCliente = new Cliente();
-            currentCliente.set("usuario", parseUser);
-            currentCliente.set("carrinhoclient", []); // Inicializa array de produtos VAZIO
-                       await currentCliente.save();
-    
-  } catch (error) {
-        if (error.code === Parse.Error.OBJECT_NOT_FOUND) {
-          const parseUser = new Parse.User();
-          parseUser.set("username", firebaseUID);
-          parseUser.set("password", firebaseUID);
-          parseUser.set("email", firebaseEmail);
-          parseUser.set("firebaseUID", firebaseUID);
-
-          const newUser = await parseUser.signUp();
-          localStorage.setItem('parseSessionToken', newUser.getSessionToken());
-
-          const newCliente = new Cliente();
-          newCliente.set("usuario", newUser);
-          newCliente.set("carrinhoclient", []);
-          await newCliente.save();
-        }
-      }
+    if (!currentCliente) {
+      currentCliente = new Cliente();
+      currentCliente.set("usuario", parseUser);
+      currentCliente.set("carrinhoclient", []);
+      await currentCliente.save();
     }
+  } catch (error) { // <-- Fechamento correto do try antes do catch
+    if (error.code === Parse.Error.OBJECT_NOT_FOUND) {
+      const parseUser = new Parse.User();
+      parseUser.set("username", firebaseUID);
+      parseUser.set("password", firebaseUID);
+      parseUser.set("email", firebaseEmail);
+      parseUser.set("firebaseUID", firebaseUID);
+
+      const newUser = await parseUser.signUp();
+      localStorage.setItem('parseSessionToken', newUser.getSessionToken());
+
+      const newCliente = new Cliente();
+      newCliente.set("usuario", newUser);
+      newCliente.set("carrinhoclient", []);
+      await newCliente.save();
+    }
+  }
+}
 
     /**
      * Monitora o estado de autenticação do Firebase.
