@@ -297,98 +297,60 @@
      * Recebe o ID Token do Google e tenta logar/linkar no Parse.
      * @param {object} response - Objeto de resposta da credencial do Google. Contém response.credential (o ID Token JWT).
      */
-    async function handleGoogleCredentialResponse(response) {
+ async function handleGoogleCredentialResponse(response) {
         console.log("[Google Sign-In] Credencial recebida:", response);
-        const googleIdToken = response.credential; // Este é o JWT ID Token
-    const decodedToken = JSON.parse(atob(googleIdToken.split('.')[1]));
-    const googleUserId = decodedToken.sub; // ID do usuário Google
- const authData = {
-        id: googleUserId,       // Obrigatório
-        id_token: googleIdToken // Obrigatório
-    };
-      
+        const googleIdToken = response.credential;
+
         if (!googleIdToken) {
-            console.error("[Google Sign-In] ID Token não encontrado na resposta.");
+            console.error("[Google Sign-In] ID Token não encontrado.");
             alert("Falha ao obter credenciais do Google. Tente novamente.");
             return;
         }
 
-        // Mostrar algum feedback visual que o login está em progresso
-        showLoadingState(true);
+        // Decodificar token para obter o ID do Google (sub)
+        const decodedToken = JSON.parse(atob(googleIdToken.split('.')[1]));
+        const googleUserId = decodedToken.sub;
 
-        // Construir o objeto authData para o Parse, usando o ID Token
+        // AuthData CORRETO com id e id_token
         const authData = {
+            id: googleUserId,
             id_token: googleIdToken
-            // Nota: O Parse Server usará este token para verificar com o Google
-            // e obter o Google User ID para vincular ou encontrar o usuário Parse.
         };
 
+        showLoadingState(true);
+
         try {
-            console.log("[Parse Login] Tentando logar/linkar com Google via Parse...");
-            // Tenta logar ou criar/linkar um usuário Parse com a conta Google
-            // O Parse Server valida o id_token com o Google e associa ao usuário correto
-            Parse.User.logInWith({ provider: 'google' }, { authData });
-            console.log(`[Parse Login] Sucesso! Usuário ${user.existed() ? 'logado' : 'criado/linkado'}:`, user.id);
+            console.log("[Parse Login] Tentando logar com Google...");
+            // Sintaxe corrigida: 'google' como string
+            const user = await Parse.User.logInWith('google', { authData });
 
-            // **Aprimoramento: Salvar nome e foto do Google no Parse User se for novo**
-            // Verifica se o usuário foi recém-criado/linkado nesta chamada
+            // Salvar session token
+            const sessionToken = user.getSessionToken();
+            localStorage.setItem(SESSION_TOKEN_KEY, sessionToken);
+
+            // Atualizar nome/foto (se necessário)
             if (!user.existed()) {
-                console.log("[Parse User Update] Usuário novo detectado. Tentando salvar nome/foto do Google.");
-                try {
-                    // Decodifica o token JWT para pegar nome/foto (APENAS para exibição inicial, a validação é no servidor)
-                    // ATENÇÃO: Decodificar JWT no cliente é apenas para dados não sensíveis como nome/foto.
-                    const base64Url = googleIdToken.split('.')[1]; // Pega o payload
-                    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-                    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-                        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-                    }).join(''));
-
-                    const decodedToken = JSON.parse(jsonPayload);
-                    const googleName = decodedToken.name;
-                    const googlePicture = decodedToken.picture; // URL da foto do perfil Google
-                    const user = await Parse.User.logInWith('google', { authData });
-                    let needsSave = false;
-                    // Define campos customizados no objeto Parse.User se eles existirem no token
-                    if (googleName && !user.get('displayName')) { // Salva apenas se não tiver um nome ainda
-                        user.set("displayName", googleName);
-                        needsSave = true;
-                        console.log("[Parse User Update] Definindo displayName:", googleName);
-                    }
-                     if (googlePicture && !user.get('profilePictureUrl')) { // Salva apenas se não tiver foto ainda
-                        user.set("profilePictureUrl", googlePicture);
-                        needsSave = true;
-                        console.log("[Parse User Update] Definindo profilePictureUrl:", googlePicture);
-                    }
-                    // Salva o usuário Parse APENAS se algum campo foi modificado
-                    if(needsSave) {
-                         await user.save();
-                         console.log("[Parse User Update] Campos customizados (nome/foto) salvos no Parse.");
-                    }
-
-                } catch (decodeError) {
-                    // A falha em decodificar/salvar nome/foto não impede o login
-                    console.warn("[Parse User Update] Não foi possível decodificar token ou salvar nome/foto:", decodeError);
+                const googleName = decodedToken.name || "";
+                const googlePicture = decodedToken.picture || "";
+                
+                if (googleName && !user.get('displayName')) {
+                    user.set("displayName", googleName);
+                    await user.save();
+                }
+                if (googlePicture && !user.get('profilePictureUrl')) {
+                    user.set("profilePictureUrl", googlePicture);
+                    await user.save();
                 }
             }
 
-            // Salvar o session token retornado pelo Parse no localStorage para persistência
-            const sessionToken = user.getSessionToken();
-            localStorage.setItem(SESSION_TOKEN_KEY, sessionToken);
-            console.log("[Parse Login] SessionToken salvo no localStorage.");
-
-            // Executa as ações pós-login (atualizar UI, carrinho, etc.)
             await onLoginSuccess(user);
 
         } catch (error) {
-            console.error("[Parse Login] Erro ao logar com Google via Parse:", error);
-            // Limpar token local se o login no Parse falhar (ex: token inválido, config errada)
+            console.error("[Erro] Login com Google falhou:", error);
+            alert(`Erro: ${error.message}`);
             localStorage.removeItem(SESSION_TOKEN_KEY);
-            updateAuthUI(null); // Garante UI de deslogado
-            updateIframeContent(null);
-            // Informa o usuário sobre o erro específico do Parse
-            alert(`Erro ao conectar com a conta (${error.code}): ${error.message}. Verifique sua conexão ou tente novamente.`);
+            updateAuthUI(null);
         } finally {
-            // Esconder o feedback de loading independentemente do resultado
             showLoadingState(false);
         }
     }
