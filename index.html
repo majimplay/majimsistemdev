@@ -387,7 +387,8 @@
             showLoadingState(true); // Mostra loading enquanto verifica a validade do token
             try {
                 // Tenta validar o token e se tornar o usuário correspondente
-                const user = await Parse.User.become(sessionToken);
+               // const user = await Parse.User.become(sessionToken);
+                      const user = await Parse.User.currentAsync();
                 console.log("[Session Check] Parse.User.become() bem-sucedido para usuário:", user.id);
                 // Se 'become' funcionou, o usuário está logado no Parse. Processa o login.
                 await onLoginSuccess(user);
