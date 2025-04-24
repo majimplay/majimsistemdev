@@ -504,7 +504,7 @@
         try {
             // Cria uma query pela Role específica chamada "Admin"
             const roleQuery = new Parse.Query(Parse.Role);
-            roleQuery.equalTo("name", "Admin"); // O nome DEVE corresponder exatamente ao da Role no Back4App
+            roleQuery.equalTo("name", "admin"); // O nome DEVE corresponder exatamente ao da Role no Back4App
             // Verifica se o usuário atual (parseUser) está contido na lista de usuários dessa Role
             roleQuery.equalTo("users", parseUser);
 
