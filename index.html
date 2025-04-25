@@ -724,7 +724,8 @@
 
     /**
      * Limpa o array 'carrinhoclient' no objeto 'Cliente' associado ao usuário logado.
-     * **CORRIGIDO:** Usa Parse.User.me() para verificar o usuário logado de forma confiável.
+     * **CORRIGIDO:** Usa Parse.User.me() para verificar o usuário logado de forma confiável
+     * e trata especificamente o erro de sessão inválida.
      */
     async function clearCart() {
         console.log("[Cart Clear] Iniciando tentativa de limpar carrinho...");
@@ -735,8 +736,13 @@
             const parseUser = await Parse.User.me();
 
             if (!parseUser) {
-                alert("Você precisa estar logado para limpar o carrinho.");
+                alert("Você precisa estar logado para limpar o carrinho. Sua sessão pode ter expirado. Por favor, faça login novamente.");
                 console.warn("[Cart Clear] Tentativa de limpar carrinho sem usuário logado (verificado via Parse.User.me()).");
+                 // Limpa o token local se Parse.User.me() retornou null (embora .me() geralmente lance erro para token inválido)
+                localStorage.removeItem(SESSION_TOKEN_KEY);
+                updateAuthUI(null); // Atualiza UI para deslogado
+                updateIframeContent(null); // Atualiza iframe
+                updateCartCount(0); // Zera contagem
                 showLoadingState(false); // Esconde loading antes de retornar
                 return;
             }
@@ -788,18 +794,28 @@
                 updateCartCount(0);
             }
         } catch (error) {
-            // Erro ao buscar ou salvar o objeto Cliente
-            console.error("[Cart Clear] Erro ao limpar carrinho do Cliente:", error);
-            // Verifica se é um erro de permissão (ACL)
-            let userMessage = "Erro ao limpar o carrinho.";
-            if (error.code === Parse.Error.OBJECT_NOT_FOUND) {
-                 userMessage = "Erro: Dados do carrinho não encontrados.";
-            } else if (error.code === Parse.Error.INVALID_ACL) { // Código 119 geralmente é ACL
-                 userMessage = "Erro de permissão ao tentar limpar o carrinho. Verifique as ACLs da classe Cliente.";
+            // Trata especificamente o erro de sessão inválida
+            if (error.code === Parse.Error.INVALID_SESSION_TOKEN) {
+                 console.error("[Cart Clear] Erro: Invalid session token.", error);
+                 alert("Sua sessão expirou ou é inválida. Por favor, faça login novamente para limpar o carrinho.");
+                 // Limpa o token local e atualiza a UI para deslogado
+                 localStorage.removeItem(SESSION_TOKEN_KEY);
+                 updateAuthUI(null);
+                 updateIframeContent(null);
+                 updateCartCount(0);
             } else {
-                 userMessage += ` (${error.message})`;
+                // Trata outros erros
+                console.error("[Cart Clear] Erro ao limpar carrinho do Cliente:", error);
+                let userMessage = "Erro ao limpar o carrinho.";
+                if (error.code === Parse.Error.OBJECT_NOT_FOUND) {
+                     userMessage = "Erro: Dados do carrinho não encontrados.";
+                } else if (error.code === Parse.Error.INVALID_ACL) { // Código 119 geralmente é ACL
+                     userMessage = "Erro de permissão ao tentar limpar o carrinho. Verifique as ACLs da classe Cliente.";
+                } else {
+                     userMessage += ` (${error.message})`;
+                }
+                alert(userMessage);
             }
-            alert(userMessage);
         } finally {
             showLoadingState(false); // Esconde loading
         }
@@ -911,7 +927,7 @@
                     client_id: GOOGLE_CLIENT_ID,
                     callback: handleGoogleCredentialResponse, // Função chamada após login Google bem-sucedido
                     // auto_select: true, // CUIDADO: Pode causar loops se o logout não limpar o estado do Google corretamente
-                    // ux_mode: "popup", // Alternativa: abrir popup em vez de redirecionar
+                    // ux_mode: "popup", // Alternativa: abrir popup em popup
                     // cancel_on_tap_outside: true
                 });
                 console.log("[Google Init] Google Identity Services inicializado com sucesso.");
