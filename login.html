@@ -2,224 +2,387 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>🛒 Base Sincronização - Multi-Loja (Corrigido)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minha Conta - Loja</title>
     <style>
-        /* Estilos CSS (mantidos do original) */
+        /* Estilos CSS (adaptados para focar apenas no Parse) */
         body {
             font-family: 'Arial', sans-serif;
-            margin: 2rem; /* Added margin for better visibility */
-            padding: 0;
+            margin: 0;
+            padding: 20px; /* Added padding to body */
             background: #f5f5f5;
+            line-height: 1.6;
         }
         .container {
             max-width: 800px;
-            margin: 2rem auto;
-            padding: 2rem;
+            margin: 0 auto; /* Center the container */
+            padding: 30px; /* Increased padding */
             background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            border-radius: 12px; /* More rounded corners */
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1); /* Softer shadow */
         }
         .profile-header {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem; /* Reduced margin */
-            padding-bottom: 1rem; /* Reduced padding */
+            flex-direction: column; /* Stack elements on top of each other */
+            align-items: center; /* Center items horizontally */
+            margin-bottom: 25px; /* Increased margin */
+            padding-bottom: 20px; /* Increased padding */
             border-bottom: 2px solid #eee;
         }
         .profile-photo {
-            width: 80px; /* Smaller photo */
-            height: 80px;
+            width: 100px; /* Slightly larger photo */
+            height: 100px;
             border-radius: 50%;
             object-fit: cover;
-            border: 3px solid #007BFF;
-            margin-right: 1rem;
+            border: 4px solid #007BFF; /* Thicker border */
+            margin-bottom: 15px; /* Space below photo */
         }
-        .profile-info h1 { margin: 0; color: #333; font-size: 1.2em; } /* Smaller title */
-        .profile-info p { color: #666; margin: 0.2rem 0; font-size: 0.9em; }
+        .profile-info {
+            text-align: center; /* Center text */
+        }
+        .profile-info h1 {
+            margin: 0 0 5px 0; /* Adjusted margins */
+            color: #333;
+            font-size: 1.5em; /* Larger title */
+        }
+        .profile-info p {
+            color: #666;
+            margin: 0; /* Removed margin */
+            font-size: 1em; /* Slightly larger email font */
+        }
         .user-details {
-            margin-top: 1rem;
-            padding: 1rem;
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            border: 1px solid #eee;
+            margin-top: 25px; /* Increased margin */
+            padding: 20px; /* Increased padding */
+            background-color: #e9f5ff; /* Light blue background */
+            border-radius: 10px; /* Rounded corners */
+            border: 1px solid #b3e0ff; /* Light blue border */
         }
         .user-details h3 {
             margin-top: 0;
-            margin-bottom: 0.5rem;
-            font-size: 1.1em;
+            margin-bottom: 15px; /* Increased margin */
+            font-size: 1.3em; /* Larger title */
             color: #0056b3;
+            border-bottom: 1px dashed #b3e0ff; /* Dashed border */
+            padding-bottom: 10px;
         }
          .user-details p {
-            margin: 0.3rem 0;
-            font-size: 0.95em;
-        }
+            margin: 10px 0; /* Increased margin */
+            font-size: 1em;
+         }
          .user-details span.label {
             font-weight: bold;
             color: #555;
+            display: inline-block; /* Ensure label takes space */
+            min-width: 120px; /* Align values */
          }
           .user-details span.value {
             color: #333;
+            word-break: break-all; /* Prevent long IDs from overflowing */
          }
          .user-details span.status-loja {
              font-style: italic;
+             font-weight: normal; /* Remove bold */
+             color: #007BFF; /* Blue color for status */
          }
         .btn {
-            padding: 0.6rem 1.2rem; /* Smaller button */
-            border: none; border-radius: 6px; cursor: pointer;
-            font-weight: 600; transition: all 0.3s ease; white-space: nowrap;
-            font-size: 0.9em;
+            display: block; /* Make button block level */
+            width: fit-content; /* Fit content width */
+            margin: 20px auto 0 auto; /* Center button below details */
+            padding: 10px 20px; /* Adjusted padding */
+            border: none;
+            border-radius: 8px; /* More rounded corners */
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 1em;
+            text-align: center;
+            text-decoration: none; /* Remove underline for links styled as buttons */
+            color: white; /* Default text color */
         }
-        .btn-secondary { background: #6c757d; color: white; }
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+         .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+         }
+         .btn-secondary:active {
+             transform: translateY(0);
+             box-shadow: none;
+         }
         .emoji { margin-right: 8px; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Loading state */
+        #loadingIndicator {
+            text-align: center;
+            padding: 30px;
+            font-size: 1.2em;
+            color: #666;
+            display: block;
+        }
+         #loadingIndicator.hidden {
+             display: none;
+         }
+
+        /* Error Message */
+        #errorMessage {
+            text-align: center;
+            padding: 15px;
+            color: #dc3545; /* Red */
+            background-color: #f8d7da; /* Light red background */
+            border: 1px solid #f5c6cb; /* Red border */
+            border-radius: 5px;
+            margin-top: 20px;
+            display: none; /* Hidden by default */
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                padding: 20px;
+            }
+            .profile-photo {
+                width: 80px;
+                height: 80px;
+            }
+            .profile-info h1 {
+                font-size: 1.3em;
+            }
+            .profile-info p {
+                font-size: 0.9em;
+            }
+            .user-details h3 {
+                font-size: 1.2em;
+            }
+             .user-details span.label {
+                 min-width: 90px; /* Adjust alignment */
+             }
+            .btn {
+                padding: 8px 15px;
+                font-size: 0.9em;
+            }
+        }
+
     </style>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script> <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
+    <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
 </head>
 <body>
 
     <div class="container">
-        <div class="profile-header">
-            <div style="display: flex; align-items: center;">
-                <img id="profilePhoto" class="profile-photo" src="https://placehold.co/80x80/eee/ccc?text=User" alt="Foto do Perfil">
-                <div class="profile-info">
-                    <h1 id="userName"><span class="emoji">👤</span> Carregando...</h1>
-                    <p id="userEmail"></p>
-                </div>
-            </div>
-            <button id="logoutBtn" class="btn btn-secondary"><span class="emoji">🚪</span> Sair</button>
+        <div id="loadingIndicator">Carregando dados do usuário... ⏳</div>
+        <div id="errorMessage"></div>
+
+        <div id="profileContent" style="display: none;">
+             <div class="profile-header">
+                 <img id="profilePhoto" class="profile-photo" src="https://placehold.co/100x100/eee/ccc?text=User" alt="Foto do Perfil">
+                 <div class="profile-info">
+                     <h1 id="userName"><span class="emoji">👤</span> Não conectado</h1>
+                     <p id="userEmail"></p>
+                 </div>
+             </div>
+
+             <div class="user-details">
+                 <h3><span class="emoji">🆔</span> Detalhes da Conta Parse</h3>
+                 <p><span class="label">Parse User ID:</span> <span id="parseUserId" class="value">Carregando...</span></p>
+                 <p><span class="label">Nome/Username:</span> <span id="parseUserName" class="value">Carregando...</span></p>
+                 <p><span class="label">Email:</span> <span id="parseUserEmail" class="value">Carregando...</span></p>
+                 <p><span class="label">Status Loja:</span> <span id="lojaStatus" class="value status-loja">Verificando...</span></p>
+             </div>
+
+             <button id="logoutBtn" class="btn btn-secondary"><span class="emoji">🚪</span> Sair</button>
         </div>
 
-        <div class="user-details">
-            <h3><span class="emoji">🆔</span> Detalhes da Conta</h3>
-            <p><span class="label">Firebase User:</span> <span id="firebaseUserInfo" class="value">Aguardando login...</span></p>
-            <p><span class="label">Parse User:</span> <span id="parseUserInfo" class="value">Aguardando login...</span></p>
-            <p><span class="label">Status Loja:</span> <span id="lojaStatus" class="value status-loja">Verificando...</span></p>
-        </div>
+         <div id="notLoggedInMessage" style="text-align: center; padding: 50px; display: none;">
+             <p style="font-size: 1.2em; color: #555;">Você não está logado.</p>
+             <p style="font-size: 1em; color: #777;">Por favor, faça login na <a href="index.html" style="color: #007BFF; text-decoration: none;">página principal</a>.</p>
+         </div>
 
     </div>
 
     <script>
-        // --- Configurations ---
-        // IMPORTANTE: Substitua pelas suas chaves reais!
-        const firebaseConfig = {
-            apiKey: "AIzaSyDlUQbbTP29VqBVmzOGHhfc67R1DTRPwxg", // Sua chave
-            authDomain: "gitautenticatio.firebaseapp.com",
-            databaseURL: "https://gitautenticatio-default-rtdb.firebaseio.com", // Necessário se usar database()
-            projectId: "gitautenticatio",
-            storageBucket: "gitautenticatio.appspot.com",
-            messagingSenderId: "21514234895",
-            appId: "1:21514234895:web:d34dc4c44baf586d2cc77a"
-        };
+        // --- Configurações Parse (Back4App) ---
+        // !! IMPORTANTE: Substitua pelas suas chaves REAIS do Back4App !!
+        const PARSE_APP_ID = "TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY"; // Substitua pelo seu Application ID
+        const PARSE_JS_KEY = "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I"; // Substitua pelo seu Javascript Key
+        const PARSE_SERVER_URL = "https://parseapi.back4app.com/";
+        Parse.initialize(PARSE_APP_ID, PARSE_JS_KEY);
+        Parse.serverURL = PARSE_SERVER_URL;
+        // Desabilita o current user inseguro se estiver habilitado
+        Parse.User.disableUnsafeCurrentUser();
 
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const database = firebase.database(); // Agora deve funcionar
-
-        // Initialize Parse
-        // IMPORTANTE: Substitua pelas suas chaves reais!
-        Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I"); // Suas chaves
-        Parse.serverURL = "https://parseapi.back4app.com/";
 
         // --- Elementos da UI ---
-        const profilePhotoElem = document.getElementById('profilePhoto');
-        const userNameElem = document.getElementById('userName');
-        const userEmailElem = document.getElementById('userEmail');
-        const firebaseUserInfoElem = document.getElementById('firebaseUserInfo');
-        const parseUserInfoElem = document.getElementById('parseUserInfo');
-        const lojaStatusElem = document.getElementById('lojaStatus');
-        const logoutButton = document.getElementById('logoutBtn');
+        const profileContentDiv = document.getElementById('profileContent');
+        const notLoggedInMessageDiv = document.getElementById('notLoggedInMessage');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const errorMessageDiv = document.getElementById('errorMessage');
 
-        // --- Global Variables ---
-        let firebaseUser = null; // Firebase user object
+        // Elementos dentro de profileContentDiv (acessados após verificar login)
+        let profilePhotoElem, userNameElem, userEmailElem, parseUserIdElem, parseUserNameElem, parseUserEmailElem, lojaStatusElem, logoutButton;
 
-        // --- Event Listeners and Initialization ---
 
-        // Monitor Firebase auth state (Essential for Sync/Login)
-        auth.onAuthStateChanged(async user => {
-            if (user) {
-                firebaseUser = user;
-                console.log("Firebase user logged in:", firebaseUser.uid);
-                atualizarCabecalhoUI(firebaseUser); // Atualiza cabeçalho
-                atualizarDetalhesFirebaseUI(firebaseUser); // Atualiza detalhes Firebase
+        // --- Funções de UI ---
 
-                const parseUser = Parse.User.current();
-                if (parseUser) {
-                    console.log("Parse user logged in:", parseUser.id);
-                    atualizarDetalhesParseUI(parseUser); // Atualiza detalhes Parse
-                    await verificarLojaParse(parseUser); // Verifica e atualiza status da loja
-                } else {
-                    console.warn("Firebase user logged in, but Parse.User.current() is null!");
-                    parseUserInfoElem.textContent = 'Erro: Usuário Parse não sincronizado.';
-                    lojaStatusElem.textContent = 'Não verificado (Erro Parse)';
-                    // Considerar tentar login/link Parse aqui se necessário
-                }
-
-            } else {
-                firebaseUser = null;
-                console.log("No Firebase user logged in.");
-                limparUI(); // Limpa toda a UI
-                // Poderia redirecionar para login: window.location.href = 'login.html';
+        /**
+         * Exibe uma mensagem de erro na interface.
+         * @param {string} message - A mensagem de erro a ser exibida.
+         */
+        function displayError(message) {
+            if (errorMessageDiv) {
+                errorMessageDiv.textContent = `❌ Erro: ${message}`;
+                errorMessageDiv.style.display = 'block';
             }
-        });
-
-        // Logout Button
-        if (logoutButton) {
-            logoutButton.addEventListener('click', async () => {
-                try {
-                    await auth.signOut(); // Logout Firebase
-                    await Parse.User.logOut(); // Logout Parse
-                    console.log("Logout successful.");
-                    limparUI();
-                    // window.location.href = 'login.html'; // Opcional: redirecionar
-                } catch (error) {
-                    console.error('Error during logout:', error);
-                    alert('❌ Error logging out: ' + error.message);
-                }
-            });
-        } else {
-            console.warn("Logout button not found.");
+            console.error("Erro exibido:", message);
         }
 
+        /**
+         * Atualiza a interface com os dados do usuário Parse logado.
+         * @param {Parse.User} parseUser - O objeto Parse.User logado.
+         */
+        function updateUIWithParseUser(parseUser) {
+            if (!parseUser) {
+                console.warn("updateUIWithParseUser chamado sem usuário.");
+                showNotLoggedInMessage();
+                return;
+            }
 
-        // --- UI Update Functions ---
+            // Garante que os elementos UI estão definidos (eles existem dentro de profileContentDiv)
+            if (!profilePhotoElem) {
+                 // Atribui os elementos DOM uma vez que profileContentDiv está visível
+                 profilePhotoElem = document.getElementById('profilePhoto');
+                 userNameElem = document.getElementById('userName');
+                 userEmailElem = document.getElementById('userEmail');
+                 parseUserIdElem = document.getElementById('parseUserId');
+                 parseUserNameElem = document.getElementById('parseUserName');
+                 parseUserEmailElem = document.getElementById('parseUserEmail');
+                 lojaStatusElem = document.getElementById('lojaStatus');
+                 logoutButton = document.getElementById('logoutBtn');
 
-        function atualizarCabecalhoUI(fbUser) {
-            if (!fbUser) return;
-            if (profilePhotoElem) profilePhotoElem.src = fbUser.photoURL || 'https://placehold.co/80x80/eee/ccc?text=:)';
-            if (userNameElem) userNameElem.textContent = '👤 ' + (fbUser.displayName || fbUser.email || 'Usuário'); // Mostra nome ou email
-            if (userEmailElem) userEmailElem.textContent = '📧 ' + fbUser.email;
+                 // Adiciona listener ao botão de logout uma vez que ele é referenciado
+                 if (logoutButton) {
+                    logoutButton.addEventListener('click', handleLogout);
+                 } else {
+                     console.error("Botão de logout não encontrado!");
+                 }
+            }
+
+
+            // Atualiza o cabeçalho do perfil
+            const displayName = parseUser.get('displayName') || parseUser.get('username') || parseUser.get('email')?.split('@')[0] || 'Usuário';
+            if (profilePhotoElem) profilePhotoElem.src = parseUser.get('profilePictureUrl') || 'https://placehold.co/100x100/eee/ccc?text=:)';
+            if (userNameElem) userNameElem.innerHTML = `<span class="emoji">👤</span> ${displayName}`; // Usar innerHTML para o emoji
+            if (userEmailElem) userEmailElem.textContent = parseUser.get('email') ? `📧 ${parseUser.get('email')}` : '';
+
+            // Atualiza os detalhes da conta Parse
+            if (parseUserIdElem) parseUserIdElem.textContent = parseUser.id || 'N/A';
+            if (parseUserNameElem) parseUserNameElem.textContent = parseUser.get('username') || parseUser.get('displayName') || 'N/A';
+            if (parseUserEmailElem) parseUserEmailElem.textContent = parseUser.get('email') || 'N/A';
+
+            // Mostra a seção de perfil e esconde a mensagem de não logado
+            if (profileContentDiv) profileContentDiv.style.display = 'block';
+            if (notLoggedInMessageDiv) notLoggedInMessageDiv.style.display = 'none';
+            if (loadingIndicator) loadingIndicator.classList.add('hidden'); // Esconde loading
+            if (errorMessageDiv) errorMessageDiv.style.display = 'none'; // Esconde erros
+
+            // Verifica o status da loja (função assíncrona)
+            verificarLojaParse(parseUser);
+
+            console.log("[UI Update] Interface atualizada para usuário Parse logado.");
         }
 
-        function atualizarDetalhesFirebaseUI(fbUser) {
-             if (!fbUser) return;
-             if (firebaseUserInfoElem) {
-                 firebaseUserInfoElem.textContent = `Nome: ${fbUser.displayName || '(não definido)'}, ID: ${fbUser.uid}`;
-             }
-        }
+        /**
+         * Limpa a interface e mostra a mensagem de "não logado".
+         */
+        function showNotLoggedInMessage() {
+            if (profileContentDiv) profileContentDiv.style.display = 'none';
+            if (notLoggedInMessageDiv) notLoggedInMessageDiv.style.display = 'block';
+            if (loadingIndicator) loadingIndicator.classList.add('hidden'); // Esconde loading
+            if (errorMessageDiv) errorMessageDiv.style.display = 'none'; // Esconde erros
 
-         function atualizarDetalhesParseUI(pUser) {
-             if (!pUser) return;
-             if (parseUserInfoElem) {
-                  // Use get("username") ou outro campo relevante como 'name' ou 'email'
-                 const parseName = pUser.get("username") || pUser.get("name") || pUser.get("email") || '(não definido)';
-                 parseUserInfoElem.textContent = `Nome: ${parseName}, ID: ${pUser.id}`;
-             }
-         }
-
-        function limparUI() {
-            if (profilePhotoElem) profilePhotoElem.src = 'https://placehold.co/80x80/eee/ccc?text=?';
-            if (userNameElem) userNameElem.textContent = '👤 Não conectado';
+            // Limpa os elementos se eles já foram referenciados
+            if (profilePhotoElem) profilePhotoElem.src = 'https://placehold.co/100x100/eee/ccc?text=?';
+            if (userNameElem) userNameElem.innerHTML = '👤 Não conectado';
             if (userEmailElem) userEmailElem.textContent = '';
-            if (firebaseUserInfoElem) firebaseUserInfoElem.textContent = 'Desconectado';
-            if (parseUserInfoElem) parseUserInfoElem.textContent = 'Desconectado';
+            if (parseUserIdElem) parseUserIdElem.textContent = 'Desconectado';
+            if (parseUserNameElem) parseUserNameElem.textContent = 'Desconectado';
+            if (parseUserEmailElem) parseUserEmailElem.textContent = 'Desconectado';
             if (lojaStatusElem) lojaStatusElem.textContent = 'Desconectado';
+
+            console.log("[UI Update] Interface atualizada para estado deslogado.");
         }
 
-        // --- Parse Logic Functions ---
+
+        // --- Lógica de Autenticação Parse ---
+
+        /**
+         * Tenta retomar a sessão Parse usando o token armazenado no localStorage.
+         * Esta é a principal forma de verificar o login nesta página.
+         * @returns {Promise<Parse.User | null>} O objeto de usuário Parse logado ou null.
+         */
+        async function checkParseSession() {
+            console.log("[Parse Session Check] Verificando sessão Parse...");
+            const sessionToken = localStorage.getItem(SESSION_TOKEN_KEY);
+
+            if (sessionToken) {
+                console.log("[Parse Session Check] Token encontrado. Tentando validar com Parse.User.me()...");
+                if (loadingIndicator) loadingIndicator.classList.remove('hidden'); // Mostra loading
+
+                try {
+                    // Usa Parse.User.me(sessionToken) para validar o token e obter o usuário
+                    const user = await Parse.User.me(sessionToken);
+                    console.log("[Parse Session Check] Parse.User.me() bem-sucedido! Usuário validado:", user.id);
+                    return user; // Retorna o usuário logado
+                } catch (error) {
+                    // O token é inválido (expirado, revogado, etc.) ou houve erro de rede
+                    console.warn("[Parse Session Check] Falha ao validar token com Parse.User.me() (token inválido/expirado?):", error.code, error.message);
+                    localStorage.removeItem(SESSION_TOKEN_KEY); // Remove o token inválido
+                    // Não exibe um erro aqui, apenas no console.
+                    return null; // Retorna null indicando que não há sessão válida
+                } finally {
+                     if (loadingIndicator) loadingIndicator.classList.add('hidden'); // Esconde loading
+                }
+            } else {
+                console.log("[Parse Session Check] Nenhum token encontrado no localStorage.");
+                return null; // Retorna null se não houver token
+            }
+        }
+
+
+        /**
+         * Lida com o processo de logout do Parse.
+         * Limpa a sessão local e atualiza a UI.
+         */
+        async function handleLogout() {
+            console.log("[Logout] Iniciando processo de logout do Parse...");
+            if (logoutButton) logoutButton.disabled = true; // Desabilita botão durante logout
+            if (loadingIndicator) loadingIndicator.classList.remove('hidden'); // Mostra loading
+
+            try {
+                // Desloga o usuário da sessão atual do Parse SDK
+                await Parse.User.logOut();
+                console.log('[Logout] Parse.User.logOut() concluído.');
+            } catch (error) {
+                // Mesmo com erro no logout do Parse (raro), prossegue com limpeza local
+                console.error('[Logout] Erro ao sair do Parse (sessão pode já estar inválida):', error);
+            } finally {
+                // Limpa o token do localStorage independentemente de erro no logOut
+                localStorage.removeItem(SESSION_TOKEN_KEY);
+                showNotLoggedInMessage(); // Atualiza UI para o estado deslogado
+                if (logoutButton) logoutButton.disabled = false; // Habilita botão novamente
+                if (loadingIndicator) loadingIndicator.classList.add('hidden'); // Esconde loading
+                console.log("[Logout] Sessão local limpa.");
+                // Opcional: Redirecionar para a página principal ou de login
+                // window.location.href = 'index.html';
+            }
+        }
+
+
+        // --- Lógica da Loja (Parse) ---
 
         /**
          * Verifica se o usuário Parse logado tem uma loja associada na classe 'Loja'.
@@ -229,18 +392,23 @@
         async function verificarLojaParse(parseUser) {
             if (!parseUser || !lojaStatusElem) return;
 
-            lojaStatusElem.textContent = 'Verificando loja...'; // Estado inicial
+            lojaStatusElem.textContent = 'Verificando...'; // Estado inicial
 
             const Loja = Parse.Object.extend("Loja"); // Nome da sua classe Parse para lojas
             const query = new Parse.Query(Loja);
-            query.equalTo("dono", parseUser); // Filtra pela coluna 'dono' que é um ponteiro para _User
-            query.select("nome"); // Seleciona apenas o nome da loja para otimizar (use o nome real do seu campo)
+            // Assume que há um ponteiro chamado 'dono' na classe Loja que aponta para _User
+            // **VERIFIQUE SE O NOME DO CAMPO 'dono' ESTÁ CORRETO NO SEU BACK4APP**
+            query.equalTo("dono", parseUser);
+            // Seleciona apenas o nome da loja para otimizar (use o nome real do seu campo de nome da loja)
+            // **VERIFIQUE SE O NOME DO CAMPO 'nome' ESTÁ CORRETO NO SEU BACK4APP**
+            query.select("nome");
 
             try {
                 const loja = await query.first(); // Tenta encontrar a primeira loja associada
 
                 if (loja) {
-                    const nomeLoja = loja.get("nome"); // Pega o nome da loja (use o nome real do seu campo)
+                    // Pega o nome da loja (use o nome real do seu campo de nome da loja)
+                    const nomeLoja = loja.get("nome");
                     console.log(`Loja encontrada para o usuário ${parseUser.id}: ${nomeLoja}`);
                     lojaStatusElem.textContent = `✅ Sim, possui loja: ${nomeLoja}`;
                 } else {
@@ -249,8 +417,63 @@
                 }
             } catch (error) {
                 console.error("Erro ao buscar loja no Parse:", error);
-                lojaStatusElem.textContent = '⚠️ Erro ao verificar loja.';
+                // Verifica se o erro é de permissão (código 119) ou objeto não encontrado (código 101)
+                let statusMessage = '⚠️ Erro ao verificar loja.';
+                if (error.code === 119) {
+                    statusMessage += ' (Permissão negada. Verifique ACLs da classe Loja)';
+                } else if (error.code === 101) {
+                     // Este código 101 (Object Not Found) é o esperado se não houver loja,
+                     // mas o query.first() já lida com isso retornando null.
+                     // Se der 101 aqui, pode ser um erro inesperado.
+                     statusMessage += ' (Dados não encontrados)';
+                } else {
+                     statusMessage += ` (${error.message})`;
+                }
+                lojaStatusElem.textContent = statusMessage;
+                displayError(`Erro ao verificar status da loja: ${error.message}`);
             }
+        }
+
+
+        // --- Inicialização da Página ---
+
+        /**
+         * Função principal de inicialização.
+         * Verifica a sessão Parse e atualiza a UI.
+         */
+        async function initializePage() {
+            console.log("[Init] Página Minha Conta carregada. Iniciando...");
+
+            // Mostra o indicador de carregamento enquanto verifica a sessão
+            if (loadingIndicator) loadingIndicator.classList.remove('hidden');
+            if (profileContentDiv) profileContentDiv.style.display = 'none'; // Esconde conteúdo de perfil
+            if (notLoggedInMessageDiv) notLoggedInMessageDiv.style.display = 'none'; // Esconde mensagem não logado
+            if (errorMessageDiv) errorMessageDiv.style.display = 'none'; // Esconde erros
+
+            // Tenta carregar a sessão Parse
+            const parseUser = await checkParseSession();
+
+            // Atualiza a UI com base no resultado da verificação da sessão
+            if (parseUser) {
+                console.log("[Init] Usuário Parse logado encontrado.");
+                updateUIWithParseUser(parseUser); // Mostra dados do usuário
+            } else {
+                console.log("[Init] Nenhum usuário Parse logado.");
+                showNotLoggedInMessage(); // Mostra mensagem de não logado
+            }
+
+            // Esconde o indicador de carregamento após a inicialização
+            if (loadingIndicator) loadingIndicator.classList.add('hidden');
+
+            console.log("[Init] Inicialização concluída.");
+        }
+
+        // Garante que o DOM esteja pronto antes de executar a inicialização
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializePage);
+        } else {
+            // DOM já carregado
+            initializePage();
         }
 
     </script>
