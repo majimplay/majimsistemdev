@@ -683,26 +683,21 @@
 
         try {
             const existingCliente = await query.first();
-            if (!existingCliente) {
-                console.log(`[Cliente Check] Cliente não encontrado. Criando...`);
-                const newCliente = new Cliente();
-                newCliente.set("usuario", user); // Linka com o usuário Parse
-                // **IMPORTANTE:** Verifique o nome do campo array "carrinhoclient"
-                newCliente.set("carrinhoclient", []); // Inicializa carrinho vazio
+  if (!existingCliente) {
+            console.log(`[Cliente Check] Cliente não encontrado. Criando...`);
+            const newCliente = new Cliente();
+            newCliente.set("usuario", user);
+            newCliente.set("carrinhoclient", []);
 
-                // **ACL:** Define permissões para que SÓ o próprio usuário possa ler e escrever
-                const acl = new Parse.ACL();
-                acl.setReadAccess(user, true);
-                acl.setWriteAccess(user, true);
-                // Opcional: Se Admins precisam de acesso, adicione setRoleReadAccess/setRoleWriteAccess("Admin", true);
-                newCliente.setACL(acl);
+            // Defina a ACL corretamente (permitindo apenas o usuário)
+            const acl = new Parse.ACL(user);
+            acl.setPublicReadAccess(false);
+            acl.setPublicWriteAccess(false);
+            newCliente.setACL(acl);
 
-                // !! IMPORTANTE: A operação .save() aqui pode falhar se a ACL da classe _User !!
-                // !! não permitir que o usuário autenticado seja "usado" para criar/associar objetos !!
-                // !! Verifique também as permissões da classe "Cliente" !!
-                await newCliente.save();
-                console.log("[Cliente Check] Objeto Cliente criado com sucesso:", newCliente.id);
-                return newCliente; // Retorna o cliente recém-criado
+            await newCliente.save();
+            console.log("[Cliente Check] Objeto Cliente criado com sucesso:", newCliente.id);
+            return newCliente;
             } else {
                 console.log("[Cliente Check] Objeto Cliente já existe:", existingCliente.id);
                 return existingCliente; // Retorna o cliente existente
