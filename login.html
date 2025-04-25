@@ -267,12 +267,13 @@
                  if (logoutButton) {
                     logoutButton.addEventListener('click', handleLogout);
                  } else {
-                     console.error("Botão de logout não encontrado!");
+                     console.error("Botão de logout ('logoutBtn') não encontrado!");
                  }
             }
 
 
             // Atualiza o cabeçalho do perfil
+            // Tenta obter nome de exibição, username, ou parte do email
             const displayName = parseUser.get('displayName') || parseUser.get('username') || parseUser.get('email')?.split('@')[0] || 'Usuário';
             if (profilePhotoElem) profilePhotoElem.src = parseUser.get('profilePictureUrl') || 'https://placehold.co/100x100/eee/ccc?text=:)';
             if (userNameElem) userNameElem.innerHTML = `<span class="emoji">👤</span> ${displayName}`; // Usar innerHTML para o emoji
@@ -305,19 +306,33 @@
             if (errorMessageDiv) errorMessageDiv.style.display = 'none'; // Esconde erros
 
             // Limpa os elementos se eles já foram referenciados
-            if (profilePhotoElem) profilePhotoElem.src = 'https://placehold.co/100x100/eee/ccc?text=?';
-            if (userNameElem) userNameElem.innerHTML = '👤 Não conectado';
-            if (userEmailElem) userEmailElem.textContent = '';
-            if (parseUserIdElem) parseUserIdElem.textContent = 'Desconectado';
-            if (parseUserNameElem) parseUserNameElem.textContent = 'Desconectado';
-            if (parseUserEmailElem) parseUserEmailElem.textContent = 'Desconectado';
-            if (lojaStatusElem) lojaStatusElem.textContent = 'Desconectado';
+            // Isso evita ReferenceErrors se a página carregar e o usuário NÃO estiver logado
+            // e os elementos dentro de profileContentDiv nunca foram criados/referenciados.
+            const tempProfilePhoto = document.getElementById('profilePhoto');
+            const tempUserName = document.getElementById('userName');
+            const tempUserEmail = document.getElementById('userEmail');
+            const tempParseUserId = document.getElementById('parseUserId');
+            const tempParseUserName = document.getElementById('parseUserName');
+            const tempParseUserEmail = document.getElementById('parseUserEmail');
+            const tempLojaStatus = document.getElementById('lojaStatus');
+
+            if (tempProfilePhoto) tempProfilePhoto.src = 'https://placehold.co/100x100/eee/ccc?text=?';
+            if (tempUserName) tempUserName.innerHTML = '👤 Não conectado';
+            if (tempUserEmail) tempUserEmail.textContent = '';
+            if (tempParseUserId) tempParseUserId.textContent = 'Desconectado';
+            if (tempParseUserName) tempParseUserName.textContent = 'Desconectado';
+            if (tempParseUserEmail) tempParseUserEmail.textContent = 'Desconectado';
+            if (tempLojaStatus) tempLojaStatus.textContent = 'Desconectado';
 
             console.log("[UI Update] Interface atualizada para estado deslogado.");
         }
 
 
         // --- Lógica de Autenticação Parse ---
+
+        // Chave usada para armazenar o sessionToken no localStorage (deve ser a mesma do index.html)
+        const SESSION_TOKEN_KEY = 'parseSessionToken'; // <-- DECLARAÇÃO DA CONSTANTE AQUI
+
 
         /**
          * Tenta retomar a sessão Parse usando o token armazenado no localStorage.
@@ -326,14 +341,15 @@
          */
         async function checkParseSession() {
             console.log("[Parse Session Check] Verificando sessão Parse...");
-            const sessionToken = localStorage.getItem(SESSION_TOKEN_KEY);
+            const sessionToken = localStorage.getItem(SESSION_TOKEN_KEY); // <-- USO DA CONSTANTE AQUI
 
             if (sessionToken) {
                 console.log("[Parse Session Check] Token encontrado. Tentando validar com Parse.User.me()...");
-                if (loadingIndicator) loadingIndicator.classList.remove('hidden'); // Mostra loading
+                // O indicador de loading já está sendo mostrado na initializePage antes de chamar esta função.
 
                 try {
                     // Usa Parse.User.me(sessionToken) para validar o token e obter o usuário
+                    // Este método é seguro e recomendado para validar sessões.
                     const user = await Parse.User.me(sessionToken);
                     console.log("[Parse Session Check] Parse.User.me() bem-sucedido! Usuário validado:", user.id);
                     return user; // Retorna o usuário logado
@@ -343,8 +359,6 @@
                     localStorage.removeItem(SESSION_TOKEN_KEY); // Remove o token inválido
                     // Não exibe um erro aqui, apenas no console.
                     return null; // Retorna null indicando que não há sessão válida
-                } finally {
-                     if (loadingIndicator) loadingIndicator.classList.add('hidden'); // Esconde loading
                 }
             } else {
                 console.log("[Parse Session Check] Nenhum token encontrado no localStorage.");
@@ -359,6 +373,7 @@
          */
         async function handleLogout() {
             console.log("[Logout] Iniciando processo de logout do Parse...");
+            // Verifica se o botão existe antes de tentar desabilitar
             if (logoutButton) logoutButton.disabled = true; // Desabilita botão durante logout
             if (loadingIndicator) loadingIndicator.classList.remove('hidden'); // Mostra loading
 
@@ -373,6 +388,7 @@
                 // Limpa o token do localStorage independentemente de erro no logOut
                 localStorage.removeItem(SESSION_TOKEN_KEY);
                 showNotLoggedInMessage(); // Atualiza UI para o estado deslogado
+                 // Verifica se o botão existe antes de tentar habilitar
                 if (logoutButton) logoutButton.disabled = false; // Habilita botão novamente
                 if (loadingIndicator) loadingIndicator.classList.add('hidden'); // Esconde loading
                 console.log("[Logout] Sessão local limpa.");
@@ -390,7 +406,11 @@
          * @param {Parse.User} parseUser - O objeto Parse.User logado.
          */
         async function verificarLojaParse(parseUser) {
-            if (!parseUser || !lojaStatusElem) return;
+            // Verifica se o elemento lojaStatusElem existe antes de usá-lo
+            if (!parseUser || !lojaStatusElem) {
+                console.warn("verificarLojaParse chamado sem usuário ou elemento lojaStatusElem não encontrado.");
+                return;
+            }
 
             lojaStatusElem.textContent = 'Verificando...'; // Estado inicial
 
