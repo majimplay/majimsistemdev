@@ -382,7 +382,7 @@
         } else {
             carouselItemsHTML = imagens.map(url => `
                 <div class="carousel-item">
-                     <a href="${url}" target="_blank"> <img src="${url}" alt="${nome}"> </a>
+                     <a href="${url}" target="_blank"> <img src="${url}" alt="${nome}" loading="lazy"> </a>
                 </div>`).join(""); // Adiciona link
         }
          //   <img src="${url}" alt="${nome}" loading="lazy">
