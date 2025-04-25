@@ -299,7 +299,8 @@
     async function handleGoogleCredentialResponse(response) {
         console.log("[Google Sign-In] Credencial recebida:", response);
         const googleIdToken = response.credential;
-
+        
+      
         if (!googleIdToken) {
             console.error("[Google Sign-In] ID Token não encontrado.");
             alert("Falha ao obter credenciais do Google. Tente novamente.");
@@ -339,6 +340,8 @@
 
             // Salvar session token no localStorage para persistência
             const sessionToken = user.getSessionToken();
+            const googleEmail = decodedToken.email || "";
+          
             if (sessionToken) {
                 localStorage.setItem(SESSION_TOKEN_KEY, sessionToken);
                 console.log("[Parse Login] Session Token salvo no localStorage.");
@@ -359,6 +362,13 @@
                 userNeedsSave = true;
                 console.log("[Parse Login] Definindo/Atualizando displayName do Google.");
             }
+            if (googleEmail && user.get("email") !== googleEmail) {
+                user.set("email", googleEmail);
+                user.set("emailVerified", true);
+                userNeedsSave = true;
+            }
+
+    
             if (googlePicture && (!user.get('profilePictureUrl') || user.get('profilePictureUrl') !== googlePicture)) { // Atualiza se diferente
                 user.set("profilePictureUrl", googlePicture);
                 userNeedsSave = true;
