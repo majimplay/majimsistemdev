@@ -382,9 +382,11 @@
         } else {
             carouselItemsHTML = imagens.map(url => `
                 <div class="carousel-item">
-                     <a href="${url}" target="_blank"> <img src="${url}" alt="${nome}" loading="lazy"> </a>
+                    <img src="${url}" alt="${nome}" loading="lazy">
                 </div>`).join(""); // Adiciona link
         }
+
+          // <a href="${url}" target="_blank"> <img src="${url}" alt="${nome}" loading="lazy"> </a>
          //   <img src="${url}" alt="${nome}" loading="lazy">
         // Adiciona botões apenas se houver mais de 1 imagem
         const prevButtonHTML = imagens.length > 1 ? `<button class="carousel-button prev" onclick="moveCarousel(event, '${produtoId}', -1)">&#10094;</button>` : '';
