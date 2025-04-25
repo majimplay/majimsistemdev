@@ -299,8 +299,7 @@
     async function handleGoogleCredentialResponse(response) {
         console.log("[Google Sign-In] Credencial recebida:", response);
         const googleIdToken = response.credential;
-        
-      
+
         if (!googleIdToken) {
             console.error("[Google Sign-In] ID Token não encontrado.");
             alert("Falha ao obter credenciais do Google. Tente novamente.");
@@ -341,7 +340,7 @@
             // Salvar session token no localStorage para persistência
             const sessionToken = user.getSessionToken();
             const googleEmail = decodedToken.email || "";
-          
+
             if (sessionToken) {
                 localStorage.setItem(SESSION_TOKEN_KEY, sessionToken);
                 console.log("[Parse Login] Session Token salvo no localStorage.");
@@ -368,7 +367,7 @@
                 userNeedsSave = true;
             }
 
-    
+
             if (googlePicture && (!user.get('profilePictureUrl') || user.get('profilePictureUrl') !== googlePicture)) { // Atualiza se diferente
                 user.set("profilePictureUrl", googlePicture);
                 userNeedsSave = true;
@@ -410,7 +409,7 @@
     /**
      * Função chamada após um login bem-sucedido no Parse (via Google ou validação de sessão).
      * Atualiza a interface e carrega dados do usuário.
-     * @param {Parse.User} user - O usuário Parse logado.
+     * @param {Parse.User} user - O objeto usuário Parse logado.
      */
     async function onLoginSuccess(user) {
         console.log("[Login Success] Processando para usuário:", user.id);
@@ -693,18 +692,24 @@
 
         try {
             const existingCliente = await query.first();
-  if (!existingCliente) {
-            console.log(`[Cliente Check] Cliente não encontrado. Criando...`);
-            const newCliente = new Cliente();
-            newCliente.set("usuario", user);
-            newCliente.set("carrinhoclient", []);
+            if (!existingCliente) {
+                console.log(`[Cliente Check] Cliente não encontrado. Criando...`);
+                const newCliente = new Cliente();
+                newCliente.set("usuario", user);
+                newCliente.set("carrinhoclient", []);
 
-            // Defina a ACL corretamente (permitindo apenas o usuário)
+                // Defina a ACL corretamente (permitindo apenas o usuário)
+                const acl = new Parse.ACL(user);
+                acl.setPublicReadAccess(false); // Ninguém mais pode ler por padrão
+                acl.setPublicWriteAccess(false); // Ninguém mais pode escrever por padrão
+                acl.setReadAccess(user, true); // O usuário pode ler
+                acl.setWriteAccess(user, true); // O usuário pode escrever
+                newCliente.setACL(acl);
 
 
-            await newCliente.save();
-            console.log("[Cliente Check] Objeto Cliente criado com sucesso:", newCliente.id);
-            return newCliente;
+                await newCliente.save();
+                console.log("[Cliente Check] Objeto Cliente criado com sucesso:", newCliente.id);
+                return newCliente;
             } else {
                 console.log("[Cliente Check] Objeto Cliente já existe:", existingCliente.id);
                 return existingCliente; // Retorna o cliente existente
@@ -719,31 +724,39 @@
 
     /**
      * Limpa o array 'carrinhoclient' no objeto 'Cliente' associado ao usuário logado.
+     * **CORRIGIDO:** Usa Parse.User.me() para verificar o usuário logado de forma confiável.
      */
     async function clearCart() {
-        // Usa Parse.User.current() que deve ter sido populado por .me() ou .logInWith()
-        const parseUser = Parse.User.current();
-        if (!parseUser) {
-            alert("Você precisa estar logado para limpar o carrinho.");
-            console.warn("[Cart Clear] Tentativa de limpar carrinho sem usuário logado.");
-            return;
-        }
-        // Confirmação do usuário
-        if (!confirm("Tem certeza que deseja esvaziar seu carrinho?")) {
-            console.log("[Cart Clear] Limpeza cancelada pelo usuário.");
-            return; // Cancela se o usuário clicar em "Cancelar"
-        }
-
+        console.log("[Cart Clear] Iniciando tentativa de limpar carrinho...");
         showLoadingState(true); // Mostra loading
-        console.log("[Cart Clear] Tentando limpar carrinho do Cliente para usuário:", parseUser.id);
-        // **IMPORTANTE:** Verifique o nome da classe "Cliente"
-        const Cliente = Parse.Object.extend("Cliente");
-        const query = new Parse.Query(Cliente);
-        // **IMPORTANTE:** Verifique o nome do campo ponteiro "usuario"
-        query.equalTo("usuario", parseUser);
 
         try {
+            // **CORREÇÃO:** Obtém o usuário logado de forma assíncrona e confiável
+            const parseUser = await Parse.User.me();
+
+            if (!parseUser) {
+                alert("Você precisa estar logado para limpar o carrinho.");
+                console.warn("[Cart Clear] Tentativa de limpar carrinho sem usuário logado (verificado via Parse.User.me()).");
+                showLoadingState(false); // Esconde loading antes de retornar
+                return;
+            }
+
+            // Confirmação do usuário
+            if (!confirm("Tem certeza que deseja esvaziar seu carrinho?")) {
+                console.log("[Cart Clear] Limpeza cancelada pelo usuário.");
+                showLoadingState(false); // Esconde loading antes de retornar
+                return; // Cancela se o usuário clicar em "Cancelar"
+            }
+
+            console.log("[Cart Clear] Tentando limpar carrinho do Cliente para usuário:", parseUser.id);
+            // **IMPORTANTE:** Verifique o nome da classe "Cliente"
+            const Cliente = Parse.Object.extend("Cliente");
+            const query = new Parse.Query(Cliente);
+            // **IMPORTANTE:** Verifique o nome do campo ponteiro "usuario"
+            query.equalTo("usuario", parseUser);
+
             const cliente = await query.first(); // Encontra o objeto Cliente do usuário
+
             if (cliente) {
                 // **IMPORTANTE:** Verifique o nome do campo array "carrinhoclient"
                 // Verifica se o carrinho já está vazio para evitar save desnecessário
