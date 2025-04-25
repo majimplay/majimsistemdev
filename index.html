@@ -690,10 +690,7 @@
             newCliente.set("carrinhoclient", []);
 
             // Defina a ACL corretamente (permitindo apenas o usuário)
-            const acl = new Parse.ACL(user);
-            acl.setPublicReadAccess(false);
-            acl.setPublicWriteAccess(false);
-            newCliente.setACL(acl);
+
 
             await newCliente.save();
             console.log("[Cliente Check] Objeto Cliente criado com sucesso:", newCliente.id);
