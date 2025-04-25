@@ -2,8 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Produtos - Loja</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>Produtos - Loja</title>
     <style>
         /* Estilos gerais */
         body {
@@ -273,7 +272,7 @@
 <script>
     // --- Configurações Parse (Back4App) ---
     // !! IMPORTANTE: Substitua pelas suas chaves REAIS do Back4App !!
-    const PARSE_APP_ID = "TYP8SUA8qxmHIRs1mHbiFalgRxCEF51sOiSWmNEY"; // Substitua pelo seu Application ID
+    const PARSE_APP_ID = "TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY"; // Substitua pelo seu Application ID
     const PARSE_JS_KEY = "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I"; // Substitua pelo seu Javascript Key
     const PARSE_SERVER_URL = "https://parseapi.back4app.com/";
     Parse.initialize(PARSE_APP_ID, PARSE_JS_KEY);
@@ -282,8 +281,6 @@
     // --- Variáveis Globais ---
     const carouselIndexes = {}; // Mantém o índice atual de cada carrossel
     let currentUser = null; // Será definido se o usuário estiver logado no Parse
-    const SESSION_TOKEN_KEY = 'parseSessionToken'; // Chave para localStorage (deve ser a mesma do index.html)
-
 
     // --- Elementos DOM ---
     const gridContainer = document.getElementById("storeProductGrid");
@@ -304,47 +301,14 @@
         console.error("Erro exibido:", message);
     }
 
-     /**
-     * Tenta retomar a sessão Parse usando o token armazenado no localStorage.
-     * Atualiza a variável global `currentUser`.
-     * @returns {Promise<Parse.User | null>} O objeto de usuário Parse logado ou null.
-     */
-    async function checkSessionOnLoad() {
-        console.log("[Produtos] Verificando sessão Parse no carregamento...");
-        const sessionToken = localStorage.getItem(SESSION_TOKEN_KEY);
-
-        if (sessionToken) {
-            console.log("[Produtos] Token encontrado. Tentando validar com Parse.User.me()...");
-            try {
-                // Usa Parse.User.me(sessionToken) para validar o token e obter o usuário
-                const user = await Parse.User.me(sessionToken);
-                console.log("[Produtos] Parse.User.me() bem-sucedido! Usuário validado:", user.id);
-                currentUser = user; // Define o usuário logado na variável global
-                return user;
-            } catch (error) {
-                // O token é inválido (expirado, revogado, etc.) ou houve erro de rede
-                console.warn("[Produtos] Falha ao validar token com Parse.User.me() (token inválido/expirado?):", error.code, error.message);
-                localStorage.removeItem(SESSION_TOKEN_KEY); // Remove o token inválido
-                currentUser = null; // Garante que o usuário global seja null
-                // Não exibe um erro para o usuário aqui, apenas no console.
-                // O comportamento de "não logado" é o esperado se a sessão falhar.
-                return null;
-            }
-        } else {
-            console.log("[Produtos] Nenhum token encontrado no localStorage.");
-            currentUser = null; // Garante que o usuário global seja null
-            return null;
-        }
-    }
-
-
     /**
      * Adiciona um produto ao carrinho do Cliente associado ao usuário logado no Parse.
      * @param {string} produtoId - O objectId do produto a ser adicionado.
      * @param {HTMLElement} buttonElement - O botão que foi clicado.
      */
     async function addToCart(produtoId, buttonElement) {
-        // Verifica se o usuário está logado no Parse SDK (usando a variável global)
+        // Verifica se o usuário está logado no Parse SDK
+        currentUser = Parse.User.current(); // Pega o usuário Parse atual (pode ser null)
         if (!currentUser) {
             alert("⚠️ Você precisa estar logado para adicionar itens ao carrinho.\nFaça login na página principal.");
             console.warn("[Add Cart] Tentativa de adicionar ao carrinho sem usuário Parse logado.");
@@ -731,19 +695,16 @@
     });
 
     // Função principal para iniciar o carregamento dos dados
-    async function initializePage() { // Tornada async para esperar checkSessionOnLoad
-        console.log("[Produtos Init] Página carregada. Iniciando verificação de sessão e carregamento de produtos...");
-
-        // Primeiro, tenta carregar a sessão do Parse
-        currentUser = await checkSessionOnLoad(); // Atualiza a variável global
-
+    function initializePage() {
+        console.log("[Produtos Init] Página carregada. Iniciando carregamento de produtos...");
+        // Verifica o usuário Parse atual (pode ser null se não logado)
+        currentUser = Parse.User.current();
         if (currentUser) {
-            console.log("[Produtos Init] Usuário Parse logado encontrado após verificação:", currentUser.id);
+            console.log("[Produtos Init] Usuário Parse logado encontrado:", currentUser.id);
         } else {
-            console.log("[Produtos Init] Nenhum usuário Parse logado após verificação.");
+            console.log("[Produtos Init] Nenhum usuário Parse logado no momento.");
         }
-
-        // Agora carrega os produtos. A função addToCart usará o `currentUser` definido aqui.
+        // Carrega os produtos. A função addToCart verificará o login novamente no momento do clique.
         loadSortedProducts();
     }
 
