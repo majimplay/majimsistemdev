@@ -182,7 +182,7 @@
     iframe {
       width: 100%;
       /* Calculate height considering header potentially wrapping */
-      height: calc(100vh - 150px); /* Adjusted height, test this value */
+      height: calc(100vh ); /* Adjusted height, test this value */
       border: none;
       display: block; /* Ensure iframe takes block space */
     }
@@ -207,7 +207,7 @@
             margin-bottom: 5px; /* Add space below welcome message */
         }
          iframe {
-             height: calc(100vh - 180px); /* Further adjust iframe height */
+             height: 100%; /* Further adjust iframe height */
          }
          #googleSignInButton {
              width: 100%; /* Make Google button container full width */
@@ -267,7 +267,7 @@
     // !! IMPORTANTE: Substitua pelas suas chaves do Back4App !!
     Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
     Parse.serverURL = "https://parseapi.back4app.com/";
-    // Parse.User.disableUnsafeCurrentUser(); // Não é mais estritamente necessário com .me(), mas pode manter se preferir
+     Parse.User.disableUnsafeCurrentUser(); // Não é mais estritamente necessário com .me(), mas pode manter se preferir
 
     // --- Configuração Google Sign-In ---
     // !! IMPORTANTE: Substitua pelo seu Client ID do Google Cloud Console !!
@@ -683,26 +683,18 @@
 
         try {
             const existingCliente = await query.first();
-            if (!existingCliente) {
-                console.log(`[Cliente Check] Cliente não encontrado. Criando...`);
-                const newCliente = new Cliente();
-                newCliente.set("usuario", user); // Linka com o usuário Parse
-                // **IMPORTANTE:** Verifique o nome do campo array "carrinhoclient"
-                newCliente.set("carrinhoclient", []); // Inicializa carrinho vazio
+  if (!existingCliente) {
+            console.log(`[Cliente Check] Cliente não encontrado. Criando...`);
+            const newCliente = new Cliente();
+            newCliente.set("usuario", user);
+            newCliente.set("carrinhoclient", []);
 
-                // **ACL:** Define permissões para que SÓ o próprio usuário possa ler e escrever
-                const acl = new Parse.ACL();
-                acl.setReadAccess(user, true);
-                acl.setWriteAccess(user, true);
-                // Opcional: Se Admins precisam de acesso, adicione setRoleReadAccess/setRoleWriteAccess("Admin", true);
-                newCliente.setACL(acl);
+            // Defina a ACL corretamente (permitindo apenas o usuário)
 
-                // !! IMPORTANTE: A operação .save() aqui pode falhar se a ACL da classe _User !!
-                // !! não permitir que o usuário autenticado seja "usado" para criar/associar objetos !!
-                // !! Verifique também as permissões da classe "Cliente" !!
-                await newCliente.save();
-                console.log("[Cliente Check] Objeto Cliente criado com sucesso:", newCliente.id);
-                return newCliente; // Retorna o cliente recém-criado
+
+            await newCliente.save();
+            console.log("[Cliente Check] Objeto Cliente criado com sucesso:", newCliente.id);
+            return newCliente;
             } else {
                 console.log("[Cliente Check] Objeto Cliente já existe:", existingCliente.id);
                 return existingCliente; // Retorna o cliente existente
