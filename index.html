@@ -293,6 +293,7 @@
      * Callback chamado pela biblioteca Google Identity Services após login bem-sucedido.
      * Recebe o ID Token do Google e tenta logar/linkar no Parse.
      * **MODIFICADO:** Remove a tentativa de definir emailVerified manualmente.
+     * **MODIFICADO:** Move a chamada para onLoginSuccess para depois do user.save().
      * @param {object} response - Objeto de resposta da credencial do Google. Contém response.credential (o ID Token JWT).
      */
     async function handleGoogleCredentialResponse(response) {
@@ -393,12 +394,13 @@
                 } catch (saveError) {
                     // Se ocorrer um erro aqui agora, é por outro motivo (ex: ACLs)
                     console.error("[Parse User Update] Erro ao salvar informações do perfil no Parse:", saveError);
+                    // Continua o fluxo mesmo com erro no save, o login principal funcionou
                 }
             } else {
                  console.log("[Parse User Update] Nenhuma atualização de perfil necessária.");
             }
 
-            // Processa o login bem-sucedido (mesmo que o save falhe, o login principal funcionou)
+            // Processa o login bem-sucedido (incluindo atualização da UI) APÓS tentar salvar as infos do perfil
             await onLoginSuccess(user);
 
         } catch (error) {
@@ -421,11 +423,12 @@
     /**
      * Função chamada após um login bem-sucedido no Parse (via Google ou validação de sessão).
      * Atualiza a interface e carrega dados do usuário.
-     * @param {Parse.User} user - O usuário Parse logado.
+     * @param {Parse.User} user - O objeto de usuário do Parse logado.
      */
     async function onLoginSuccess(user) {
         console.log("[Login Success] Processando para usuário:", user.id);
         // Atualiza a UI imediatamente para refletir o estado logado
+        // A UI agora deve receber um objeto 'user' que já teve suas propriedades de perfil atualizadas (se aplicável)
         updateAuthUI(user);
 
         // Tenta carregar/criar dados associados em paralelo
@@ -441,7 +444,8 @@
                 console.error(`[Login Success] Erro na operação ${index} (0:Cart, 1:Admin, 2:Cliente):`, result.reason);
                  // Informar o usuário sobre falha na criação do cliente pode ser útil
                  if (index === 2) { // Índice 2 corresponde a createClienteForUser
-                     alert("Houve um problema ao inicializar os dados da sua conta (Cliente). Tente recarregar a página.");
+                     // Removido alert para não ser muito intrusivo, erro já está no console
+                     // alert("Houve um problema ao inicializar os dados da sua conta (Cliente). Tente recarregar a página.");
                  }
             }
         });
@@ -464,9 +468,10 @@
             console.log("[Session Check] Token encontrado. Tentando validar com Parse.User.me()...");
             showLoadingState(true);
             try {
+                // Parse.User.me() retorna o objeto User atualizado do servidor
                 const user = await Parse.User.me(sessionToken);
                 console.log("[Session Check] Parse.User.me() bem-sucedido! Usuário validado:", user.id);
-                await onLoginSuccess(user); // Chama onLoginSuccess com o usuário validado
+                await onLoginSuccess(user); // Chama onLoginSuccess com o usuário validado (que já deve ter o nome se foi salvo)
             } catch (error) {
                 console.warn("[Session Check] Falha ao validar token com Parse.User.me() (token inválido/expirado?):", error.code, error.message);
                 localStorage.removeItem(SESSION_TOKEN_KEY); // Remove token inválido
@@ -501,11 +506,10 @@
             userArea.style.display = 'flex';
 
             // Tenta obter o nome de exibição, senão o email, senão um padrão
-            //const displayName = parseUser.get('displayName') || parseUser.get('email')?.split('@')[0] || 'semnome';
-
-          const displayName = parseUser.get('displayName') || 'Usuário sem nome';
-          let welcomeMessage = `Bem-vindo, ${displayName}!`;
-          console.log(`Bem-vindo: ${displayName}, email: ${parseUser.get('email')}`);
+            // Agora parseUser.get('displayName') deve retornar o nome se ele foi salvo
+            const displayName = parseUser.get('displayName') || parseUser.get('email')?.split('@')[0] || 'Usuário'; // Fallback para 'Usuário'
+            let welcomeMessage = `Bem-vindo, ${displayName}!`;
+            console.log(`Bem-vindo: ${displayName}, email: ${parseUser.get('email')}`);
             // Adiciona foto do perfil se existir
             const profilePic = parseUser.get('profilePictureUrl');
             if (profilePic) {
