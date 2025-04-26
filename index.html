@@ -409,9 +409,10 @@
         // Carrega dados assíncronos em paralelo para agilizar
         // Usar Promise.allSettled para que um erro não impeça o outro de rodar
         const results = await Promise.allSettled([
-            loadInitialCartCount(user), // Passa o usuário para evitar buscar Parse.User.current() de novo
+          
             checkAdminStatus(user),     // Passa o usuário
-            createClienteForUser(user)  // Garante que o Cliente existe (pode falhar se ACL do _User estiver errada)
+            createClienteForUser(user),  // Garante que o Cliente existe (pode falhar se ACL do _User estiver errada)
+           loadInitialCartCount(user)   // Passa o usuário para evitar buscar Parse.User.current() de novo
         ]);
 
         // Logar resultados (opcional)
@@ -712,8 +713,9 @@
      */
     async function clearCart() {
         // Usa Parse.User.current() que deve ter sido populado por .me() ou .logInWith()
-        const parseUser = Parse.User.current();
-        if (!parseUser) {
+      //  const parseUser = Parse.User.current();
+       // if (!parseUser) { user
+      if (!user) {
             alert("Você precisa estar logado para limpar o carrinho.");
             console.warn("[Cart Clear] Tentativa de limpar carrinho sem usuário logado.");
             return;
@@ -897,7 +899,7 @@
                 checkSessionOnLoad().then(() => {
                     // 2. SÓ renderiza o botão Google SE o usuário NÃO estiver logado APÓS checkSessionOnLoad
                     // Parse.User.current() retorna o usuário logado (se .me() ou .logInWith() foi bem-sucedido) ou null
-                    if (!Parse.User.current()) {
+                    if (!user()) {
                         console.log("[Init Flow] Usuário não logado após checkSession. Renderizando botão Google.");
                         renderGoogleButton(); // Renderiza o botão GSI
                     } else {
@@ -908,20 +910,20 @@
                 }).catch(err => {
                      console.error("[Init Error] Erro CRÍTICO durante checkSessionOnLoad:", err);
                      // Mesmo com erro na sessão, tenta renderizar botão de login se GSI carregou e não há user
-                     if (!Parse.User.current()) renderGoogleButton();
+                     if (!user()) renderGoogleButton();
                 });
 
             } catch (initError) {
                  console.error("[Google Init] Erro CRÍTICO ao inicializar Google Identity Services:", initError);
                  // GSI falhou na inicialização. Tenta verificar sessão Parse e mostrar fallback.
-                 checkSessionOnLoad().finally(() => { if (!Parse.User.current()) showFallbackGoogleButton(); });
+                 checkSessionOnLoad().finally(() => { if (!user()) showFallbackGoogleButton(); });
             }
 
         } else {
             // Se a biblioteca GSI não carregou corretamente
             console.error("[Google Init] Falha CRÍTICA: Objeto 'google.accounts.id' não encontrado. Verifique o script GSI e bloqueadores.");
             // Tenta verificar a sessão Parse mesmo assim e mostra o botão fallback se deslogado
-             checkSessionOnLoad().finally(() => { if (!Parse.User.current()) showFallbackGoogleButton(); });
+             checkSessionOnLoad().finally(() => { if (!user()) showFallbackGoogleButton(); });
         }
 
         // --- Listener para mensagens recebidas do iframe (ex: atualização do carrinho) ---
