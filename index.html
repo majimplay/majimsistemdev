@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Minha Loja Virtual (Login Google Direto)</title>
+  <title>Minha Loja Virtual (Login Google Cloud Code)</title>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
-    /* Estilos CSS (mantidos da versão anterior com ajustes para GSI) */
+    /* Estilos CSS (mantidos da versão anterior com ajustes) */
     body {
       font-family: sans-serif;
       margin: 0;
@@ -44,25 +44,44 @@
       margin-top: 5px; /* Spacing when wrapped */
     }
      /* Estilo específico para o botão Google Sign-In renderizado pela biblioteca */
-     #googleSignInButton div { /* Target the div created by Google */
-        margin: 5px 10px 5px 0 !important; /* Adjust margin as needed */
-     }
+     /* Nota: Com o fluxo de código, usaremos um botão HTML customizado */
+     /* #googleSignInButton div {
+        margin: 5px 10px 5px 0 !important;
+     } */
 
     .login-form p {
       margin-right: 10px;
       font-weight: bold;
       margin-bottom: 5px; /* Spacing */
-       /* Esconder o texto quando o botão Google for renderizado */
-       display: none;
+       /* Manter o texto visível para o botão customizado */
+       display: block;
     }
 
-     /* Mostrar o texto se o botão Google não renderizar (fallback) */
-     .login-form.no-google-button p {
-         display: block;
+     /* Estilo para o botão de login Google customizado */
+     .google-login-button {
+        background: white;
+        color: #757575;
+        border: 1px solid #ddd; /* Ajustado para 1px */
+        padding: 8px 15px; /* Ajustado padding */
+        border-radius: 4px; /* Ajustado border-radius */
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.3s ease;
+        margin-left: 10px;
+        font-size: 1em; /* Ajustado font-size */
+        font-weight: 500; /* Ajustado font-weight */
+        box-shadow: 1px 1px 2px rgba(0,0,0,0.1); /* Adicionado sombra */
      }
-     /* Esconder o botão fallback se o botão Google renderizar */
-     .login-form:not(.no-google-button) #googleLoginBtnFallback {
-         display: none;
+     .google-login-button:hover {
+        background: #f8f8f8;
+        box-shadow: 1px 1px 3px rgba(0,0,0,0.2); /* Sombra maior no hover */
+        transform: translateY(-1px); /* Leve movimento para cima */
+     }
+     .google-login-button .google-icon {
+        width: 18px; /* Ajustado tamanho do ícone */
+        height: 18px; /* Ajustado tamanho do ícone */
+        margin-right: 10px; /* Ajustado margem */
      }
 
 
@@ -156,29 +175,6 @@
       transform: translateY(-2px);
       box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     }
-    /* Botão Google Fallback (se a biblioteca GSI falhar) */
-    .google-btn-fallback {
-      background: white;
-      color: #757575;
-      border: 2px solid #ddd;
-      padding: 5px 10px;
-      border-radius: 3px;
-      cursor: pointer;
-      display: inline-flex; /* Changed from flex to inline-flex */
-      align-items: center;
-      transition: all 0.3s ease;
-      margin-left: 10px;
-    }
-    .google-btn-fallback:hover {
-      background: #f8f8f8;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-       transform: translateY(-1px);
-    }
-    .google-icon {
-      width: 16px;
-      height: 16px;
-      margin-right: 8px;
-    }
     iframe {
       width: 100%;
       /* Calculate height considering header potentially wrapping */
@@ -209,12 +205,9 @@
          iframe {
              height: 100%; /* Further adjust iframe height */
          }
-         #googleSignInButton {
-             width: 100%; /* Make Google button container full width */
-             margin-bottom: 10px;
-         }
-         #googleSignInButton div {
-             margin: 5px auto !important; /* Center Google button */
+         .google-login-button {
+             width: auto; /* Ajuste conforme necessário */
+             margin: 5px auto; /* Centraliza o botão */
          }
     }
      @media (max-width: 480px) {
@@ -224,6 +217,10 @@
         }
         iframe {
              height: calc(100vh - 200px); /* Adjust iframe height again */
+         }
+         .google-login-button {
+             width: auto; /* Ajuste conforme necessário */
+             margin: 5px auto; /* Centraliza o botão */
          }
      }
   </style>
@@ -237,10 +234,9 @@
     <div class="auth-area">
       <div id="loginArea" class="login-form">
           <p>Faça login com sua conta Google</p>
-          <div id="googleSignInButton"></div>
-          <button id="googleLoginBtnFallback" class="google-btn-fallback" style="display: none;">
+          <button id="googleLoginBtn" class="google-login-button">
                 <svg class="google-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="18px" height="18px"><path fill="#EA4335" d="M24 9.5c3.46 0 6.3 1.18 8.4 3.19l6.4-6.4C34.8 2.5 30 .5 24 .5 14.9.5 7.2 5.8 4 13.6l7.2 5.6C12.8 13.4 18 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.8c0-1.6-.14-3.2-.4-4.8H24v9.1h12.8c-.6 3-2.2 5.5-4.6 7.2l7.2 5.6c4.2-3.8 6.7-9.4 6.7-16.1z"/><path fill="#FBBC05" d="M11.2 19.2c-.4 1.2-.6 2.5-.6 3.8s.2 2.6.6 3.8l-7.2 5.6C2.5 30.2.5 27.2.5 24s2-6.2 4.5-8.4l7.2 5.6z"/><path fill="#34A853" d="M24 47.5c5.9 0 10.9-1.9 14.6-5.2l-7.2-5.6c-2 1.3-4.5 2.1-7.4 2.1-6 0-11.2-3.9-13-9.2L4 32.8C7.2 40.6 14.9 47.5 24 47.5z"/><path fill="none" d="M.5.5h47v47H.5z"/></svg>
-                Entrar com Google (Fallback)
+                Entrar com Google
             </button>
       </div>
       <div id="userArea" class="user-info" style="display:none;">
@@ -266,10 +262,15 @@
     // --- Configuração Parse/Back4App ---
     Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
     Parse.serverURL = "https://parseapi.back4app.com/";
-    Parse.User.disableUnsafeCurrentUser();
+    // Não desabilitamos unsafeCurrentUser aqui, pois usaremos Parse.User.become()
+    // Parse.User.disableUnsafeCurrentUser();
 
-    // --- Configuração Google Sign-In ---
+    // --- Configuração Google Sign-In (OAuth 2.0 Code Flow) ---
     const GOOGLE_CLIENT_ID = "21514234895-keiqos567ifvs4hjkg3l1q5mvun8lri0.apps.googleusercontent.com";
+    // A redirect_uri DEVE ser exatamente a mesma configurada no Google Cloud Console e no seu Cloud Code auth.js
+    const GOOGLE_REDIRECT_URI = "https://majimplay.github.io/"; // Verifique se esta URL está correta
+
+    let googleCodeClient; // Variável para o cliente de código Google
 
     // --- Constantes ---
     const SESSION_TOKEN_KEY = 'parseSessionToken';
@@ -284,159 +285,84 @@
     const cartCountSpan = document.getElementById('cart-count');
     const iframe = document.getElementById('mainContent');
     const logoutBtn = document.getElementById('logoutBtn');
-    const googleSignInButtonContainer = document.getElementById('googleSignInButton');
-    const googleLoginBtnFallback = document.getElementById('googleLoginBtnFallback');
+    const googleLoginBtn = document.getElementById('googleLoginBtn'); // Nosso novo botão customizado
 
     // --- Funções ---
 
     /**
-     * Callback chamado pela biblioteca Google Identity Services após login bem-sucedido.
-     * Recebe o ID Token do Google e tenta logar/linkar no Parse.
-     * **MODIFICADO:** Remove a tentativa de definir emailVerified manualmente.
-     * **MODIFICADO:** Move a chamada para onLoginSuccess para depois do user.save().
-     * @param {object} response - Objeto de resposta da credencial do Google. Contém response.credential (o ID Token JWT).
+     * Callback chamado pela biblioteca Google Identity Services após obter o código de autorização.
+     * Envia o código para o Cloud Code para autenticar no Parse.
+     * @param {object} response - Objeto de resposta do código do Google. Contém response.code (o código de autorização).
      */
-    async function handleGoogleCredentialResponse(response) {
-        console.log("[Google Sign-In] Credencial recebida:", response);
-        const googleIdToken = response.credential;
+    async function handleGoogleAuthCodeResponse(response) {
+        console.log("[Google OAuth Code] Código de autorização recebido:", response);
+        const authCode = response.code;
 
-        if (!googleIdToken) {
-            console.error("[Google Sign-In] ID Token não encontrado.");
-            alert("Falha ao obter credenciais do Google. Tente novamente.");
+        if (!authCode) {
+            console.error("[Google OAuth Code] Código de autorização não encontrado.");
+            alert("Falha ao obter código de autorização do Google. Tente novamente.");
+            showLoadingState(false); // Esconde loading em caso de falha inicial
             return;
         }
 
-        // Decodificar token para obter informações do Google
-        let decodedToken;
-        try {
-            decodedToken = JSON.parse(atob(googleIdToken.split('.')[1]));
-            console.log("[Google Sign-In] Token decodificado:", decodedToken);
-        } catch (e) {
-            console.error("[Google Sign-In] Erro ao decodificar o ID Token:", e);
-            alert("Erro ao processar as credenciais do Google.");
-            return;
-        }
-        const googleUserId = decodedToken.sub;
-        //const googleEmail = decodedToken.email;
-        // const googleEmailVerified = decodedToken.email_verified; // Não usaremos para definir manualmente
-
-        if (!googleUserId) {
-            console.error("[Google Sign-In] ID do usuário Google (sub) não encontrado no token.");
-            alert("Credencial do Google inválida.");
-            return;
-        }
-       // if (!googleEmail) {
-       //     console.warn("[Google Sign-In] Email não encontrado no token do Google.");
-       // }
-
-        // AuthData para o Parse
-        const authData = {
-            id: googleUserId,
-            id_token: googleIdToken
-        };
-
-        showLoadingState(true);
+        showLoadingState(true); // Mostra loading enquanto processa no Cloud Code
 
         try {
-            console.log("[Parse Login] Tentando logar/linkar com Google AuthData...");
-            const user = await Parse.User.logInWith('google', { authData });
-            console.log(`[Parse Login] Sucesso! Usuário ${user.existed() ? 'existente' : 'novo'} logado/linkado:`, user.id);
+            console.log("[Cloud Code] Executando 'handleGoogleAuth' com o código...");
+            // Chama a função Cloud Code passando o código de autorização
+            const result = await Parse.Cloud.run('handleGoogleAuth', { code: authCode });
+            console.log("[Cloud Code] Resposta recebida:", result);
 
-            // Salvar session token no localStorage
-            const sessionToken = user.getSessionToken();
-            if (sessionToken) {
-                localStorage.setItem(SESSION_TOKEN_KEY, sessionToken);
-                console.log("[Parse Login] Session Token salvo no localStorage.");
-            } else {
-                console.warn("[Parse Login] Não foi possível obter o Session Token após o login.");
+            const { user: userData, sessionToken } = result;
+
+            if (!sessionToken) {
+                 throw new Error("Token de sessão não retornado pelo Cloud Code.");
             }
 
-            // Atualizar informações do perfil no Parse (nome, foto, email)
-            let userNeedsSave = false;
-            const googleName = decodedToken.name || "";
-            const googlePicture = decodedToken.picture || "";
+            // Usa o token de sessão retornado pelo Cloud Code para autenticar o usuário no cliente
+            console.log("[Parse Client] Autenticando cliente com sessionToken...");
+            const parseUser = await Parse.User.become(sessionToken);
+            console.log("[Parse Client] Parse.User.become() bem-sucedido. Usuário:", parseUser.id);
 
-            // Atualiza Nome se diferente
-            if (googleName && (!user.get('displayName') || user.get('displayName') !== googleName)) {
-                user.set("displayName", googleName);
-                userNeedsSave = true;
-                console.log("[Parse User Update] Definindo/Atualizando displayName do Google.");
-            }
-            // Atualiza Foto se diferente
-            if (googlePicture && (!user.get('profilePictureUrl') || user.get('profilePictureUrl') !== googlePicture)) {
-                user.set("profilePictureUrl", googlePicture);
-                userNeedsSave = true;
-                console.log("[Parse User Update] Definindo/Atualizando profilePictureUrl do Google.");
-            }
-            // Atualiza Email se diferente (e se disponível no token)
-           // if (googleEmail && (!user.get('email') || user.get('email') !== googleEmail)) {
-            //    user.set("email", googleEmail); // Define o campo 'email' padrão do Parse User
-           //     userNeedsSave = true;
-           //     console.log("[Parse User Update] Definindo/Atualizando email do Google.");
-           // }
+            // Salva o session token no localStorage
+            localStorage.setItem(SESSION_TOKEN_KEY, sessionToken);
+            console.log("[Parse Client] Session Token salvo no localStorage.");
 
-            // *** REMOVIDO: Não definir emailVerified manualmente ***
-            // if (googleEmailVerified === true && user.get('emailVerified') !== true) {
-            //     user.set("emailVerified", true);
-            //     userNeedsSave = true;
-            //     console.log("[Parse User Update] Definindo emailVerified como true (confirmado pelo Google).");
-            // } else if (user.get('emailVerified') === undefined && googleEmailVerified !== true) {
-            //     user.set("emailVerified", false);
-            //     userNeedsSave = true;
-            //     console.log("[Parse User Update] Definindo emailVerified como false (não confirmado pelo Google).");
-            // }
-
-            // Salva o usuário no Parse APENAS se alguma informação foi alterada/adicionada
-            if (userNeedsSave) {
-                try {
-	              await user.save(null, { useMasterKey: true });
-                  //  await user.save();
-                    console.log("[Parse User Update] Informações do perfil (nome/foto/emailnao) salvas no Parse.");
-                } catch (saveError) {
-                    // Se ocorrer um erro aqui agora, é por outro motivo (ex: ACLs)
-                    console.error("[Parse User Update] Erro ao salvar informações do perfil no Parse:", saveError);
-                    // Continua o fluxo mesmo com erro no save, o login principal funcionou
-                }
-            } else {
-                 console.log("[Parse User Update] Nenhuma atualização de perfil necessária.");
-            }
-
-            // Processa o login bem-sucedido (incluindo atualização da UI) APÓS tentar salvar as infos do perfil
-            await onLoginSuccess(user);
+            // O objeto parseUser retornado por become() já deve ter os dados salvos pelo Cloud Code
+            await onLoginSuccess(parseUser); // Processa o login bem-sucedido
 
         } catch (error) {
-            console.error("[Erro] Login/Link com Google falhou:", error);
+            console.error("[Erro] Falha ao processar código Google ou autenticar no Parse via Cloud Code:", error);
             let errorMessage = `Erro ao fazer login com Google: ${error.message}`;
-            if (error.code === Parse.Error.OBJECT_NOT_FOUND || error.code === Parse.Error.INVALID_SESSION_TOKEN) {
-                errorMessage += " Sua sessão pode ter expirado. Tente novamente.";
-            } else if (error.code === Parse.Error.CONNECTION_FAILED) {
-                 errorMessage += " Verifique sua conexão com a internet.";
-            }
+             if (error.code === Parse.Error.SCRIPT_FAILED) {
+                 errorMessage = `Erro no servidor de autenticação: ${error.message}`;
+             }
             alert(errorMessage);
-            localStorage.removeItem(SESSION_TOKEN_KEY);
-            updateAuthUI(null);
-            updateIframeContent(null);
+            localStorage.removeItem(SESSION_TOKEN_KEY); // Limpa token inválido
+            updateAuthUI(null); // Atualiza UI para deslogado
+            updateIframeContent(null); // Atualiza iframe
         } finally {
-            showLoadingState(false);
+            showLoadingState(false); // Esconde loading
         }
     }
 
+
     /**
-     * Função chamada após um login bem-sucedido no Parse (via Google ou validação de sessão).
+     * Função chamada após um login bem-sucedido no Parse (via Cloud Code ou validação de sessão).
      * Atualiza a interface e carrega dados do usuário.
      * @param {Parse.User} user - O objeto de usuário do Parse logado.
      */
     async function onLoginSuccess(user) {
         console.log("[Login Success] Processando para usuário:", user.id);
         // Atualiza a UI imediatamente para refletir o estado logado
-        // A UI agora deve receber um objeto 'user' que já teve suas propriedades de perfil atualizadas (se aplicável)
+        // O objeto 'user' aqui já deve ter os dados de perfil salvos pelo Cloud Code
         updateAuthUI(user);
 
         // Tenta carregar/criar dados associados em paralelo
         const results = await Promise.allSettled([
             loadInitialCartCount(user),
             checkAdminStatus(user),
-            createClienteForUser(user) // Esta função agora deve funcionar se o user.save() anterior funcionou
+            createClienteForUser(user) // Esta função agora deve funcionar sem erro de permissão se o Cloud Code salvou o User
         ]);
 
         // Log de erros (opcional, mas útil para debug)
@@ -469,10 +395,11 @@
             console.log("[Session Check] Token encontrado. Tentando validar com Parse.User.me()...");
             showLoadingState(true);
             try {
-                // Parse.User.me() retorna o objeto User atualizado do servidor
+                // Parse.User.me() valida o token no servidor e obtém o objeto User atualizado
                 const user = await Parse.User.me(sessionToken);
                 console.log("[Session Check] Parse.User.me() bem-sucedido! Usuário validado:", user.id);
-                await onLoginSuccess(user); // Chama onLoginSuccess com o usuário validado (que já deve ter o nome se foi salvo)
+                 // O objeto 'user' retornado por me() deve ter os dados salvos pelo Cloud Code
+                await onLoginSuccess(user); // Chama onLoginSuccess com o usuário validado
             } catch (error) {
                 console.warn("[Session Check] Falha ao validar token com Parse.User.me() (token inválido/expirado?):", error.code, error.message);
                 localStorage.removeItem(SESSION_TOKEN_KEY); // Remove token inválido
@@ -496,7 +423,7 @@
      */
     function updateAuthUI(parseUser) {
         // Garante que os elementos existem antes de manipulá-los
-        if (!loginArea || !userArea || !welcomeUser || !adminPanel || !cartButton || !clearCartButton || !googleSignInButtonContainer) {
+        if (!loginArea || !userArea || !welcomeUser || !adminPanel || !cartButton || !clearCartButton || !googleLoginBtn) { // Incluindo o botão customizado
             console.error("[UI Update] Um ou mais elementos da UI não foram encontrados no DOM. Verifique os IDs.");
             return; // Impede a execução se algum elemento essencial faltar
         }
@@ -507,13 +434,12 @@
             userArea.style.display = 'flex';
 
             // Tenta obter o nome de exibição, senão o email, senão um padrão
-            // Agora parseUser.get('displayName') deve retornar o nome se ele foi salvo
-            const displayName = parseUser.get('displayName') || parseUser.get('email')?.split('@')[0] || 'Usuário'; // Fallback para 'Usuário'
+            // Agora parseUser.get('nome') deve retornar o nome salvo pelo Cloud Code
+            const displayName = parseUser.get('nome') || parseUser.get('email')?.split('@')[0] || 'Usuário'; // Fallback para 'Usuário'
             let welcomeMessage = `Bem-vindo, ${displayName}!`;
-           // console.log(`Bem-vindo: ${displayName}, email: ${parseUser.get('email')}`);
-			console.log(`Bem-vindo: ${displayName} `);
+            console.log(`Bem-vindo: ${displayName}, email: ${parseUser.get('email')}`);
             // Adiciona foto do perfil se existir
-            const profilePic = parseUser.get('profilePictureUrl');
+            const profilePic = parseUser.get('picture'); // Usando o campo 'picture' salvo pelo Cloud Code
             if (profilePic) {
                 welcomeMessage += ` <img src="${profilePic}" alt="Foto" style="width: 30px; height: 30px; border-radius: 50%; margin-left: 8px; vertical-align: middle;" onerror="this.style.display='none'; console.warn('Falha ao carregar foto de perfil: ${profilePic}')">`;
             }
@@ -522,8 +448,8 @@
             // Mostra botões de usuário logado
             cartButton.style.display = 'inline-flex';
             clearCartButton.style.display = 'inline-block'; // Ou 'inline-flex'
-            // Esconde o botão de login do Google
-            googleSignInButtonContainer.style.display = 'none';
+            // Esconde o botão de login do Google customizado
+            googleLoginBtn.style.display = 'none';
 
         } else {
             // --- Estado Deslogado ---
@@ -533,10 +459,8 @@
             adminPanel.style.display = 'none'; // Garante painel admin oculto
             cartButton.style.display = 'none'; // Esconde botão carrinho
             clearCartButton.style.display = 'none'; // Esconde botão limpar carrinho
-            // Mostra o container do botão Google para permitir novo login
-            googleSignInButtonContainer.style.display = 'block'; // Ou 'flex'
-            // Renderiza o botão Google (se a biblioteca GSI estiver carregada)
-            renderGoogleButton();
+            // Mostra o botão de login do Google customizado
+            googleLoginBtn.style.display = 'inline-flex'; // Mostra o botão customizado
         }
         console.log("[UI Update] Interface de autenticação atualizada. Logado:", !!parseUser);
     }
@@ -560,7 +484,7 @@
             updateIframeContent(null); // Atualiza iframe para versão offline
             console.log("[Logout] Sessão local limpa.");
 
-            // Opcional: Desabilitar Google One Tap
+            // Opcional: Desabilitar Google One Tap (não aplicável diretamente com o fluxo de código, mas manter por segurança)
             if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
                 google.accounts.id.disableAutoSelect();
                 console.log("[Logout] Google Auto Select desabilitado.");
@@ -590,7 +514,7 @@
             const roleQuery = new Parse.Query(Parse.Role);
             roleQuery.equalTo("name", "admin"); // Use o nome exato da sua Role
             roleQuery.equalTo("users", parseUser);
-            const count = await roleQuery.count(); // Verifica se existe (count > 0)
+            const count = await roleQuery.count({ useMasterKey: true }); // Usar master key pode ser necessário dependendo das ACLs das Roles
             const isAdmin = count > 0;
 
             console.log(`[Admin Check] Usuário ${parseUser.id} pertence à Role 'admin'? ${isAdmin}`);
@@ -648,7 +572,8 @@
             query.select("carrinhoclient"); // Busca apenas o campo do carrinho
 
             try {
-                const cliente = await query.first(); // Encontra o Cliente do usuário
+                // Usar master key aqui pode ser necessário se as ACLs do Cliente forem restritivas
+                const cliente = await query.first({ useMasterKey: true }); // Encontra o Cliente do usuário
                 if (cliente) {
                     // Pega o array do carrinho ou um array vazio se não existir
                     const cart = cliente.get('carrinhoclient') || [];
@@ -672,6 +597,7 @@
 
     /**
      * Cria um objeto 'Cliente' para um usuário Parse se ele ainda não tiver um.
+     * Esta função é chamada APÓS o usuário ser autenticado e salvo pelo Cloud Code.
      * @param {Parse.User} user - O usuário Parse.
      * @returns {Promise<Parse.Object | null>} O objeto Cliente ou null.
      */
@@ -684,7 +610,8 @@
         query.equalTo("usuario", user); // Filtra pelo ponteiro 'usuario'
 
         try {
-            const existingCliente = await query.first(); // Tenta encontrar um Cliente existente
+            // Usar master key aqui para garantir que a busca funcione
+            const existingCliente = await query.first({ useMasterKey: true }); // Tenta encontrar um Cliente existente
             if (!existingCliente) {
                 // Se não existe, cria um novo
                 console.log(`[Cliente Check] Cliente não encontrado. Criando...`);
@@ -702,7 +629,8 @@
                 // acl.setRoleWriteAccess("admin", true);
                 newCliente.setACL(acl); // Aplica a ACL ao novo objeto Cliente
 
-                await newCliente.save(); // Salva o novo Cliente no Back4App
+                // Usar master key para salvar o novo Cliente, garantindo que a criação funcione
+                await newCliente.save(null, { useMasterKey: true });
                 console.log("[Cliente Check] Objeto Cliente criado com sucesso:", newCliente.id);
                 return newCliente; // Retorna o Cliente recém-criado
             } else {
@@ -739,6 +667,8 @@
             console.log("[Cart Clear] Token encontrado. Tentando validar com Parse.User.me()...");
             try {
                 // Valida o token no servidor e obtém o objeto User atualizado
+                // Usar master key aqui não é apropriado para operações do cliente,
+                // Parse.User.me() deve funcionar com ACLs corretas no _User
                 parseUser = await Parse.User.me(sessionToken);
                 console.log("[Cart Clear] Sessão validada com sucesso via Parse.User.me(). Usuário:", parseUser.id);
             } catch (error) {
@@ -771,7 +701,8 @@
         query.equalTo("usuario", parseUser); // Busca o Cliente associado ao usuário
 
         try {
-            const cliente = await query.first(); // Encontra o objeto Cliente
+            // Usar master key aqui para garantir que a busca e o salvamento funcionem
+            const cliente = await query.first({ useMasterKey: true }); // Encontra o objeto Cliente
             if (cliente) {
                 // Verifica se o carrinho já está vazio
                 const currentCart = cliente.get('carrinhoclient') || [];
@@ -782,7 +713,7 @@
                 } else {
                     // Esvazia o array e salva
                     cliente.set('carrinhoclient', []);
-                    await cliente.save();
+                    await cliente.save(null, { useMasterKey: true }); // Salva com master key
                     updateCartCount(0); // Atualiza UI
                     alert("Carrinho esvaziado com sucesso!");
                     console.log("[Cart Clear] Carrinho do Cliente limpo no Parse.");
@@ -824,62 +755,10 @@
         // Desabilita/habilita botões para evitar cliques duplos
         if (logoutBtn) logoutBtn.disabled = isLoading;
         if (clearCartButton) clearCartButton.disabled = isLoading;
+        if (googleLoginBtn) googleLoginBtn.disabled = isLoading; // Desabilita botão de login
         // Adiciona/remove classe no body para estilização (ex: opacidade, cursor)
         document.body.classList.toggle('app-loading', isLoading);
         console.log(`[Loading State] ${isLoading ? 'Ativado' : 'Desativado'}`);
-    }
-
-    /**
-     * Renderiza o botão Google Sign-In oficial.
-     */
-    function renderGoogleButton() {
-        if (!googleSignInButtonContainer) {
-            console.error("[Google Button] Container 'googleSignInButtonContainer' não encontrado.");
-            return;
-        }
-        // Verifica se a biblioteca GSI está carregada
-        if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
-            googleSignInButtonContainer.innerHTML = ''; // Limpa botão antigo
-            // Mostra o container apenas se a área de login estiver visível
-            if (loginArea && loginArea.style.display !== 'none') {
-                 googleSignInButtonContainer.style.display = 'block';
-            } else {
-                 googleSignInButtonContainer.style.display = 'none';
-            }
-            // Esconde o botão fallback
-            if (googleLoginBtnFallback) googleLoginBtnFallback.style.display = 'none';
-            if (loginArea) loginArea.classList.remove('no-google-button'); // Remove classe de fallback
-
-            try {
-                // Renderiza o botão GSI
-                google.accounts.id.renderButton(
-                    googleSignInButtonContainer,
-                    { theme: "outline", size: "large", text: "signin_with", shape: "rectangular", logo_alignment: "left", width: "250" }
-                );
-                console.log("[Google Button] Botão oficial GSI renderizado.");
-            } catch (renderError) {
-                 console.error("[Google Button] Erro ao renderizar o botão GSI:", renderError);
-                 showFallbackGoogleButton(); // Mostra fallback em caso de erro
-            }
-        } else {
-            // Se GSI não carregou, mostra fallback
-            console.warn("[Google Button] Biblioteca Google GSI não carregada ou falhou.");
-            showFallbackGoogleButton();
-        }
-    }
-
-    /**
-     * Mostra o botão/texto de fallback quando GSI falha.
-     */
-    function showFallbackGoogleButton() {
-         if (googleSignInButtonContainer) googleSignInButtonContainer.innerHTML = ''; // Limpa container
-         if (googleSignInButtonContainer) googleSignInButtonContainer.style.display = 'none'; // Esconde container
-         if (loginArea) loginArea.classList.add('no-google-button'); // Adiciona classe para mostrar fallback CSS
-         if (googleLoginBtnFallback) {
-             googleLoginBtnFallback.style.display = 'inline-flex'; // Mostra botão HTML
-             // Adiciona aviso de que não funcionará
-             googleLoginBtnFallback.onclick = () => alert('O login com Google não está disponível no momento.');
-         }
     }
 
     // --- Inicialização da Aplicação ---
@@ -897,48 +776,67 @@
         } else {
             console.warn("Botão Limpar Carrinho ('clearCartBtn') não encontrado!");
         }
+         if (googleLoginBtn) {
+            // Adiciona listener para o botão de login customizado
+            googleLoginBtn.addEventListener('click', () => {
+                // Inicia o fluxo de código do Google
+                if (googleCodeClient) {
+                     console.log("[Google OAuth Code] Iniciando fluxo de código...");
+                     googleCodeClient.requestCode(); // Abre o popup/redireciona para obter o código
+                } else {
+                     console.error("[Google OAuth Code] Cliente de código Google não inicializado!");
+                     alert("Erro na inicialização do login com Google. Tente recarregar a página.");
+                }
+            });
+        } else {
+            console.error("CRÍTICO: Botão Login Google ('googleLoginBtn') não encontrado!");
+        }
 
-        // Configuração do Google Sign-In
-        if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
-            console.log("[Google Init] Inicializando Google Identity Services...");
+
+        // Configuração do Google Identity Services (OAuth 2.0 Code Flow)
+        if (typeof google !== 'undefined' && google.accounts && google.accounts.oauth2) {
+            console.log("[Google Init] Inicializando Google OAuth 2.0 Code Client...");
             try {
-                google.accounts.id.initialize({
+                googleCodeClient = google.accounts.oauth2.initCodeClient({
                     client_id: GOOGLE_CLIENT_ID,
-                    callback: handleGoogleCredentialResponse, // Função chamada após login Google
+                    scope: 'openid email profile', // Escopos necessários
+                    redirect_uri: GOOGLE_REDIRECT_URI, // URI de redirecionamento configurada
+                    callback: handleGoogleAuthCodeResponse, // Função chamada com o código de autorização
                 });
-                console.log("[Google Init] Google Identity Services inicializado.");
+                console.log("[Google Init] Google OAuth 2.0 Code Client inicializado.");
 
-                // 1. Tenta validar a sessão Parse existente
+                 // 1. Tenta validar a sessão Parse existente
                 checkSessionOnLoad().then(() => {
-                    // 2. Renderiza o botão Google SOMENTE SE não houver usuário logado após a verificação
-                    // Parse.User.current() foi atualizado por checkSessionOnLoad se a sessão era válida
-                    if (!Parse.User.current()) {
-                        console.log("[Init Flow] Usuário não logado. Renderizando botão Google.");
-                        renderGoogleButton();
-                    } else {
-                         console.log("[Init Flow] Usuário já logado via sessão.");
-                         // Garante que o botão GSI não seja mostrado se já logado
-                         if (googleSignInButtonContainer) googleSignInButtonContainer.style.display = 'none';
-                    }
+                    // 2. A UI é atualizada dentro de checkSessionOnLoad/onLoginSuccess
+                    // O botão de login Google customizado será mostrado/escondido por updateAuthUI
                 }).catch(err => {
                      // Erro durante a verificação da sessão
                      console.error("[Init Error] Erro durante checkSessionOnLoad:", err);
-                     // Tenta renderizar o botão Google mesmo assim se não houver usuário
-                     if (!Parse.User.current()) renderGoogleButton();
+                     // A UI já deve estar no estado deslogado por causa do catch em checkSessionOnLoad
                 });
+
 
             } catch (initError) {
                  // Erro na inicialização do GSI
-                 console.error("[Google Init] Erro CRÍTICO ao inicializar Google Identity Services:", initError);
-                 // Tenta verificar a sessão Parse e mostra fallback se deslogado
-                 checkSessionOnLoad().finally(() => { if (!Parse.User.current()) showFallbackGoogleButton(); });
+                 console.error("[Google Init] Erro CRÍTICO ao inicializar Google OAuth 2.0 Code Client:", initError);
+                 alert("Erro crítico ao inicializar o login com Google.");
+                 // Garante que a UI esteja no estado deslogado em caso de erro crítico
+                 updateAuthUI(null);
+                 updateIframeContent(null);
             }
 
         } else {
             // Biblioteca GSI não carregou
-            console.error("[Google Init] Falha CRÍTICA: Objeto 'google.accounts.id' não encontrado.");
+            console.error("[Google Init] Falha CRÍTICA: Objeto 'google.accounts.oauth2' não encontrado.");
+            alert("Biblioteca de login Google não carregada. Verifique sua conexão ou a URL da biblioteca.");
             // Tenta verificar a sessão Parse e mostra fallback se deslogado
-             checkSessionOnLoad().finally(() => { if (!Parse.User.current()) showFallbackGoogleButton(); });
+             checkSessionOnLoad().finally(() => {
+                 // Garante que a UI esteja no estado deslogado se a sessão não puder ser verificada
+                 if (!Parse.User.current()) {
+                      updateAuthUI(null);
+                      updateIframeContent(null);
+                 }
+             });
         }
 
         // --- Listener para mensagens do iframe ---
