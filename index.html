@@ -317,7 +317,7 @@
             return;
         }
         const googleUserId = decodedToken.sub;
-        const googleEmail = decodedToken.email;
+        //const googleEmail = decodedToken.email;
         // const googleEmailVerified = decodedToken.email_verified; // Não usaremos para definir manualmente
 
         if (!googleUserId) {
@@ -325,9 +325,9 @@
             alert("Credencial do Google inválida.");
             return;
         }
-        if (!googleEmail) {
-            console.warn("[Google Sign-In] Email não encontrado no token do Google.");
-        }
+       // if (!googleEmail) {
+       //     console.warn("[Google Sign-In] Email não encontrado no token do Google.");
+       // }
 
         // AuthData para o Parse
         const authData = {
@@ -369,11 +369,11 @@
                 console.log("[Parse User Update] Definindo/Atualizando profilePictureUrl do Google.");
             }
             // Atualiza Email se diferente (e se disponível no token)
-            if (googleEmail && (!user.get('email') || user.get('email') !== googleEmail)) {
-                user.set("email", googleEmail); // Define o campo 'email' padrão do Parse User
-                userNeedsSave = true;
-                console.log("[Parse User Update] Definindo/Atualizando email do Google.");
-            }
+           // if (googleEmail && (!user.get('email') || user.get('email') !== googleEmail)) {
+            //    user.set("email", googleEmail); // Define o campo 'email' padrão do Parse User
+           //     userNeedsSave = true;
+           //     console.log("[Parse User Update] Definindo/Atualizando email do Google.");
+           // }
 
             // *** REMOVIDO: Não definir emailVerified manualmente ***
             // if (googleEmailVerified === true && user.get('emailVerified') !== true) {
@@ -390,7 +390,7 @@
             if (userNeedsSave) {
                 try {
                     await user.save();
-                    console.log("[Parse User Update] Informações do perfil (nome/foto/email) salvas no Parse.");
+                    console.log("[Parse User Update] Informações do perfil (nome/foto/emailnao) salvas no Parse.");
                 } catch (saveError) {
                     // Se ocorrer um erro aqui agora, é por outro motivo (ex: ACLs)
                     console.error("[Parse User Update] Erro ao salvar informações do perfil no Parse:", saveError);
@@ -509,7 +509,8 @@
             // Agora parseUser.get('displayName') deve retornar o nome se ele foi salvo
             const displayName = parseUser.get('displayName') || parseUser.get('email')?.split('@')[0] || 'Usuário'; // Fallback para 'Usuário'
             let welcomeMessage = `Bem-vindo, ${displayName}!`;
-            console.log(`Bem-vindo: ${displayName}, email: ${parseUser.get('email')}`);
+           // console.log(`Bem-vindo: ${displayName}, email: ${parseUser.get('email')}`);
+			console.log(`Bem-vindo: ${displayName} `);
             // Adiciona foto do perfil se existir
             const profilePic = parseUser.get('profilePictureUrl');
             if (profilePic) {
