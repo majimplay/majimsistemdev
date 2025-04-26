@@ -683,18 +683,24 @@
 
         try {
             const existingCliente = await query.first();
-  if (!existingCliente) {
-            console.log(`[Cliente Check] Cliente não encontrado. Criando...`);
-            const newCliente = new Cliente();
-            newCliente.set("usuario", user);
-            newCliente.set("carrinhoclient", []);
+            if (!existingCliente) {
+                console.log(`[Cliente Check] Cliente não encontrado. Criando...`);
+                const newCliente = new Cliente();
+                newCliente.set("usuario", user);
+                newCliente.set("carrinhoclient", []);
 
-            // Defina a ACL corretamente (permitindo apenas o usuário)
+                // Defina a ACL corretamente (permitindo apenas o usuário)
+                // Exemplo:
+                // const acl = new Parse.ACL();
+                // acl.setReadAccess(user, true);
+                // acl.setWriteAccess(user, true);
+                // // Se precisar de acesso de leitura para admin (opcional):
+                // // acl.setRoleReadAccess("admin", true);
+                // newCliente.setACL(acl);
 
-
-            await newCliente.save();
-            console.log("[Cliente Check] Objeto Cliente criado com sucesso:", newCliente.id);
-            return newCliente;
+                await newCliente.save();
+                console.log("[Cliente Check] Objeto Cliente criado com sucesso:", newCliente.id);
+                return newCliente;
             } else {
                 console.log("[Cliente Check] Objeto Cliente já existe:", existingCliente.id);
                 return existingCliente; // Retorna o cliente existente
@@ -711,11 +717,16 @@
      * Limpa o array 'carrinhoclient' no objeto 'Cliente' associado ao usuário logado.
      */
     async function clearCart() {
+        // *** ADICIONADO PARA DEBUG ***
+        // Log the current user state *before* the check
+        console.log("[Cart Clear] Checking Parse.User.current() state:", Parse.User.current());
+
         // Usa Parse.User.current() que deve ter sido populado por .me() ou .logInWith()
         const parseUser = Parse.User.current();
         if (!parseUser) {
             alert("Você precisa estar logado para limpar o carrinho.");
-            console.warn("[Cart Clear] Tentativa de limpar carrinho sem usuário logado.");
+            // *** ADICIONADO PARA DEBUG ***
+            console.warn("[Cart Clear] Tentativa de limpar carrinho sem usuário logado. Parse.User.current() was:", parseUser);
             return;
         }
         // Confirmação do usuário
