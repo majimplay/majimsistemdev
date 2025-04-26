@@ -501,10 +501,11 @@
             userArea.style.display = 'flex';
 
             // Tenta obter o nome de exibição, senão o email, senão um padrão
-          //  const displayName = parseUser.get('displayName') || parseUser.get('email')?.split('@')[0] || 'Usuário';
-             console.log(`Bem-vindo displayName: ${displayName}, email: ${parseUser.get('email')}`);
-            let welcomeMessage = `Bem-vindo, ${displayName}!`;
-             console.log('parseUser.get('displayName') parseUser.get('email')');
+            //const displayName = parseUser.get('displayName') || parseUser.get('email')?.split('@')[0] || 'semnome';
+
+          const displayName = parseUser.get('displayName') || 'Usuário sem nome';
+          let welcomeMessage = `Bem-vindo, ${displayName}!`;
+          console.log(`Bem-vindo: ${displayName}, email: ${parseUser.get('email')}`);
             // Adiciona foto do perfil se existir
             const profilePic = parseUser.get('profilePictureUrl');
             if (profilePic) {
