@@ -299,7 +299,8 @@
     async function handleGoogleCredentialResponse(response) {
         console.log("[Google Sign-In] Credencial recebida:", response);
         const googleIdToken = response.credential;
-
+        
+      
         if (!googleIdToken) {
             console.error("[Google Sign-In] ID Token não encontrado.");
             alert("Falha ao obter credenciais do Google. Tente novamente.");
@@ -340,7 +341,7 @@
             // Salvar session token no localStorage para persistência
             const sessionToken = user.getSessionToken();
             const googleEmail = decodedToken.email || "";
-
+          
             if (sessionToken) {
                 localStorage.setItem(SESSION_TOKEN_KEY, sessionToken);
                 console.log("[Parse Login] Session Token salvo no localStorage.");
@@ -367,7 +368,7 @@
                 userNeedsSave = true;
             }
 
-
+    
             if (googlePicture && (!user.get('profilePictureUrl') || user.get('profilePictureUrl') !== googlePicture)) { // Atualiza se diferente
                 user.set("profilePictureUrl", googlePicture);
                 userNeedsSave = true;
@@ -409,7 +410,7 @@
     /**
      * Função chamada após um login bem-sucedido no Parse (via Google ou validação de sessão).
      * Atualiza a interface e carrega dados do usuário.
-     * @param {Parse.User} user - O objeto usuário Parse logado.
+     * @param {Parse.User} user - O usuário Parse logado.
      */
     async function onLoginSuccess(user) {
         console.log("[Login Success] Processando para usuário:", user.id);
@@ -692,24 +693,18 @@
 
         try {
             const existingCliente = await query.first();
-            if (!existingCliente) {
-                console.log(`[Cliente Check] Cliente não encontrado. Criando...`);
-                const newCliente = new Cliente();
-                newCliente.set("usuario", user);
-                newCliente.set("carrinhoclient", []);
+  if (!existingCliente) {
+            console.log(`[Cliente Check] Cliente não encontrado. Criando...`);
+            const newCliente = new Cliente();
+            newCliente.set("usuario", user);
+            newCliente.set("carrinhoclient", []);
 
-                // Defina a ACL corretamente (permitindo apenas o usuário)
-                const acl = new Parse.ACL(user);
-                acl.setPublicReadAccess(false); // Ninguém mais pode ler por padrão
-                acl.setPublicWriteAccess(false); // Ninguém mais pode escrever por padrão
-                acl.setReadAccess(user, true); // O usuário pode ler
-                acl.setWriteAccess(user, true); // O usuário pode escrever
-                newCliente.setACL(acl);
+            // Defina a ACL corretamente (permitindo apenas o usuário)
 
 
-                await newCliente.save();
-                console.log("[Cliente Check] Objeto Cliente criado com sucesso:", newCliente.id);
-                return newCliente;
+            await newCliente.save();
+            console.log("[Cliente Check] Objeto Cliente criado com sucesso:", newCliente.id);
+            return newCliente;
             } else {
                 console.log("[Cliente Check] Objeto Cliente já existe:", existingCliente.id);
                 return existingCliente; // Retorna o cliente existente
@@ -724,45 +719,31 @@
 
     /**
      * Limpa o array 'carrinhoclient' no objeto 'Cliente' associado ao usuário logado.
-     * **CORRIGIDO:** Usa Parse.User.me() para verificar o usuário logado de forma confiável
-     * e trata especificamente o erro de sessão inválida.
      */
     async function clearCart() {
-        console.log("[Cart Clear] Iniciando tentativa de limpar carrinho...");
+        // Usa Parse.User.current() que deve ter sido populado por .me() ou .logInWith()
+        const parseUser = Parse.User.current();
+        if (!parseUser) {
+            alert("Você precisa estar logado para limpar o carrinho.");
+            console.warn("[Cart Clear] Tentativa de limpar carrinho sem usuário logado.");
+            return;
+        }
+        // Confirmação do usuário
+        if (!confirm("Tem certeza que deseja esvaziar seu carrinho?")) {
+            console.log("[Cart Clear] Limpeza cancelada pelo usuário.");
+            return; // Cancela se o usuário clicar em "Cancelar"
+        }
+
         showLoadingState(true); // Mostra loading
+        console.log("[Cart Clear] Tentando limpar carrinho do Cliente para usuário:", parseUser.id);
+        // **IMPORTANTE:** Verifique o nome da classe "Cliente"
+        const Cliente = Parse.Object.extend("Cliente");
+        const query = new Parse.Query(Cliente);
+        // **IMPORTANTE:** Verifique o nome do campo ponteiro "usuario"
+        query.equalTo("usuario", parseUser);
 
         try {
-            // **CORREÇÃO:** Obtém o usuário logado de forma assíncrona e confiável
-            const parseUser = await Parse.User.me();
-
-            if (!parseUser) {
-                alert("Você precisa estar logado para limpar o carrinho. Sua sessão pode ter expirado. Por favor, faça login novamente.");
-                console.warn("[Cart Clear] Tentativa de limpar carrinho sem usuário logado (verificado via Parse.User.me()).");
-                 // Limpa o token local se Parse.User.me() retornou null (embora .me() geralmente lance erro para token inválido)
-                localStorage.removeItem(SESSION_TOKEN_KEY);
-                updateAuthUI(null); // Atualiza UI para deslogado
-                updateIframeContent(null); // Atualiza iframe
-                updateCartCount(0); // Zera contagem
-                showLoadingState(false); // Esconde loading antes de retornar
-                return;
-            }
-
-            // Confirmação do usuário
-            if (!confirm("Tem certeza que deseja esvaziar seu carrinho?")) {
-                console.log("[Cart Clear] Limpeza cancelada pelo usuário.");
-                showLoadingState(false); // Esconde loading antes de retornar
-                return; // Cancela se o usuário clicar em "Cancelar"
-            }
-
-            console.log("[Cart Clear] Tentando limpar carrinho do Cliente para usuário:", parseUser.id);
-            // **IMPORTANTE:** Verifique o nome da classe "Cliente"
-            const Cliente = Parse.Object.extend("Cliente");
-            const query = new Parse.Query(Cliente);
-            // **IMPORTANTE:** Verifique o nome do campo ponteiro "usuario"
-            query.equalTo("usuario", parseUser);
-
             const cliente = await query.first(); // Encontra o objeto Cliente do usuário
-
             if (cliente) {
                 // **IMPORTANTE:** Verifique o nome do campo array "carrinhoclient"
                 // Verifica se o carrinho já está vazio para evitar save desnecessário
@@ -794,28 +775,18 @@
                 updateCartCount(0);
             }
         } catch (error) {
-            // Trata especificamente o erro de sessão inválida
-            if (error.code === Parse.Error.INVALID_SESSION_TOKEN) {
-                 console.error("[Cart Clear] Erro: Invalid session token.", error);
-                 alert("Sua sessão expirou ou é inválida. Por favor, faça login novamente para limpar o carrinho.");
-                 // Limpa o token local e atualiza a UI para deslogado
-                 localStorage.removeItem(SESSION_TOKEN_KEY);
-                 updateAuthUI(null);
-                 updateIframeContent(null);
-                 updateCartCount(0);
+            // Erro ao buscar ou salvar o objeto Cliente
+            console.error("[Cart Clear] Erro ao limpar carrinho do Cliente:", error);
+            // Verifica se é um erro de permissão (ACL)
+            let userMessage = "Erro ao limpar o carrinho.";
+            if (error.code === Parse.Error.OBJECT_NOT_FOUND) {
+                 userMessage = "Erro: Dados do carrinho não encontrados.";
+            } else if (error.code === Parse.Error.INVALID_ACL) { // Código 119 geralmente é ACL
+                 userMessage = "Erro de permissão ao tentar limpar o carrinho. Verifique as ACLs da classe Cliente.";
             } else {
-                // Trata outros erros
-                console.error("[Cart Clear] Erro ao limpar carrinho do Cliente:", error);
-                let userMessage = "Erro ao limpar o carrinho.";
-                if (error.code === Parse.Error.OBJECT_NOT_FOUND) {
-                     userMessage = "Erro: Dados do carrinho não encontrados.";
-                } else if (error.code === Parse.Error.INVALID_ACL) { // Código 119 geralmente é ACL
-                     userMessage = "Erro de permissão ao tentar limpar o carrinho. Verifique as ACLs da classe Cliente.";
-                } else {
-                     userMessage += ` (${error.message})`;
-                }
-                alert(userMessage);
+                 userMessage += ` (${error.message})`;
             }
+            alert(userMessage);
         } finally {
             showLoadingState(false); // Esconde loading
         }
@@ -927,7 +898,7 @@
                     client_id: GOOGLE_CLIENT_ID,
                     callback: handleGoogleCredentialResponse, // Função chamada após login Google bem-sucedido
                     // auto_select: true, // CUIDADO: Pode causar loops se o logout não limpar o estado do Google corretamente
-                    // ux_mode: "popup", // Alternativa: abrir popup em popup
+                    // ux_mode: "popup", // Alternativa: abrir popup em vez de redirecionar
                     // cancel_on_tap_outside: true
                 });
                 console.log("[Google Init] Google Identity Services inicializado com sucesso.");
