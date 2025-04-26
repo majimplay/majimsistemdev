@@ -264,17 +264,15 @@
 
   <script>
     // --- Configuração Parse/Back4App ---
-    // !! IMPORTANTE: Substitua pelas suas chaves do Back4App !!
     Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
     Parse.serverURL = "https://parseapi.back4app.com/";
-     Parse.User.disableUnsafeCurrentUser(); // Não é mais estritamente necessário com .me(), mas pode manter se preferir
+    Parse.User.disableUnsafeCurrentUser();
 
     // --- Configuração Google Sign-In ---
-    // !! IMPORTANTE: Substitua pelo seu Client ID do Google Cloud Console !!
     const GOOGLE_CLIENT_ID = "21514234895-keiqos567ifvs4hjkg3l1q5mvun8lri0.apps.googleusercontent.com";
 
     // --- Constantes ---
-    const SESSION_TOKEN_KEY = 'parseSessionToken'; // Chave para localStorage
+    const SESSION_TOKEN_KEY = 'parseSessionToken';
 
    // --- Elementos DOM ---
     const loginArea = document.getElementById('loginArea');
@@ -287,7 +285,7 @@
     const iframe = document.getElementById('mainContent');
     const logoutBtn = document.getElementById('logoutBtn');
     const googleSignInButtonContainer = document.getElementById('googleSignInButton');
-    const googleLoginBtnFallback = document.getElementById('googleLoginBtnFallback'); // Botão fallback caso GSI falhe
+    const googleLoginBtnFallback = document.getElementById('googleLoginBtnFallback');
 
     // --- Funções ---
 
@@ -306,7 +304,6 @@
             return;
         }
 
-        // Decodificar token para obter o ID do Google (sub) e outras informações
         let decodedToken;
         try {
             decodedToken = JSON.parse(atob(googleIdToken.split('.')[1]));
@@ -323,43 +320,36 @@
             return;
         }
 
-        // AuthData CORRETO com id e id_token para o Parse.User.logInWith('google', ...)
         const authData = {
             id: googleUserId,
             id_token: googleIdToken
         };
 
-        showLoadingState(true); // Mostra indicador de carregamento
+        showLoadingState(true);
 
         try {
             console.log("[Parse Login] Tentando logar/linkar com Google AuthData...");
-            // Usa logInWith para criar ou logar o usuário no Parse usando as credenciais do Google
             const user = await Parse.User.logInWith('google', { authData });
             console.log(`[Parse Login] Sucesso! Usuário ${user.existed() ? 'existente' : 'novo'} logado/linkado:`, user.id);
 
-            // Salvar session token no localStorage para persistência
             const sessionToken = user.getSessionToken();
             if (sessionToken) {
                 localStorage.setItem(SESSION_TOKEN_KEY, sessionToken);
                 console.log("[Parse Login] Session Token salvo no localStorage.");
             } else {
                 console.warn("[Parse Login] Não foi possível obter o Session Token após o login.");
-                // Considerar se isso deve impedir o fluxo ou não
             }
 
-            // Atualizar nome/foto do perfil no Parse se for um novo usuário ou se ainda não tiverem sido definidos
-            // !! IMPORTANTE: Isso pode falhar se as ACLs da classe _User no Back4App não permitirem escrita pelo próprio usuário !!
-            // !! Verifique as permissões (CLP/ACL) da classe _User no seu dashboard Back4App !!
             let userNeedsSave = false;
             const googleName = decodedToken.name || "";
             const googlePicture = decodedToken.picture || "";
 
-            if (googleName && (!user.get('displayName') || user.get('displayName') !== googleName)) { // Atualiza se diferente
+            if (googleName && (!user.get('displayName') || user.get('displayName') !== googleName)) {
                 user.set("displayName", googleName);
                 userNeedsSave = true;
                 console.log("[Parse Login] Definindo/Atualizando displayName do Google.");
             }
-            if (googlePicture && (!user.get('profilePictureUrl') || user.get('profilePictureUrl') !== googlePicture)) { // Atualiza se diferente
+            if (googlePicture && (!user.get('profilePictureUrl') || user.get('profilePictureUrl') !== googlePicture)) {
                 user.set("profilePictureUrl", googlePicture);
                 userNeedsSave = true;
                 console.log("[Parse Login] Definindo/Atualizando profilePictureUrl do Google.");
@@ -371,16 +361,13 @@
                     console.log("[Parse Login] Informações do perfil (nome/foto) salvas no Parse.");
                 } catch (saveError) {
                     console.error("[Parse Login] Erro ao salvar informações do perfil no Parse (Verifique ACLs da classe _User):", saveError);
-                    // Continua mesmo se salvar o perfil falhar, o login principal funcionou
                 }
             }
 
-            // Processa o login bem-sucedido (atualiza UI, carrega dados, etc.)
             await onLoginSuccess(user);
 
         } catch (error) {
             console.error("[Erro] Login/Link com Google falhou:", error);
-            // Tenta fornecer uma mensagem mais útil
             let errorMessage = `Erro ao fazer login com Google: ${error.message}`;
             if (error.code === Parse.Error.OBJECT_NOT_FOUND || error.code === Parse.Error.INVALID_SESSION_TOKEN) {
                 errorMessage += " Sua sessão pode ter expirado. Tente novamente.";
@@ -388,12 +375,11 @@
                  errorMessage += " Verifique sua conexão com a internet.";
             }
             alert(errorMessage);
-            // Limpa qualquer token antigo em caso de falha
             localStorage.removeItem(SESSION_TOKEN_KEY);
-            updateAuthUI(null); // Garante UI de deslogado
-            updateIframeContent(null); // Garante iframe de deslogado
+            updateAuthUI(null);
+            updateIframeContent(null);
         } finally {
-            showLoadingState(false); // Esconde indicador de carregamento
+            showLoadingState(false);
         }
     }
 
@@ -404,32 +390,28 @@
      */
     async function onLoginSuccess(user) {
         console.log("[Login Success] Processando para usuário:", user.id);
-        updateAuthUI(user); // Atualiza a UI principal (bem-vindo, botões)
+        updateAuthUI(user);
 
-        // Carrega dados assíncronos em paralelo para agilizar
-        // Usar Promise.allSettled para que um erro não impeça o outro de rodar
         const results = await Promise.allSettled([
-            loadInitialCartCount(user), // Passa o usuário para evitar buscar Parse.User.current() de novo
-            checkAdminStatus(user),     // Passa o usuário
-            createClienteForUser(user)  // Garante que o Cliente existe (pode falhar se ACL do _User estiver errada)
+            loadInitialCartCount(user),
+            checkAdminStatus(user),
+            createClienteForUser(user)
         ]);
 
-        // Logar resultados (opcional)
         results.forEach((result, index) => {
             if (result.status === 'rejected') {
                 console.error(`[Login Success] Erro na operação ${index}:`, result.reason);
             }
         });
 
-        updateIframeContent(user); // Atualiza o conteúdo do iframe (produtos.html)
+        updateIframeContent(user);
         console.log("[Login Success] Processamento concluído.");
     }
 
 
     /**
      * Tenta retomar a sessão Parse usando o token armazenado no localStorage.
-     * **MODIFICADO:** Usa Parse.User.me(sessionToken) em vez de Parse.User.become().
-     * Chamado no carregamento inicial da página.
+     * Usa Parse.User.me(sessionToken).
      */
     async function checkSessionOnLoad() {
         console.log("[Session Check] Verificando sessão Parse no carregamento...");
@@ -437,29 +419,21 @@
 
         if (sessionToken) {
             console.log("[Session Check] Token encontrado. Tentando validar com Parse.User.me()...");
-            showLoadingState(true); // Mostra loading enquanto verifica a validade do token
+            showLoadingState(true);
             try {
-                // **CORREÇÃO:** Usa Parse.User.me(sessionToken) para validar o token e obter o usuário
-                // O método .me() retorna o objeto User se o token for válido
                 const user = await Parse.User.me(sessionToken);
                 console.log("[Session Check] Parse.User.me() bem-sucedido! Usuário validado:", user.id);
-
-                // Se .me() funcionou, o usuário está autenticado no Parse. Processa o login.
                 await onLoginSuccess(user);
-
             } catch (error) {
-                // O token é inválido (expirado, revogado, etc.) ou houve erro de rede
-                // Parse.User.me() rejeita a Promise se o token for inválido.
                 console.warn("[Session Check] Falha ao validar token com Parse.User.me() (token inválido/expirado?):", error.code, error.message);
-                localStorage.removeItem(SESSION_TOKEN_KEY); // Remove o token inválido
-                updateAuthUI(null); // Garante UI de deslogado
-                updateIframeContent(null); // Garante iframe de deslogado
+                localStorage.removeItem(SESSION_TOKEN_KEY);
+                updateAuthUI(null);
+                updateIframeContent(null);
             } finally {
-                showLoadingState(false); // Esconde o loading após a tentativa de validação
+                showLoadingState(false);
             }
         } else {
             console.log("[Session Check] Nenhum token encontrado no localStorage.");
-            // Garante que a UI e o iframe estejam no estado deslogado se não houver token
             updateAuthUI(null);
             updateIframeContent(null);
         }
@@ -467,8 +441,7 @@
 
 
     /**
-     * Atualiza a interface de autenticação (mostra/esconde áreas de login/usuário,
-     * atualiza mensagem de boas-vindas e botões).
+     * Atualiza a interface de autenticação.
      * @param {Parse.User | null} parseUser - O objeto de usuário do Parse logado ou null.
      */
     function updateAuthUI(parseUser) {
@@ -478,84 +451,63 @@
         }
 
         if (parseUser) {
-            // --- Estado Logado ---
-            loginArea.style.display = 'none'; // Esconde área de login
-            userArea.style.display = 'flex'; // Mostra área do usuário
+            loginArea.style.display = 'none';
+            userArea.style.display = 'flex';
 
-            // Monta a mensagem de boas-vindas
             const displayName = parseUser.get('displayName') || parseUser.get('username') || parseUser.get('email')?.split('@')[0] || 'Usuário';
             let welcomeMessage = `Bem-vindo, ${displayName}!`;
 
-            // Adiciona a foto do perfil se disponível
             const profilePic = parseUser.get('profilePictureUrl');
             if (profilePic) {
-                // Adiciona onerror para caso a URL da imagem falhe
                 welcomeMessage += ` <img src="${profilePic}" alt="Foto" style="width: 30px; height: 30px; border-radius: 50%; margin-left: 8px; vertical-align: middle;" onerror="this.style.display='none'; console.warn('Falha ao carregar foto de perfil: ${profilePic}')">`;
             }
             welcomeUser.innerHTML = welcomeMessage;
 
-            // Mostra botões específicos do usuário logado (carrinho, etc.)
             cartButton.style.display = 'inline-flex';
-            clearCartButton.style.display = 'inline-block'; // ou 'inline-flex' se preferir
-
-            // Esconde o botão de login do Google (o container)
+            clearCartButton.style.display = 'inline-block';
             googleSignInButtonContainer.style.display = 'none';
 
         } else {
-            // --- Estado Deslogado ---
-            loginArea.style.display = 'flex'; // Mostra área de login
-            userArea.style.display = 'none'; // Esconde área do usuário
-            welcomeUser.innerHTML = ''; // Limpa mensagem de boas-vindas
-            adminPanel.style.display = 'none'; // Garante que painel admin está oculto
-
-            // Esconde botões do carrinho
+            loginArea.style.display = 'flex';
+            userArea.style.display = 'none';
+            welcomeUser.innerHTML = '';
+            adminPanel.style.display = 'none';
             cartButton.style.display = 'none';
             clearCartButton.style.display = 'none';
-
-            // Mostra o container do botão Google para renderização
-            googleSignInButtonContainer.style.display = 'block'; // Ou 'flex', dependendo do seu CSS
-            // Renderiza o botão do Google novamente para permitir novo login
+            googleSignInButtonContainer.style.display = 'block';
             renderGoogleButton();
         }
         console.log("[UI Update] Interface de autenticação atualizada. Logado:", !!parseUser);
     }
 
     /**
-     * Função unificada para lidar com o processo de logout do Parse.
-     * Limpa a sessão local e atualiza a UI.
+     * Lida com o processo de logout do Parse.
      */
     async function handleLogout() {
         console.log("[Logout] Iniciando processo de logout do Parse...");
         showLoadingState(true);
         try {
-            // Desloga o usuário da sessão atual do Parse SDK
             await Parse.User.logOut();
             console.log('[Logout] Parse.User.logOut() concluído.');
         } catch (error) {
-            // Mesmo com erro no logout do Parse (raro, pode ocorrer se a sessão já for inválida), prossegue com limpeza local
             console.error('[Logout] Erro ao sair do Parse (sessão pode já estar inválida):', error);
         } finally {
-            // Limpa o token do localStorage independentemente de erro no logOut
             localStorage.removeItem(SESSION_TOKEN_KEY);
-            updateCartCount(0); // Zera contagem do carrinho na UI
-            updateAuthUI(null); // Atualiza UI para o estado deslogado (isso renderizará o botão Google)
-            updateIframeContent(null); // Atualiza iframe para a versão offline
+            updateCartCount(0);
+            updateAuthUI(null);
+            updateIframeContent(null);
             console.log("[Logout] Sessão local limpa.");
 
-            // Opcional: Desabilitar o login automático do Google (One Tap) se estiver usando
             if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
                 google.accounts.id.disableAutoSelect();
                 console.log("[Logout] Google Auto Select desabilitado.");
             }
-            showLoadingState(false); // Esconde loading
+            showLoadingState(false);
         }
     }
 
     /**
      * Verifica se o usuário Parse logado pertence à Role "Admin".
-     * Mostra ou esconde o painel de administração baseado no resultado.
-     * IMPORTANTE: Requer que uma Role chamada "admin" (ou o nome exato que você usa) exista no Back4App
-     * e que os usuários administradores sejam adicionados a ela.
      * @param {Parse.User} parseUser - O objeto de usuário Parse logado.
      */
     async function checkAdminStatus(parseUser) {
@@ -563,38 +515,27 @@
             console.warn("[Admin Check] Elemento adminPanel não encontrado.");
             return;
         }
-        // Se não há usuário logado, esconde o painel
         if (!parseUser) {
             adminPanel.style.display = 'none';
             return;
         }
         console.log(`[Admin Check] Verificando status de admin (Role 'admin') para usuário Parse: ${parseUser.id}`);
         try {
-            // Cria uma query pela Role específica (use o nome exato da sua Role)
             const roleQuery = new Parse.Query(Parse.Role);
-            roleQuery.equalTo("name", "admin"); // <-- CONFIRME O NOME DA SUA ROLE AQUI (case-sensitive)
-            // Verifica se o usuário atual (parseUser) está contido na relação 'users' dessa Role
+            roleQuery.equalTo("name", "admin");
             roleQuery.equalTo("users", parseUser);
-
-            // Executa a query. Não precisa de MasterKey aqui.
-            // count() é mais eficiente que first() se você só precisa saber se existe (>= 1)
             const count = await roleQuery.count();
             const isAdmin = count > 0;
-
             console.log(`[Admin Check] Usuário ${parseUser.id} pertence à Role 'admin'? ${isAdmin}`);
-            // Mostra ou esconde o painel de administração com base no resultado
             adminPanel.style.display = isAdmin ? 'flex' : 'none';
-
         } catch (error) {
-            // Erro ao consultar Roles (pode ser permissão, rede, nome da role incorreto, etc.)
             console.error('[Admin Check] Erro ao verificar Role "admin":', error);
-            adminPanel.style.display = 'none'; // Esconde o painel por segurança em caso de erro
+            adminPanel.style.display = 'none';
         }
     }
 
     /**
-     * Atualiza o atributo 'src' do iframe principal para mostrar
-     * conteúdo apropriado para usuário logado ou deslogado.
+     * Atualiza o 'src' do iframe principal.
      * @param {Parse.User | null} user - Um objeto de usuário Parse ou null.
      */
     function updateIframeContent(user) {
@@ -602,10 +543,8 @@
             console.warn("[Iframe Update] Elemento iframe 'mainContent' não encontrado.");
             return;
         }
-        // Define o src do iframe com base no estado de login
         const targetSrc = user ? 'produtos.html' : 'produtosoff.html';
-        // Verifica se o src precisa ser atualizado para evitar recarregamentos desnecessários
-        const currentSrc = iframe.getAttribute('src'); // Usar getAttribute é mais confiável que .src para comparação inicial
+        const currentSrc = iframe.getAttribute('src');
         if (currentSrc !== targetSrc) {
             iframe.src = targetSrc;
             console.log(`[Iframe Update] Iframe atualizado para: ${targetSrc}`);
@@ -615,12 +554,12 @@
     }
 
     /**
-     * Atualiza o número exibido no contador de itens do carrinho na UI.
+     * Atualiza o contador de itens do carrinho na UI.
      * @param {number} count - O número de itens no carrinho.
      */
     function updateCartCount(count) {
         if (cartCountSpan) {
-            cartCountSpan.textContent = count >= 0 ? count : 0; // Garante que não seja negativo
+            cartCountSpan.textContent = count >= 0 ? count : 0;
             console.log(`[Cart Count UI] Atualizado para: ${cartCountSpan.textContent}`);
         } else {
             console.warn("[Cart Count UI] Span do contador de carrinho ('cart-count') não encontrado.");
@@ -628,36 +567,30 @@
     }
 
     /**
-     * Carrega a contagem inicial do carrinho buscando o objeto 'Cliente'
-     * associado ao usuário Parse atualmente logado.
+     * Carrega a contagem inicial do carrinho.
      * @param {Parse.User} parseUser - O usuário Parse logado.
      */
     async function loadInitialCartCount(parseUser) {
         if (parseUser) {
             console.log("[Load Cart Count] Buscando contagem para usuário Parse:", parseUser.id);
-            // **IMPORTANTE:** Verifique se o nome da classe "Cliente" está correto
             const Cliente = Parse.Object.extend("Cliente");
             const query = new Parse.Query(Cliente);
-            // **IMPORTANTE:** Verifique se o nome do campo ponteiro "usuario" está correto
             query.equalTo("usuario", parseUser);
-            // **IMPORTANTE:** Verifique se o nome do campo array "carrinhoclient" está correto
-            query.select("carrinhoclient"); // Otimização: busca apenas o campo do carrinho
+            query.select("carrinhoclient");
 
             try {
                 const cliente = await query.first();
                 if (cliente) {
-                    // Se encontrou o Cliente, pega o array 'carrinhoclient' (ou um array vazio se for null/undefined)
                     const cart = cliente.get('carrinhoclient') || [];
                     console.log("[Load Cart Count] Objeto Cliente encontrado. Itens no carrinho:", cart.length);
-                    updateCartCount(cart.length); // Atualiza a UI
+                    updateCartCount(cart.length);
                 } else {
                     console.warn("[Load Cart Count] Nenhum objeto Cliente encontrado para este usuário. Contagem zerada.");
                     updateCartCount(0);
-                    // A criação do Cliente é tentada em onLoginSuccess via createClienteForUser
                 }
             } catch (error) {
                 console.error("[Load Cart Count] Erro ao buscar objeto Cliente:", error);
-                updateCartCount(0); // Zera a contagem na UI em caso de erro
+                updateCartCount(0);
             }
         } else {
             console.log("[Load Cart Count] Nenhum usuário Parse fornecido. Contagem zerada.");
@@ -666,207 +599,198 @@
     }
 
     /**
-     * Cria um objeto 'Cliente' para um usuário Parse se ele ainda não tiver um associado.
-     * É uma boa prática garantir que cada usuário tenha um Cliente correspondente.
-     * @param {Parse.User} user - O usuário Parse para o qual verificar/criar o Cliente.
-     * @returns {Promise<Parse.Object | null>} O objeto Cliente existente ou recém-criado, ou null em caso de erro.
+     * Cria um objeto 'Cliente' para um usuário Parse se ele ainda não tiver um.
+     * @param {Parse.User} user - O usuário Parse.
+     * @returns {Promise<Parse.Object | null>} O objeto Cliente ou null.
      */
     async function createClienteForUser(user) {
-        if (!user) return null; // Não faz nada se não houver usuário
+        if (!user) return null;
 
         console.log(`[Cliente Check] Verificando/Criando objeto Cliente para usuário ${user.id}...`);
-        // **IMPORTANTE:** Verifique o nome da classe "Cliente"
         const Cliente = Parse.Object.extend("Cliente");
         const query = new Parse.Query(Cliente);
-        // **IMPORTANTE:** Verifique o nome do campo ponteiro "usuario"
         query.equalTo("usuario", user);
 
         try {
             const existingCliente = await query.first();
-  if (!existingCliente) {
-            console.log(`[Cliente Check] Cliente não encontrado. Criando...`);
-            const newCliente = new Cliente();
-            newCliente.set("usuario", user);
-            newCliente.set("carrinhoclient", []);
-
-            // Defina a ACL corretamente (permitindo apenas o usuário)
-
-
-            await newCliente.save();
-            console.log("[Cliente Check] Objeto Cliente criado com sucesso:", newCliente.id);
-            return newCliente;
+            if (!existingCliente) {
+                console.log(`[Cliente Check] Cliente não encontrado. Criando...`);
+                const newCliente = new Cliente();
+                newCliente.set("usuario", user);
+                newCliente.set("carrinhoclient", []);
+                // Definir ACLs aqui se necessário
+                // const acl = new Parse.ACL();
+                // acl.setReadAccess(user, true);
+                // acl.setWriteAccess(user, true);
+                // newCliente.setACL(acl);
+                await newCliente.save();
+                console.log("[Cliente Check] Objeto Cliente criado com sucesso:", newCliente.id);
+                return newCliente;
             } else {
                 console.log("[Cliente Check] Objeto Cliente já existe:", existingCliente.id);
-                return existingCliente; // Retorna o cliente existente
+                return existingCliente;
             }
         } catch (error) {
             console.error("[Cliente Check] Erro ao verificar/criar Cliente (Verifique ACLs do _User e Cliente):", error);
-            // Não impede o fluxo principal, mas loga o erro
             return null;
         }
     }
 
-
     /**
      * Limpa o array 'carrinhoclient' no objeto 'Cliente' associado ao usuário logado.
+     * **MODIFICADO:** Revalida a sessão antes de prosseguir.
      */
     async function clearCart() {
-        // Usa Parse.User.current() que deve ter sido populado por .me() ou .logInWith()
-        const parseUser = Parse.User.current();
-        if (!parseUser) {
-            alert("Você precisa estar logado para limpar o carrinho.");
-            console.warn("[Cart Clear] Tentativa de limpar carrinho sem usuário logado.");
-            return;
-        }
-        // Confirmação do usuário
+        console.log("[Cart Clear] Iniciando limpeza do carrinho...");
+        // Confirmação do usuário PRIMEIRO
         if (!confirm("Tem certeza que deseja esvaziar seu carrinho?")) {
             console.log("[Cart Clear] Limpeza cancelada pelo usuário.");
-            return; // Cancela se o usuário clicar em "Cancelar"
+            return;
         }
 
-        showLoadingState(true); // Mostra loading
-        console.log("[Cart Clear] Tentando limpar carrinho do Cliente para usuário:", parseUser.id);
-        // **IMPORTANTE:** Verifique o nome da classe "Cliente"
+        showLoadingState(true);
+        let parseUser = null; // Inicializa como null
+
+        // 1. Tenta obter o usuário validado usando o token do localStorage
+        const sessionToken = localStorage.getItem(SESSION_TOKEN_KEY);
+        if (sessionToken) {
+            console.log("[Cart Clear] Token encontrado. Tentando validar com Parse.User.me()...");
+            try {
+                // Tenta validar o token e obter o usuário ATUALIZADO
+                parseUser = await Parse.User.me(sessionToken);
+                console.log("[Cart Clear] Sessão validada com sucesso via Parse.User.me(). Usuário:", parseUser.id);
+            } catch (error) {
+                console.warn("[Cart Clear] Falha ao validar token com Parse.User.me() (token inválido/expirado?):", error.code, error.message);
+                // Limpa o token inválido e força o estado de deslogado
+                localStorage.removeItem(SESSION_TOKEN_KEY);
+                updateAuthUI(null); // Atualiza a UI para deslogado
+                updateIframeContent(null);
+                parseUser = null; // Garante que parseUser é null
+            }
+        } else {
+            console.log("[Cart Clear] Nenhum token encontrado no localStorage.");
+            // Se não há token, força o estado de deslogado
+            updateAuthUI(null);
+            updateIframeContent(null);
+        }
+
+        // 2. Verifica se conseguiu obter um usuário válido APÓS a tentativa de validação
+        if (!parseUser) {
+            console.warn("[Cart Clear] Não foi possível obter um usuário válido após revalidação. Abortando limpeza.");
+            alert("Você precisa estar logado para limpar o carrinho. Sua sessão pode ter expirado.");
+            showLoadingState(false);
+            return; // Aborta a função
+        }
+
+        // 3. Prossegue com a lógica de limpeza do carrinho, AGORA com um parseUser garantido (ou a função já teria retornado)
+        console.log("[Cart Clear] Tentando limpar carrinho do Cliente para usuário validado:", parseUser.id);
         const Cliente = Parse.Object.extend("Cliente");
         const query = new Parse.Query(Cliente);
-        // **IMPORTANTE:** Verifique o nome do campo ponteiro "usuario"
         query.equalTo("usuario", parseUser);
 
         try {
-            const cliente = await query.first(); // Encontra o objeto Cliente do usuário
+            const cliente = await query.first();
             if (cliente) {
-                // **IMPORTANTE:** Verifique o nome do campo array "carrinhoclient"
-                // Verifica se o carrinho já está vazio para evitar save desnecessário
                 const currentCart = cliente.get('carrinhoclient') || [];
                 if (currentCart.length === 0) {
                      console.log("[Cart Clear] Carrinho já está vazio. Nenhuma alteração necessária.");
                      alert("Seu carrinho já está vazio.");
-                     updateCartCount(0); // Garante que a UI esteja 0
+                     updateCartCount(0);
                 } else {
-                    cliente.set('carrinhoclient', []); // Define o campo como um array vazio
-                    await cliente.save(); // Salva a alteração no Parse/Back4App
-                    updateCartCount(0); // Atualiza a contagem na UI para 0
+                    cliente.set('carrinhoclient', []);
+                    await cliente.save();
+                    updateCartCount(0);
                     alert("Carrinho esvaziado com sucesso!");
                     console.log("[Cart Clear] Carrinho do Cliente limpo no Parse.");
 
-                    // Envia mensagem para o iframe (produtos.html) para que ele possa atualizar sua UI interna
                     if (iframe && iframe.contentWindow) {
-                        // Envia um objeto simples indicando que o carrinho foi limpo
-                        // Use a origem específica do seu iframe em produção! Ex: 'https://seusite.com'
                         iframe.contentWindow.postMessage({ type: 'cartCleared' }, '*');
                         console.log("[Cart Clear] Mensagem 'cartCleared' enviada para o iframe.");
                     }
                 }
             } else {
-                // Se não encontrou um objeto Cliente para o usuário
-                console.error("[Cart Clear] Objeto Cliente não encontrado para o usuário. Não foi possível limpar. Verifique se createClienteForUser está funcionando.");
+                console.error("[Cart Clear] Objeto Cliente não encontrado para o usuário validado. Não foi possível limpar.");
                 alert("Erro: Não foi possível encontrar os dados do seu carrinho para limpar. Tente recarregar a página.");
-                // Zera a UI para consistência visual, embora o backend não tenha sido alterado
                 updateCartCount(0);
             }
         } catch (error) {
-            // Erro ao buscar ou salvar o objeto Cliente
             console.error("[Cart Clear] Erro ao limpar carrinho do Cliente:", error);
-            // Verifica se é um erro de permissão (ACL)
             let userMessage = "Erro ao limpar o carrinho.";
             if (error.code === Parse.Error.OBJECT_NOT_FOUND) {
                  userMessage = "Erro: Dados do carrinho não encontrados.";
-            } else if (error.code === Parse.Error.INVALID_ACL) { // Código 119 geralmente é ACL
+            } else if (error.code === Parse.Error.INVALID_ACL) {
                  userMessage = "Erro de permissão ao tentar limpar o carrinho. Verifique as ACLs da classe Cliente.";
             } else {
                  userMessage += ` (${error.message})`;
             }
             alert(userMessage);
         } finally {
-            showLoadingState(false); // Esconde loading
+            showLoadingState(false); // Esconde loading independentemente do resultado
         }
     }
 
     /**
-     * Mostra/Esconde um indicador de carregamento simples (adicionando/removendo
-     * uma classe no body e desabilitando botões).
-     * @param {boolean} isLoading - True para mostrar estado de loading, false para remover.
+     * Mostra/Esconde um indicador de carregamento.
+     * @param {boolean} isLoading - True para mostrar, false para remover.
      */
     function showLoadingState(isLoading) {
-        // Desabilita/Habilita botões principais para feedback visual e evitar cliques duplos
         if (logoutBtn) logoutBtn.disabled = isLoading;
         if (clearCartButton) clearCartButton.disabled = isLoading;
-        // Adiciona ou remove uma classe CSS no body para estilização global de loading (ex: overlay, cursor)
         document.body.classList.toggle('app-loading', isLoading);
         console.log(`[Loading State] ${isLoading ? 'Ativado' : 'Desativado'}`);
     }
 
     /**
-     * Renderiza o botão Google Sign-In oficial usando a biblioteca GSI
-     * dentro do container 'googleSignInButtonContainer'.
-     * Mostra um botão fallback se a biblioteca GSI não carregar.
+     * Renderiza o botão Google Sign-In oficial.
      */
     function renderGoogleButton() {
         if (!googleSignInButtonContainer) {
             console.error("[Google Button] Container 'googleSignInButtonContainer' não encontrado.");
             return;
         }
-        // Verifica se a biblioteca Google Identity Services (GSI) está carregada e pronta
         if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
-            // Limpa o container de qualquer botão anterior (útil se re-renderizar após logout)
             googleSignInButtonContainer.innerHTML = '';
-            // Garante que o container está visível (somente se a área de login estiver visível)
             if (loginArea && loginArea.style.display !== 'none') {
-                 googleSignInButtonContainer.style.display = 'block'; // Ou 'flex', etc.
+                 googleSignInButtonContainer.style.display = 'block';
             } else {
                  googleSignInButtonContainer.style.display = 'none';
             }
-            // Esconde o fallback (se existir)
             if (googleLoginBtnFallback) googleLoginBtnFallback.style.display = 'none';
             if (loginArea) loginArea.classList.remove('no-google-button');
 
             try {
-                // Renderiza o botão Google Sign-In
                 google.accounts.id.renderButton(
-                    googleSignInButtonContainer, // O elemento DIV onde o botão será inserido
-                    { // Opções de configuração da aparência do botão
-                        theme: "outline",       // Estilo do botão (filled, outline)
-                        size: "large",          // Tamanho (small, medium, large)
-                        text: "signin_with",    // Texto (signin_with, signup_with, continue_with)
-                        shape: "rectangular",   // Formato (rectangular, pill, circle, square)
-                        logo_alignment: "left", // Alinhamento do logo (left, center)
-                        width: "250"            // Largura customizada (opcional)
-                        // locale: 'pt-BR'      // Opcional: Forçar idioma
-                    }
+                    googleSignInButtonContainer,
+                    { theme: "outline", size: "large", text: "signin_with", shape: "rectangular", logo_alignment: "left", width: "250" }
                 );
                 console.log("[Google Button] Botão oficial GSI renderizado.");
             } catch (renderError) {
                  console.error("[Google Button] Erro ao renderizar o botão GSI:", renderError);
-                 showFallbackGoogleButton(); // Mostra fallback em caso de erro na renderização
+                 showFallbackGoogleButton();
             }
         } else {
-            // Se a biblioteca GSI não estiver disponível
             console.warn("[Google Button] Biblioteca Google GSI não carregada ou falhou. Mostrando botão/texto fallback.");
             showFallbackGoogleButton();
         }
     }
 
     /**
-     * Função auxiliar para mostrar o botão/texto de fallback quando GSI falha.
+     * Mostra o botão/texto de fallback quando GSI falha.
      */
     function showFallbackGoogleButton() {
-         if (googleSignInButtonContainer) googleSignInButtonContainer.innerHTML = ''; // Limpa container GSI
-         if (googleSignInButtonContainer) googleSignInButtonContainer.style.display = 'none'; // Esconde container GSI
-         if (loginArea) loginArea.classList.add('no-google-button'); // Adiciona classe para mostrar texto/botão fallback via CSS
+         if (googleSignInButtonContainer) googleSignInButtonContainer.innerHTML = '';
+         if (googleSignInButtonContainer) googleSignInButtonContainer.style.display = 'none';
+         if (loginArea) loginArea.classList.add('no-google-button');
          if (googleLoginBtnFallback) {
-             googleLoginBtnFallback.style.display = 'inline-flex'; // Mostra o botão HTML fallback
-             // Adicionar um aviso ao botão fallback, pois ele não funcionará sem GSI
+             googleLoginBtnFallback.style.display = 'inline-flex';
              googleLoginBtnFallback.onclick = () => alert('O login com Google não está disponível no momento. Verifique sua conexão ou tente mais tarde.');
          }
     }
 
     // --- Inicialização da Aplicação ---
-    // A função window.onload garante que o DOM está pronto e os scripts (incluindo GSI) tiveram chance de carregar.
     window.onload = function () {
         console.log("[Window Load] Página carregada. Iniciando configuração...");
 
-        // Adiciona Listeners para botões que devem existir sempre (Logout, Limpar Carrinho)
-        // Faz isso ANTES de verificar a sessão, para que estejam disponíveis mesmo se a sessão falhar
         if (logoutBtn) {
             logoutBtn.addEventListener('click', handleLogout);
         } else {
@@ -875,85 +799,58 @@
         if (clearCartButton) {
             clearCartButton.addEventListener('click', clearCart);
         } else {
-            // Não é crítico se não existir, mas loga um aviso
             console.warn("Elemento do botão Limpar Carrinho ('clearCartBtn') não encontrado!");
         }
 
-        // Verifica se a biblioteca Google Identity Services (GSI) está disponível
         if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
             console.log("[Google Init] Inicializando Google Identity Services...");
             try {
-                // Inicializa a biblioteca GSI com o Client ID e a função de callback
                 google.accounts.id.initialize({
                     client_id: GOOGLE_CLIENT_ID,
-                    callback: handleGoogleCredentialResponse, // Função chamada após login Google bem-sucedido
-                    // auto_select: true, // CUIDADO: Pode causar loops se o logout não limpar o estado do Google corretamente
-                    // ux_mode: "popup", // Alternativa: abrir popup em vez de redirecionar
-                    // cancel_on_tap_outside: true
+                    callback: handleGoogleCredentialResponse,
                 });
                 console.log("[Google Init] Google Identity Services inicializado com sucesso.");
 
-                // 1. Tenta retomar a sessão Parse existente PRIMEIRO usando checkSessionOnLoad (agora com .me())
                 checkSessionOnLoad().then(() => {
-                    // 2. SÓ renderiza o botão Google SE o usuário NÃO estiver logado APÓS checkSessionOnLoad
-                    // Parse.User.current() retorna o usuário logado (se .me() ou .logInWith() foi bem-sucedido) ou null
+                    // Usamos Parse.User.current() AQUI porque checkSessionOnLoad o terá definido se a sessão for válida
                     if (!Parse.User.current()) {
                         console.log("[Init Flow] Usuário não logado após checkSession. Renderizando botão Google.");
-                        renderGoogleButton(); // Renderiza o botão GSI
+                        renderGoogleButton();
                     } else {
                          console.log("[Init Flow] Usuário já estava logado via sessão. Botão Google não será renderizado inicialmente.");
-                         // Garante que o container do botão GSI esteja oculto se o usuário já estiver logado
                          if (googleSignInButtonContainer) googleSignInButtonContainer.style.display = 'none';
                     }
                 }).catch(err => {
                      console.error("[Init Error] Erro CRÍTICO durante checkSessionOnLoad:", err);
-                     // Mesmo com erro na sessão, tenta renderizar botão de login se GSI carregou e não há user
                      if (!Parse.User.current()) renderGoogleButton();
                 });
 
             } catch (initError) {
                  console.error("[Google Init] Erro CRÍTICO ao inicializar Google Identity Services:", initError);
-                 // GSI falhou na inicialização. Tenta verificar sessão Parse e mostrar fallback.
                  checkSessionOnLoad().finally(() => { if (!Parse.User.current()) showFallbackGoogleButton(); });
             }
 
         } else {
-            // Se a biblioteca GSI não carregou corretamente
             console.error("[Google Init] Falha CRÍTICA: Objeto 'google.accounts.id' não encontrado. Verifique o script GSI e bloqueadores.");
-            // Tenta verificar a sessão Parse mesmo assim e mostra o botão fallback se deslogado
              checkSessionOnLoad().finally(() => { if (!Parse.User.current()) showFallbackGoogleButton(); });
         }
 
-        // --- Listener para mensagens recebidas do iframe (ex: atualização do carrinho) ---
+        // --- Listener para mensagens do iframe ---
         window.addEventListener('message', (event) => {
-            // IMPORTANTE: Em produção, SEMPRE verifique a origem da mensagem por segurança!
-            // Ex: if (event.origin !== 'https://SUA_ORIGEM_ESPERADA.com') { console.warn("Origem da mensagem ignorada:", event.origin); return; }
-
-            // Verifica se a mensagem tem dados e o tipo esperado
+            // !! IMPORTANTE: Verifique event.origin em produção !!
             if (event.data && typeof event.data === 'object') {
                  switch (event.data.type) {
                      case 'cartUpdate':
                          console.log("[Message Listener] Recebido 'cartUpdate' do iframe. Nova contagem:", event.data.count);
-                         // Valida se a contagem é um número antes de atualizar
                          if (typeof event.data.count === 'number' && !isNaN(event.data.count)) {
                              updateCartCount(event.data.count);
                          } else {
                              console.warn("[Message Listener] Contagem inválida recebida do iframe:", event.data.count);
                          }
                          break;
-                     // Adicione outros tipos de mensagens aqui se necessário
-                     // case 'navigateTo':
-                     //    console.log("[Message Listener] Navegar para:", event.data.url);
-                     //    // Lógica para navegação
-                     //    break;
                      default:
-                        // Ignora mensagens desconhecidas ou sem tipo
-                        // console.log("[Message Listener] Mensagem recebida de tipo desconhecido ou sem tipo:", event.data);
                         break;
                 }
-            } else {
-                 // Ignora mensagens que não são objetos ou não têm dados
-                 // console.log("[Message Listener] Mensagem ignorada (formato inválido):", event);
             }
         });
 
