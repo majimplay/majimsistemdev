@@ -292,6 +292,7 @@
     /**
      * Callback chamado pela biblioteca Google Identity Services após login bem-sucedido.
      * Recebe o ID Token do Google e tenta logar/linkar no Parse.
+     * **MODIFICADO:** Adiciona email e emailVerified ao usuário Parse.
      * @param {object} response - Objeto de resposta da credencial do Google. Contém response.credential (o ID Token JWT).
      */
     async function handleGoogleCredentialResponse(response) {
@@ -304,22 +305,34 @@
             return;
         }
 
+        // Decodificar token para obter informações do Google
         let decodedToken;
         try {
             decodedToken = JSON.parse(atob(googleIdToken.split('.')[1]));
+            console.log("[Google Sign-In] Token decodificado:", decodedToken); // Log para ver o conteúdo do token
         } catch (e) {
             console.error("[Google Sign-In] Erro ao decodificar o ID Token:", e);
             alert("Erro ao processar as credenciais do Google.");
             return;
         }
-        const googleUserId = decodedToken.sub;
+        const googleUserId = decodedToken.sub; // ID único do Google
+        const googleEmail = decodedToken.email; // Email do Google
+        const googleEmailVerified = decodedToken.email_verified; // Booleano indicando se o email foi verificado pelo Google
 
         if (!googleUserId) {
             console.error("[Google Sign-In] ID do usuário Google (sub) não encontrado no token.");
             alert("Credencial do Google inválida.");
             return;
         }
+        if (!googleEmail) {
+            // Embora raro, alguns logins Google podem não retornar email. Decida como tratar.
+            console.warn("[Google Sign-In] Email não encontrado no token do Google.");
+            // Poderia impedir o login ou continuar sem email:
+            // alert("Não foi possível obter o email da sua conta Google.");
+            // return;
+        }
 
+        // AuthData para o Parse
         const authData = {
             id: googleUserId,
             id_token: googleIdToken
@@ -332,6 +345,7 @@
             const user = await Parse.User.logInWith('google', { authData });
             console.log(`[Parse Login] Sucesso! Usuário ${user.existed() ? 'existente' : 'novo'} logado/linkado:`, user.id);
 
+            // Salvar session token no localStorage
             const sessionToken = user.getSessionToken();
             if (sessionToken) {
                 localStorage.setItem(SESSION_TOKEN_KEY, sessionToken);
@@ -340,30 +354,56 @@
                 console.warn("[Parse Login] Não foi possível obter o Session Token após o login.");
             }
 
+            // Atualizar informações do perfil no Parse (nome, foto, email, emailVerified)
+            // Verifica se precisa salvar o usuário (se alguma informação mudou ou é nova)
             let userNeedsSave = false;
             const googleName = decodedToken.name || "";
             const googlePicture = decodedToken.picture || "";
 
+            // Atualiza Nome se diferente
             if (googleName && (!user.get('displayName') || user.get('displayName') !== googleName)) {
                 user.set("displayName", googleName);
                 userNeedsSave = true;
-                console.log("[Parse Login] Definindo/Atualizando displayName do Google.");
+                console.log("[Parse User Update] Definindo/Atualizando displayName do Google.");
             }
+            // Atualiza Foto se diferente
             if (googlePicture && (!user.get('profilePictureUrl') || user.get('profilePictureUrl') !== googlePicture)) {
                 user.set("profilePictureUrl", googlePicture);
                 userNeedsSave = true;
-                console.log("[Parse Login] Definindo/Atualizando profilePictureUrl do Google.");
+                console.log("[Parse User Update] Definindo/Atualizando profilePictureUrl do Google.");
+            }
+            // Atualiza Email se diferente (e se disponível no token)
+            if (googleEmail && (!user.get('email') || user.get('email') !== googleEmail)) {
+                user.set("email", googleEmail); // Define o campo 'email' padrão do Parse User
+                userNeedsSave = true;
+                console.log("[Parse User Update] Definindo/Atualizando email do Google.");
+            }
+            // Atualiza emailVerified se veio como true do Google e ainda não está true no Parse
+            // Importante: Só marque como true se o Google confirmar (googleEmailVerified === true)
+            if (googleEmailVerified === true && user.get('emailVerified') !== true) {
+                user.set("emailVerified", true); // Define o campo 'emailVerified' padrão do Parse User
+                userNeedsSave = true;
+                console.log("[Parse User Update] Definindo emailVerified como true (confirmado pelo Google).");
+            } else if (user.get('emailVerified') === undefined && googleEmailVerified !== true) {
+                // Opcional: Se o campo não existe no Parse e o Google não confirmou, definir como false
+                user.set("emailVerified", false);
+                userNeedsSave = true;
+                console.log("[Parse User Update] Definindo emailVerified como false (não confirmado pelo Google).");
             }
 
+
+            // Salva o usuário no Parse APENAS se alguma informação foi alterada/adicionada
             if (userNeedsSave) {
                 try {
                     await user.save();
-                    console.log("[Parse Login] Informações do perfil (nome/foto) salvas no Parse.");
+                    console.log("[Parse User Update] Informações do perfil (nome/foto/email/verified) salvas no Parse.");
                 } catch (saveError) {
-                    console.error("[Parse Login] Erro ao salvar informações do perfil no Parse (Verifique ACLs da classe _User):", saveError);
+                    console.error("[Parse User Update] Erro ao salvar informações do perfil no Parse (Verifique ACLs da classe _User):", saveError);
+                    // Continua mesmo se salvar o perfil falhar, o login principal funcionou
                 }
             }
 
+            // Processa o login bem-sucedido
             await onLoginSuccess(user);
 
         } catch (error) {
@@ -638,51 +678,44 @@
 
     /**
      * Limpa o array 'carrinhoclient' no objeto 'Cliente' associado ao usuário logado.
-     * **MODIFICADO:** Revalida a sessão antes de prosseguir.
+     * Revalida a sessão antes de prosseguir.
      */
     async function clearCart() {
         console.log("[Cart Clear] Iniciando limpeza do carrinho...");
-        // Confirmação do usuário PRIMEIRO
         if (!confirm("Tem certeza que deseja esvaziar seu carrinho?")) {
             console.log("[Cart Clear] Limpeza cancelada pelo usuário.");
             return;
         }
 
         showLoadingState(true);
-        let parseUser = null; // Inicializa como null
+        let parseUser = null;
 
-        // 1. Tenta obter o usuário validado usando o token do localStorage
         const sessionToken = localStorage.getItem(SESSION_TOKEN_KEY);
         if (sessionToken) {
             console.log("[Cart Clear] Token encontrado. Tentando validar com Parse.User.me()...");
             try {
-                // Tenta validar o token e obter o usuário ATUALIZADO
                 parseUser = await Parse.User.me(sessionToken);
                 console.log("[Cart Clear] Sessão validada com sucesso via Parse.User.me(). Usuário:", parseUser.id);
             } catch (error) {
                 console.warn("[Cart Clear] Falha ao validar token com Parse.User.me() (token inválido/expirado?):", error.code, error.message);
-                // Limpa o token inválido e força o estado de deslogado
                 localStorage.removeItem(SESSION_TOKEN_KEY);
-                updateAuthUI(null); // Atualiza a UI para deslogado
+                updateAuthUI(null);
                 updateIframeContent(null);
-                parseUser = null; // Garante que parseUser é null
+                parseUser = null;
             }
         } else {
             console.log("[Cart Clear] Nenhum token encontrado no localStorage.");
-            // Se não há token, força o estado de deslogado
             updateAuthUI(null);
             updateIframeContent(null);
         }
 
-        // 2. Verifica se conseguiu obter um usuário válido APÓS a tentativa de validação
         if (!parseUser) {
             console.warn("[Cart Clear] Não foi possível obter um usuário válido após revalidação. Abortando limpeza.");
             alert("Você precisa estar logado para limpar o carrinho. Sua sessão pode ter expirado.");
             showLoadingState(false);
-            return; // Aborta a função
+            return;
         }
 
-        // 3. Prossegue com a lógica de limpeza do carrinho, AGORA com um parseUser garantido (ou a função já teria retornado)
         console.log("[Cart Clear] Tentando limpar carrinho do Cliente para usuário validado:", parseUser.id);
         const Cliente = Parse.Object.extend("Cliente");
         const query = new Parse.Query(Cliente);
@@ -725,7 +758,7 @@
             }
             alert(userMessage);
         } finally {
-            showLoadingState(false); // Esconde loading independentemente do resultado
+            showLoadingState(false);
         }
     }
 
@@ -812,7 +845,6 @@
                 console.log("[Google Init] Google Identity Services inicializado com sucesso.");
 
                 checkSessionOnLoad().then(() => {
-                    // Usamos Parse.User.current() AQUI porque checkSessionOnLoad o terá definido se a sessão for válida
                     if (!Parse.User.current()) {
                         console.log("[Init Flow] Usuário não logado após checkSession. Renderizando botão Google.");
                         renderGoogleButton();
@@ -847,6 +879,10 @@
                          } else {
                              console.warn("[Message Listener] Contagem inválida recebida do iframe:", event.data.count);
                          }
+                         break;
+                     case 'cartCleared': // Adicionado para ouvir a mensagem de carrinho limpo
+                         console.log("[Message Listener] Recebido 'cartCleared' do iframe.");
+                         // A contagem já foi atualizada pela função clearCart, mas podemos fazer algo mais se necessário
                          break;
                      default:
                         break;
