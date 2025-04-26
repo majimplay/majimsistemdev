@@ -389,7 +389,8 @@
             // Salva o usuário no Parse APENAS se alguma informação foi alterada/adicionada
             if (userNeedsSave) {
                 try {
-                    await user.save();
+	              await user.save(null, { useMasterKey: true });
+                  //  await user.save();
                     console.log("[Parse User Update] Informações do perfil (nome/foto/emailnao) salvas no Parse.");
                 } catch (saveError) {
                     // Se ocorrer um erro aqui agora, é por outro motivo (ex: ACLs)
