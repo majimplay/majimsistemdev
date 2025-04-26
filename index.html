@@ -503,9 +503,8 @@
             // Tenta obter o nome de exibição, senão o email, senão um padrão
           //  const displayName = parseUser.get('displayName') || parseUser.get('email')?.split('@')[0] || 'Usuário';
           const displayName = parseUser.get('displayName') || 'Usuáriosemnome';
-          console.log("parseUser.get('displayName') parseUser.get('email')");
             let welcomeMessage = `Bem-vindo, ${displayName}!`;
-
+             console.log('parseUser.get('displayName') parseUser.get('email')');
             // Adiciona foto do perfil se existir
             const profilePic = parseUser.get('profilePictureUrl');
             if (profilePic) {
