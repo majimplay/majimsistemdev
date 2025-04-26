@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minha Loja Virtual (Login Google Direto)</title>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
+
+  <style>
+    /* Estilos CSS básicos */
+    body {
+      font-family: 'Inter', sans-serif; /* Usando Inter como fonte */
+      margin: 0;
+      padding: 0;
+      background: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      transition: opacity 0.3s ease-in-out;
+    }
+
+    /* Estilo para indicar carregamento */
+    body.app-loading {
+        opacity: 0.7;
+        pointer-events: none; /* Impede interações durante o loading */
+    }
+
+    .container {
+        background: #fff;
+        padding: 30px;
+        border-radius: 10px; /* Cantos arredondados */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        max-width: 400px; /* Largura máxima */
+        width: 90%; /* Largura fluida */
+    }
+
+    h1 {
+        color: #333;
+        margin-bottom: 20px;
+    }
+
+    #google-signin-button {
+        margin-top: 20px;
+        /* O estilo do botão Google é controlado pela biblioteca GSI */
+    }
+
+    .user-info {
+        margin-top: 20px;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background-color: #e9e9e9;
+        text-align: left;
+        word-break: break-all; /* Quebra palavras longas */
+    }
+
+    .user-info p {
+        margin-bottom: 10px;
+        color: #555;
+    }
+
+    .user-info strong {
+        color: #000;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .message-box {
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 8px;
+        background-color: #ffeeba; /* Amarelo claro */
+        color: #856404; /* Texto escuro */
+        border: 1px solid #ffc107; /* Borda amarela */
+        display: none; /* Inicialmente oculto */
+        text-align: left;
+    }
+
+    .message-box.show {
+        display: block;
+    }
+
+    .message-box.error {
+        background-color: #f8d7da; /* Vermelho claro */
+        color: #721c24; /* Texto escuro */
+        border: 1px solid #f5c6cb; /* Borda vermelha */
+    }
+
+    /* Estilos responsivos */
+    @media (max-width: 600px) {
+        .container {
+            padding: 20px;
+        }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Login com Google</h1>
+
+    <div id="google-signin-button"></div>
+
+    <div id="user-info" class="user-info hidden">
+      <h2>Informações do Usuário</h2>
+      <p><strong>Nome:</strong> <span id="user-name"></span></p>
+      <p><strong>Email:</strong> <span id="user-email"></span></p>
+      <p><strong>Parse User ID:</strong> <span id="parse-user-id"></span></p>
+      <p><strong>Session Token:</strong> <span id="session-token"></span></p>
+      </div>
+
+    <div id="message-box" class="message-box"></div>
+
+  </div>
+
+  <script>
+    // Configuração do Parse Server
+    // ** IMPORTANTE: Substitua com os dados do seu Parse Server **
+    // --- Configuração Parse/Back4App ---
+    Parse.initialize("TYP8SUA8qxmHIRs1mHbiFalgRxCEf51sOiSWmNEY", "n4Gfko9sO7jiAUnWX5U5GGCDQ5QtPWX97K4TzB8I");
+    Parse.serverURL = "https://parseapi.back4app.com/";
+    Parse.User.disableUnsafeCurrentUser();
+
+    // Função para exibir mensagens na caixa de mensagem
+    function showMessage(message, isError = false) {
+        const messageBox = document.getElementById('message-box');
+        messageBox.textContent = message;
+        messageBox.className = 'message-box show'; // Remove classes anteriores e adiciona show
+        if (isError) {
+            messageBox.classList.add('error');
+        }
+    }
+
+    // Função para ocultar a caixa de mensagem
+    function hideMessage() {
+        const messageBox = document.getElementById('message-box');
+        messageBox.className = 'message-box'; // Remove show e error classes
+    }
+
+    // Função callback chamada pelo Google Sign-In após a interação do usuário
+    async function handleCredentialResponse(response) {
+      hideMessage(); // Oculta mensagens anteriores
+      document.body.classList.add('app-loading'); // Mostra indicador de carregamento
+
+      if (response.code) {
+        console.log("Código de autorização recebido:", response.code);
+
+        try {
+          // Chama a função Cloud 'handleGoogleAuth' no seu Parse Server
+          const result = await Parse.Cloud.run('handleGoogleAuth', { code: response.code });
+
+          console.log("Resposta da função Cloud:", result);
+
+          // Verifica se a chamada foi bem sucedida e se retornou os dados esperados
+          if (result && result.sessionToken && result.objectId) {
+            // Login/Registro bem sucedido!
+            showMessage("Login com Google realizado com sucesso!", false);
+
+            // Opcional: Você pode querer armazenar o sessionToken para manter o usuário logado
+            // Ex: localStorage.setItem('parseSessionToken', result.sessionToken);
+
+            // Exibir informações do usuário (você pode buscar o objeto completo do usuário se precisar de mais dados)
+            document.getElementById('user-name').textContent = result.nome || 'N/A'; // Assume que a Cloud Function retorna 'nome'
+            document.getElementById('user-email').textContent = result.email || 'N/A'; // Assume que a Cloud Function retorna 'email'
+            document.getElementById('parse-user-id').textContent = result.objectId;
+            document.getElementById('session-token').textContent = result.sessionToken;
+
+            // Oculta o botão de login e mostra as informações do usuário
+            document.getElementById('google-signin-button').classList.add('hidden');
+            document.getElementById('user-info').classList.remove('hidden');
+
+             // Opcional: se você tiver uma imagem de perfil retornada
+            // if (result.picture) {
+            //     document.getElementById('user-picture').src = result.picture;
+            //     document.getElementById('user-picture').classList.remove('hidden');
+            // }
+
+
+          } else {
+             // Resposta da Cloud Function inesperada
+             console.error("Resposta inesperada da Cloud Function:", result);
+             showMessage("Erro ao processar login: Resposta inesperada do servidor.", true);
+          }
+
+        } catch (error) {
+          // Trata erros na chamada da função Cloud
+          console.error("Erro ao chamar a função Cloud 'handleGoogleAuth':", error);
+          showMessage(`Erro ao fazer login: ${error.message || 'Erro desconhecido'}`, true);
+        } finally {
+            document.body.classList.remove('app-loading'); // Remove indicador de carregamento
+        }
+
+      } else {
+        // Trata casos onde o Google não retornou um código (ex: usuário fechou o popup)
+        console.warn("Google Sign-In não retornou um código de autorização.");
+        document.body.classList.remove('app-loading'); // Remove indicador de carregamento
+      }
+    }
+
+    // Configuração do Google Sign-In (GSI)
+    window.onload = function () {
+        // Inicializa o Google Sign-In
+        google.accounts.id.initialize({
+            // ** IMPORTANTE: Substitua com o seu Client ID do Google **
+            client_id: "21514234895-keiqos567ifvs4hjkg3l1q5mvun8lri0.apps.googleusercontent.com", // Use o mesmo Client ID que está na sua Cloud Function
+            callback: handleCredentialResponse, // Função que será chamada após a interação do usuário
+            ux_mode: 'popup', // 'popup' ou 'redirect' - 'popup' é mais comum para SPAs
+            // ** IMPORTANTE: O redirect_uri AQUI DEVE SER EXATAMENTE IGUAL AO CONFIGURADO NO GOOGLE CLOUD E NA SUA CLOUD FUNCTION **
+            redirect_uri: 'https://majimplay.github.io/', // Deve ser a URL onde esta página está hospedada
+            scope: 'openid email profile', // Escopos solicitados
+            flow: 'auth-code' // Solicita o fluxo de código de autorização
+        });
+
+        // Renderiza o botão Google Sign-In
+        google.accounts.id.renderButton(
+            document.getElementById("google-signin-button"),
+            { size: "large", type: "standard", shape: "rectangular", text: "signin_with" } // Opções de customização do botão
+        );
+
+        // Opcional: Exibe o One Tap prompt automaticamente (pode ser intrusivo)
+        // google.accounts.id.prompt();
+    };
+  </script>
+</body>
+</html>
